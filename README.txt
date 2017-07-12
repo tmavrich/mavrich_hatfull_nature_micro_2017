@@ -25,7 +25,7 @@ genbank-formatted files.
 
 3. compute_mash_distance.sh
 
-Bash script to compute nucleotide distances between genomes using Mash.
+Bash script to compute nucleotide distances between whole genomes using Mash.
 
 
 

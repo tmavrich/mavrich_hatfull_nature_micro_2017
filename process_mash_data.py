@@ -1,5 +1,5 @@
 #Python3 script to process Mash output
-#It removes all duplicate reactions and trims the names
+#It removes all duplicate comparisons and trims the names
 
 
 
@@ -71,27 +71,27 @@ same_phage = 0
 print("Comparing lines of data...")
 for line in mash_data_list:
     total += 1
-    
+
     #Trim off the preceding path text and ".fasta" suffixes.
     reference = trim(line[0])
     query = trim(line[1])
-    
-    
+
+
     #Remove if reference and query are the same.
     if reference == query:
         print("Reference and query are the same: %s, %s" % (reference,query))
         same_phage += 1
         continue
-    
+
     #Create a reference_query name combination
     ref_query_list = [reference,query]
     ref_query_list.sort()
     ref_query = ref_query_list[0] + "_" + ref_query_list[1]
     print(ref_query)
-    
+
     #If the reference_query name combination is not already in the dictionary, add it.
     #Otherwise, verify that the the matching reference_query name combination contains matching data.
-    #(which is should). If it doesn't match, throw an error.
+    #(which it should). If it doesn't match, throw an error.
     if ref_query not in mash_dict:
         line[0] = reference
         line[1] = query
@@ -124,12 +124,4 @@ column_headers = ["reference","query","distance","p-value","kmer_count","ref_que
 writer.writerow(column_headers)
 for key in mash_dict:
     writer.writerow(mash_dict[key])
-output_file_handle.close()    
-    
-    
-    
-    
-    
-    
-    
-
+output_file_handle.close()
