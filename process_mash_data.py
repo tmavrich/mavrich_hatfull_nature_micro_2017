@@ -1,5 +1,6 @@
 #Python3 script to process Mash output
 #It removes all duplicate comparisons and trims the names
+#Travis Mavrich
 
 
 
