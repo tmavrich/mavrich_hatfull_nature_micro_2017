@@ -1,6 +1,5 @@
 #To retrieve ncbi taxonomy with a list of taxon names
 #Travis Mavrich
-#20160925
 
 
 
@@ -13,7 +12,7 @@ from ete3 import NCBITaxa
 try:
 
     input_file = sys.argv[1]
-    
+
 except:
 
     print("\n\n\
@@ -121,10 +120,10 @@ for input_taxon in taxon_set:
         tax_family = error_message1
         tax_genus = error_message1
         tax_species = error_message1
-    
+
 
     else:
-        
+
         input_taxid_list = taxid_dict[input_taxon]
 
         #If the input taxon name results in multiple taxa, then unable to parse output
@@ -157,7 +156,7 @@ for input_taxon in taxon_set:
             lineage_list = ncbi.get_lineage(input_taxid)
             lineage_rank_dict = ncbi.get_rank(lineage_list)
             taxonomy_name_dict = ncbi.get_taxid_translator(lineage_list)
-        
+
             #Create a full record of the taxonomy rank and name data for output
             for input_taxid in lineage_list:
                 taxonomy_rank_list.append(lineage_rank_dict[input_taxid])
@@ -165,7 +164,7 @@ for input_taxon in taxon_set:
 
             #Parse specific rankings
             for output_taxid in lineage_rank_dict:
-    
+
                 #Retrieve the rank and name of the taxon
                 rank = lineage_rank_dict[output_taxid]
                 name_lookup = ncbi.get_taxid_translator([output_taxid])
@@ -176,7 +175,7 @@ for input_taxon in taxon_set:
                     tax_superkingdom = name
 
                 elif rank == "no rank":
-            
+
                     if name in virus_type_dict.keys():
                         tax_viral_type = virus_type_dict[name]
 
