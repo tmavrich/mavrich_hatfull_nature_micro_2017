@@ -1,10 +1,5 @@
 #To extract all features and/or header information in a genbank file
 #Travis Mavrich
-#version 5
-#In this version, I will try to extract the same fields for every CDS and tRNA feature, and add exception handlers
-#It will also provide the option to extract header information
-#20160922
-#I may need to have this script extract "Function" annotations as well
 
 
 #Import modules
@@ -19,7 +14,7 @@ from ete3 import NCBITaxa
 try:
 
     genbank_files_dir = sys.argv[1]
-    
+
 except:
 
     print("\n\n\
@@ -120,7 +115,7 @@ header_info = [\
 #2 = locus_tag
 #3 = gene number
 #4 = startCoord (uncorrected)
-#5 = stopCoord 
+#5 = stopCoord
 #6 = typeID
 #7 = translation table
 #8 = translation
@@ -218,7 +213,7 @@ for filename in os.listdir(genbank_files_dir):
     #Sequence, length
     try:
         seqLength = len(seq_record.seq)
-        
+
     except:
         seqLength = ""
 
@@ -226,12 +221,12 @@ for filename in os.listdir(genbank_files_dir):
     #The Accession field, with the appended version number, is stored as the record.id
     #The Locus name at the top of the file is stored as the record.name
     #The base accession number, without the version, is stored in the 'accession' annotation list
-    
+
     try:
         record_name = str(seq_record.name)
     except:
-        record_name = ""    
-    
+        record_name = ""
+
     try:
         record_id = str(seq_record.id)
     except:
@@ -249,24 +244,24 @@ for filename in os.listdir(genbank_files_dir):
         record_source = str(seq_record.annotations["source"])
     except:
         record_source = ""
-    
+
     record_source_genus = record_source.split(' ')[0]
 
     try:
         accessionNum = seq_record.annotations["accessions"][0]
     except:
         accessionNum = ""
-    
+
     try:
         taxonomy_list = seq_record.annotations["taxonomy"]
     except:
         taxonomy_list = [""]
-    
-    
+
+
 
     #Parse info from the organism's features
     for feature in seq_record.features:
-    
+
         #Some genbank files have multiple source features. This complicates taxonomy parsing.
         #Collect all source features and process them afterwards.
         if feature.type == "source":
@@ -276,14 +271,14 @@ for filename in os.listdir(genbank_files_dir):
         elif feature.type == "CDS" or feature.type == "tRNA":
 
             typeID = feature.type
-        
+
             #This will store all data for this feature that will be imported
             feature_data_list = []
 
-             
+
             #Feature_locus_tag
             try:
-                feature_locus_tag = feature.qualifiers["locus_tag"][0]                
+                feature_locus_tag = feature.qualifiers["locus_tag"][0]
             except:
                 feature_locus_tag = ""
 
@@ -310,50 +305,50 @@ for filename in os.listdir(genbank_files_dir):
 
                 #Skip this compound feature if it is comprised of more than two features (too tricky to parse).
                 if len(feature.location.parts) > 2:
-            
+
                     strStart = ""
                     strStop = ""
-            
+
                 else:
 
                     #Retrieve compound feature positions based on strand
                     if feature.strand == 1:
-                
+
                         strStart = str(feature.location.parts[0].start)
                         strStop = str(feature.location.parts[1].end)
-                
+
                     elif feature.strand == -1:
-                
+
                         strStart = str(feature.location.parts[1].start)
                         strStop = str(feature.location.parts[0].end)
-                    
+
                     #If strand is None...
                     else:
                         strStart = ""
                         strStop = ""
-            
+
             else:
                 strStart = str(feature.location.start)
                 strStop = str(feature.location.end)
 
 
-                
+
             #Translation
             try:
                 translation = feature.qualifiers["translation"][0].upper()
-                            
+
             except:
                 translation = ""
-        
-            total_protein_sequence_length += len(translation) 
+
+            total_protein_sequence_length += len(translation)
 
             #Compile list of translations for downstream analysis if there are no apparent sequence errors
             amino_acid_set = set(translation)
             amino_acid_error_set = amino_acid_set - protein_alphabet_set
             if len(amino_acid_error_set) == 0:
                 translation_list.append(translation)
-        
-            
+
+
             #Translation table used
             try:
                 feature_transl_table = feature.qualifiers["transl_table"][0]
@@ -377,15 +372,16 @@ for filename in os.listdir(genbank_files_dir):
             except:
                 feature_note = ""
 
-        
-        
-            #Now that it has acquired all gene feature info, create list of gene data and append to list of all gene feature data
+
+
+            #Now that it has acquired all gene feature info,
+            #create list of gene data and append to list of all gene feature data
             #0 = basename
             #1 = phageName
             #2 = locus_tag
             #3 = gene number
             #4 = startCoord (uncorrected)
-            #5 = stopCoord 
+            #5 = stopCoord
             #6 = typeID
             #7 = translation table
             #8 = translation
@@ -394,8 +390,8 @@ for filename in os.listdir(genbank_files_dir):
             #11 = feature_function
             #12 = feature_note
             feature_data_list.append(basename)
-            feature_data_list.append(phageName) 
-            feature_data_list.append(feature_locus_tag) 
+            feature_data_list.append(phageName)
+            feature_data_list.append(feature_locus_tag)
             feature_data_list.append(feature_gene_num)
             feature_data_list.append(strStart)
             feature_data_list.append(strStop)
@@ -416,12 +412,12 @@ for filename in os.listdir(genbank_files_dir):
 
     #Try to parse source feature(s)
     for feature in feature_source_list:
-        
+
         try:
-            feature_source_organism = str(feature.qualifiers["organism"][0])            
+            feature_source_organism = str(feature.qualifiers["organism"][0])
         except:
             feature_source_organism = ""
-        
+
         #Only try to parse information about host if the source feature matches the record organism
         if feature_source_organism == record_organism:
 
@@ -436,16 +432,16 @@ for filename in os.listdir(genbank_files_dir):
                 taxid = ""
 
             try:
-                feature_source_host = str(feature.qualifiers["host"][0])            
+                feature_source_host = str(feature.qualifiers["host"][0])
             except:
                 feature_source_host = ""
 
             try:
-                feature_source_lab_host = str(feature.qualifiers["lab_host"][0])            
+                feature_source_lab_host = str(feature.qualifiers["lab_host"][0])
             except:
                 feature_source_lab_host = ""
 
-    
+
 
 
     #Now that source feature info has been retrieved, taxonomic data and genus info can be parsed
@@ -471,17 +467,17 @@ for filename in os.listdir(genbank_files_dir):
 
     #See if all genus data are the same
     if len(genus_set) == 0:
-        genus_comparison = "error"    
+        genus_comparison = "error"
     elif len(genus_set) == 1:
         genus_comparison = record_def_genus
     else:
         genus_comparison = "multiple"
 
-        
+
     #Retrieve taxonomic data if the file has a taxid, otherwise skip
     if taxid != "":
 
-        #Since each organism may not have all rankings present, first set all rankings 
+        #Since each organism may not have all rankings present, first set all rankings
         #to 'unspecified' as a positive indication that the taxonomy was retrieved.
         tax_superkingdom = "Unspecified"
         tax_viral_type = "Unspecified"
@@ -492,11 +488,11 @@ for filename in os.listdir(genbank_files_dir):
         tax_genus = "Unspecified"
         tax_species = "Unspecified"
         species_check = "Unspecified"
-    
+
         lineage_list = ncbi.get_lineage(taxid)
         lineage_rank_dict = ncbi.get_rank(lineage_list)
         for taxon in lineage_rank_dict:
-    
+
             #Retrieve the rank and name of the taxon
             rank = lineage_rank_dict[taxon]
             name_lookup = ncbi.get_taxid_translator([taxon])
@@ -507,7 +503,7 @@ for filename in os.listdir(genbank_files_dir):
                 tax_superkingdom = name
 
             elif rank == "no rank":
-            
+
                 if name in virus_type_dict.keys():
                     tax_viral_type = virus_type_dict[name]
 
@@ -570,7 +566,7 @@ for filename in os.listdir(genbank_files_dir):
     phage_data_list.append(tax_genus)
     phage_data_list.append(tax_species)
     phage_data_list.append(species_check)
-        
+
 
 
 
@@ -606,4 +602,3 @@ print("\n\n\n\nParsing script completed.")
 phage_header_handle.close()
 phage_feature_handle.close()
 concatenated_translations_handle.close()
-
