@@ -78,6 +78,7 @@ phylogenetic tree.
 
 11. analyze_all_data.R
 
-RStudio script to compile all datasets, compute misc. analyses, and visualize/plot data.
+RStudio script to compile all datasets, compute misc. analyses (some of which are
+then outputted and used in downstream python scripts), and visualize/plot data.
 
 
