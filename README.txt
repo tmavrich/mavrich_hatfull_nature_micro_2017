@@ -1,7 +1,11 @@
 The scripts in the repository 'mavrich_hatfull_nature_micro_2017' contain the analyses 
 used in the publication Mavrich & Hatfull, Nature Microbiology, 2017. Below is a brief
-description of each file in the repository. Note: some scripts may have tools not utilized
-for this particular publication.
+description of each file in the repository. 
+
+Notes: 
+- some scripts may have tools not utilized for this particular publication.
+- the format of SuppData2 file is a compilation of data from different parts of these
+analyses, and does not itself serve as input data for the scripts.
 
 
 
@@ -28,14 +32,14 @@ Bash script to compute nucleotide distances between genomes using Mash.
 4. process_mash_data.py
 
 Python3 script to process the output from compute_mash_distance.sh, in which duplicated
-data is removed and the reference and query file names are trimmed.
+data is removed and the reference and query file paths are trimmed.
 
 
 
 5. analyze_pham_data.py
 
-Python3 script to perform several computations based on Phamerator-derived gene family (pham) data, such as pairwise
-gene content dissimilarity.
+Python3 script to perform several computations based on Phamerator-derived gene family
+(pham) data, such as pairwise gene content dissimilarity.
 
 
 
@@ -60,7 +64,8 @@ Python3 script to compute pairwise gene content dissimilarity using VOG data.
 
 9. edit_phylogenetic_tree.py
 
-Python3 script to manipulate phylogenetic trees.
+Python3 script to manipulate phylogenetic trees, such as naming internal nodes to be
+compatible with Count output data.
 
 
 
