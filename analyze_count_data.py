@@ -1,6 +1,5 @@
 #Python3 script to analyze horizontal gene transfer data from Count software
 #Travis Mavrich
-#20170320
 
 
 
@@ -40,17 +39,17 @@ except:
             3 Cumulative pham gains\n\
             4 Cumulative pham losses\n\
         ")
-        
+
     sys.exit(1)
-    
-    
-    
 
 
 
 
-    
-    
+
+
+
+
+
 #Expand home and working directory
 home_dir = os.path.expanduser('~')
 working_dir = os.path.abspath('.')
@@ -128,7 +127,7 @@ pairwise_comparison_data_list = []
 for leaf1 in tree:
 
     for leaf2 in tree:
-    
+
         #If both leaves are the same, then skip
         if leaf1.name != leaf2.name:
 
@@ -170,7 +169,7 @@ for leaf1 in tree:
                             leaf1_leaf2_gain_sum,\
                             leaf1_leaf2_loss_sum]
 
-            print(data_list)    
+            print(data_list)
             pairwise_comparison_data_list.append(data_list)
 
 
@@ -194,22 +193,3 @@ csvfile.close()
 
 #End script
 print("HGT analyss script completed.")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
