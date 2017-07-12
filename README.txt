@@ -69,14 +69,7 @@ compatible with Count output data.
 
 
 
-10. analyze_count_data.py
-
-Python3 script to analyze gene family gains and losses from Count based on a
-phylogenetic tree.
-
-
-
-11. analyze_all_data.R
+10. analyze_all_data.R
 
 RStudio script to compile all datasets, compute misc. analyses (some of which are
 then outputted and used in downstream python scripts), and visualize/plot data.
