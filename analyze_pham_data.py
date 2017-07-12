@@ -1,17 +1,18 @@
-#Python3 script to compute conservation of phams within pre-determined groups of phages and/or
-#proportion of shared phams between every pair of phages
+#Python3 script to compute misc. analyses based on pham data.
 #Travis Mavrich
-#20160628
 
 
 #General notes:
 #1. Script does not account for genes that straddle genome ends when calculating gene length. So it will not properly handle this edge case.
 #2. For pham function analysis, all phams found in gene data are expected to be present in the pham function list, and vice versa. If this
 #   is not the case, the script will exit.
-#3. Pham proportion analysis outputs redundant data, so for two phages, it outputs (phage1, phage2, proportion data) as well as (phage2, phage1, proportion data)
-#4. Gene data for phages that are not in the phage list does not cause errors. However, their associated pham data does get included in the analysis
-#   (where their description gets added to that pham's dictionary). In general though, it is a good idea to ensure the phage, gene, and function input files
-#   are consistent.
+#3. Pham proportion analysis outputs redundant data, so for two phages,
+#   it outputs (phage1, phage2, proportion data) as well as (phage2, phage1, proportion data)
+#4. Gene data for phages that are not in the phage list does not cause errors.
+#   However, their associated pham data does get included in the analysis
+#   (where their description gets added to that pham's dictionary).
+#   In general though, it is a good idea to ensure the phage, gene, and
+#   function input files are consistent.
 
 #Import requisite modules
 import time, sys, os, csv, statistics
@@ -31,11 +32,11 @@ except:
         Execute script in any working directory\n\
         Script requires three input files:\n\n\
         First file: genome file (csv-formatted)\n\
-            0 Phage Name (NOT phageID)\n\
-            1 Predetermined group designation (Cluster, Subcluster, par phages, etc.)\n\n\
+            0 Phage Name\n\
+            1 Predetermined group designation (Cluster, Subcluster, etc.)\n\n\
             \n\
         Second file: gene file (csv-formatted)\n\
-            0 Phage Name (NOT phageID)\n\
+            0 Phage Name\n\
             1 GeneID\n\
             2 Gene Start (1-based indexing)\n\
             3 Gene Stop (1-based indexing)\n\
@@ -53,7 +54,7 @@ except:
         1. Pham dictionary (Option 0) = list of all gene descriptions associated with each pham (csv-formatted)\n\
             0 pham\n\
             1 description\n\
-        2. Genome-specific function summary (Option 0 with function analysis)= analysis of how functions contribute to gene totals and gene coding sequence\n\
+        2. Genome-specific function summary (Option 0 with function analysis) = analysis of how functions contribute to gene totals and gene coding sequence\n\
             0 Phage Name\n\
             1 Total gene count\n\
             2...Function-specific gene count\n\
@@ -61,15 +62,15 @@ except:
             4...Function-specific nucleotide gene length mean\n\
             ....Repeat function-specific columns for each function\n\
             Last...Processed gene count\n\
-        3. Group-specific pham tables (Option 0)= Pham presence/absence tables for each group\n\
+        3. Group-specific pham tables (Option 0) = Pham presence/absence tables for each group\n\
             0 Pham\n\
             1+ All phages in group\n\
-        4. Total pham conservation (Option 1)= list of all phams in the dataset and pham conservation at the Group level (csv-formatted)\n\
+        4. Total pham conservation (Option 1) = list of all phams in the dataset and pham conservation at the Group level (csv-formatted)\n\
             0 Pham\n\
             1 Pham descriptions\n\
             2+...Each unique element/name in the Group designation\n\
         5. Genome-specific pham conservation (Option 1) = unique file for each phage, reflecting levels of pham conservation at the Group level (csv-formatted)\n\
-            0 Phage Name (NOT phageID)\n\
+            0 Phage Name\n\
             1 GeneID\n\
             2 Gene Start\n\
             3 Gene Stop\n\
@@ -673,7 +674,8 @@ if (analysis_type == 1) or (analysis_type == 4):
 
 
     ###Output conservation data for each phage
-    #Creates a separate csv file for each phage. Each row is a gene, each column is a pham conservation per group
+    #Creates a separate csv file for each phage.
+    #Each row is a gene, each column is a pham conservation per group
 
 
     #Create output directory and move there
@@ -913,7 +915,8 @@ if (analysis_type == 2) or (analysis_type == 4):
 
 
     #Don't add a header to this file.
-    #This file is large, and it gets loaded into R for downstream analysis, so the header rows complicates file import
+    #This file is large, and it gets loaded into R for downstream analysis,
+    #so the header row complicates file import
     columns = ['phage1_name',\
                 'phage1_number_of_unshared_phams',\
                 'phage1_shared_proportion',\
@@ -1031,7 +1034,9 @@ if (analysis_type == 3) or (analysis_type == 4):
                     pham_group1_completely_conserved += 1
 
 
-            #Now that the shared and unshared phams are computed, for each group compute the mean, median, and max number of groups each shared pham is found in
+            #Now that the shared and unshared phams are computed,
+            #for each group compute the mean, median, and max number of groups
+            # each shared pham is found in
             group1_shared_pham_distribution = []
             for pham in group1_shared_pham_set:
                 group1_shared_pham_distribution.append(len(pham_group_dict[pham]))
