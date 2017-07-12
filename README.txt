@@ -64,7 +64,7 @@ Python3 script to compute pairwise gene content dissimilarity using VOG data.
 
 9. edit_phylogenetic_tree.py
 
-Python3 script to manipulate phylogenetic trees, such as naming internal nodes to be
+Python3 script to manipulate phylogenetic tree data, such as naming internal nodes to be
 compatible with Count output data.
 
 

@@ -1,6 +1,5 @@
-#Python3 script to convert names in a phylogenetic tree
+#Python3 script to manipulate phylogenetic tree data
 #Travis Mavrich
-#20170320
 
 
 
@@ -20,24 +19,24 @@ except:
 
 
     print("\n\n\
-        This is a Python3 script to convert names in a phylogenetic tree\n\
+        This is a Python3 script to manipulate phylogenetic tree data\n\
         Execute script in any working directory\n\
         Script requires two input files:\n\n\
         First file: tree file (tab delimited)\n\
             \n\
         Second file: name file (csv-formatted):\n\
-            0 Taxa name in tree\n\
-            1 New taxa name\n\
+            0 Taxon name in tree\n\
+            1 New taxon name\n\
             (Note: if you don't want to convert taxa names, enter 'none'.\
             \n\
             \n")
 
 
-        
+
     sys.exit(1)
-    
-    
-    
+
+
+
 #Determine what the user wants to do
 print("\n\nChoose one option from below:")
 print("1 = Do you want to rename tree leaf names?")
@@ -54,7 +53,7 @@ while response_valid == False:
 
         response = int(response)
         response_valid = True
-        
+
     else:
         print("Invalid response.")
 
@@ -90,7 +89,7 @@ while input_format_valid == False:
         input_format == "5" or \
         input_format == "8" or \
         input_format == "9":
-        
+
         input_format = int(input_format)
         input_format_valid = True
 
@@ -98,8 +97,8 @@ while input_format_valid == False:
         print("Invalid response.")
 
 
-   
-    
+
+
 #Expand home and working directory
 home_dir = os.path.expanduser('~')
 working_dir = os.path.abspath('.')
@@ -178,7 +177,7 @@ if response == 1:
 
     #Replace all leaf names
     for leaf in tree:
-    
+
         try:
             leaf.name = name_conversion_dict[leaf.name]
         except:
@@ -189,10 +188,10 @@ if response == 1:
 
 #Label internal nodes if selected by user
 if response == 2:
-    
+
     node_label_num = 1
     for node in tree.traverse("postorder"):
-    
+
         if node.is_leaf() == False and node.name == "":
             node.name = "node%s" %node_label_num
             node_label_num += 1
@@ -200,14 +199,14 @@ if response == 2:
         else:
             print("nothing changed")
             print(node.name)
-        
+
         if node.is_root() == True:
             print("Root is: %s" %node.name)
 
 
 #Parse tree elements if selected by user
 if response == 3:
-    
+
     node_data_list = []
     for node in tree.traverse("postorder"):
         node_data_list.append([node.name,node.dist,node.support])
@@ -234,8 +233,10 @@ if response == 3:
 
 
 #Export the renamed tree based on selections
-#If you specify format=3, then support values are lost, and node names are outputted in the support position, even if there are no node names (default = "NoName")
-#If you don't specify format, it looks to output anything available. Not sure if it gives preference to support or node names
+#If you specify format=3, then support values are lost, and node names are
+#outputted in the support position, even if there are no node names (default = "NoName")
+#If you don't specify format, it looks to output anything available.
+#Not sure if it gives preference to support or node names
 
 
 if response == 1 or response == 2:
@@ -254,14 +255,14 @@ if response == 1 or response == 2:
     while output_format_valid == False:
 
         output_format = input()
-    
+
         if output_format == "0" or \
             output_format == "2" or \
             output_format == "3" or \
             output_format == "5" or \
             output_format == "8" or \
             output_format == "9":
-        
+
             output_format = int(output_format)
             output_format_valid = True
 
@@ -269,7 +270,8 @@ if response == 1 or response == 2:
             print("Invalid response.")
 
 
-    #Format_root_node will output the root node, if it is present. Otherwise, it doesn't seem to care if the root is absent.
+    #Format_root_node will output the root node, if it is present.
+    #Otherwise, it doesn't seem to care if the root is absent.
     tree.write(outfile=tree_basename + "_modified.txt",format=output_format,format_root_node=True)
 
 
@@ -277,13 +279,4 @@ if response == 1 or response == 2:
 
 
 #End script
-print("\n\nTree name conversion script completed.")
-
-
-
-
-
-
-
-
-
+print("\n\nTree manipulation script completed.")
