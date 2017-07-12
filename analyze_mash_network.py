@@ -1,6 +1,4 @@
-#Python3 script to perform misc analyses on mash networks
-#Travis Mavrich
-#20161206
+#Python3 script to perform misc analyses on mash and gene content data
 
 
 import csv, os, sys, time
@@ -16,7 +14,7 @@ except:
         This is a Python3 script to perform misc analyses on phage networks\n\
         Script requires two arguments:\n\n\
         Execute script in any working directory\n\
-        First argument: input file, which is the processed/filtered Mash data (csv-formatted)\n\
+        First argument: input file of the Mash and gene content data (csv-formatted)\n\
             0 = reference\n\
             1 = query\n\
             2 = nucleotide distance\n\
@@ -24,8 +22,8 @@ except:
             4+ = ...\n\
             \n\
         Second argument: input file of all phage names used in the Mash analysis (csv-formatted)\n\
-            0 Phage Name (NOT phageID)\n\
-            1 Predetermined group designation (Cluster, Subcluster, par phages, etc.)\n\n\
+            0 Phage Name\n\
+            1 Predetermined group designation (Cluster, Subcluster, etc.)\n\n\
             2+ = ...\n\
         \n\n\n\
         The script outputs two file(s):\n\
@@ -52,10 +50,10 @@ except:
 
 
     sys.exit(1)
-    
-    
-    
-    
+
+
+
+
 #Expand home and working directory
 home_dir = os.path.expanduser('~')
 working_dir = os.path.abspath('.')
@@ -124,7 +122,7 @@ file_object.close()
 
 
 
-#Open the processed mash file
+#Open the processed Mash and gene content data file
 processed_data_list = []
 processed_data_handle = open(processed_file, 'r')
 processed_reader = csv.reader(processed_data_handle,delimiter=',')
@@ -197,7 +195,7 @@ print("Creating group-results dictionary")
 group_results_dict = {}
 for group_id in sorted_group_list:
     group_results_dict[group_id] = [set(),0,set(),0,set(),set(),0]
-    
+
 
 
 #Prepare results file
@@ -230,7 +228,7 @@ for line in processed_data_list:
 
     ref_group = phage_group_dict[line[0]]
     query_group = phage_group_dict[line[1]]
-    
+
 
     #If the group is "Unspecified", then skip. The analysis should only take into account specified Group data, with no missing values
     if ref_group == 'Unspecified' or query_group == 'Unspecified':
@@ -254,7 +252,7 @@ for line in processed_data_list:
 
     #If the comparison is between phages of different groups, update inter-group analysis fields
     else:
-    
+
 
         ref_results[0].add(line[0])
         ref_results[1] += 1
@@ -275,8 +273,8 @@ for line in processed_data_list:
 
 #Output all results to file
 for key in group_results_dict:
-    
-    output_format = group_results_dict[key]    
+
+    output_format = group_results_dict[key]
     output_list = [key,\
                     len(group_phage_dict[key]),\
                     len(output_format[0]),\
@@ -288,7 +286,7 @@ for key in group_results_dict:
                     output_format[6]]
 
     results_file_writer.writerow(output_list)
-    
+
 
 
 #Close the file
@@ -310,7 +308,7 @@ print("Evolutionary mode analysis...\n\n")
 analysis_phage_set = set()
 for line in processed_data_list:
     analysis_phage_set.add(line[0])
-    analysis_phage_set.add(line[1])    
+    analysis_phage_set.add(line[1])
 
 
 #Create a phage-data dictionary
@@ -341,7 +339,7 @@ for phage in phage_data_dict.keys():
     lgcf_tally = 0
     out_of_range_tally = 0
 
-    
+
     #Iterate through each set of coordinates
     for coordinates in data_list:
 
@@ -351,16 +349,16 @@ for phage in phage_data_dict.keys():
         if (coordinates[0] < 0.06 and coordinates[1] < 0.22) or \
             (coordinates[0] > 0.28 and coordinates[1] > 0.79):
            out_of_range_tally += 1
-           
-           
+
+
         elif coordinates[0] < 0.16:
-            
+
             if coordinates[1] > (3.5 * coordinates[0]):
                 hgcf_tally += 1
             else:
                 lgcf_tally += 1
         else:
-            
+
             if coordinates[1] > ((2 * coordinates[0]) + 0.25):
                 hgcf_tally += 1
             else:
@@ -370,12 +368,12 @@ for phage in phage_data_dict.keys():
     #Now compute the mode
     total_tally = hgcf_tally + lgcf_tally + out_of_range_tally
     in_range_tally = hgcf_tally + lgcf_tally
-    
+
     #Make sure there is at least one measurable data point in either category
     if in_range_tally > 0:
         hgcf_percent = round(hgcf_tally/in_range_tally,2)
         lgcf_percent = round(lgcf_tally/in_range_tally,2)
-    
+
 
         if hgcf_percent == 1:
             mode_exact = "hgcf"
@@ -383,15 +381,15 @@ for phage in phage_data_dict.keys():
             mode_exact = "lgcf"
         else:
             mode_exact = "mixed"
-        
-        
+
+
         if hgcf_percent > 0.8:
             mode_80 = "hgcf"
         elif hgcf_percent < 0.2:
             mode_80 = "lgcf"
         else:
             mode_80 = "mixed"
-            
+
     else:
         hgcf_percent = 0
         lgcf_percent = 0
@@ -451,13 +449,3 @@ print("Stop time: %s" %end_time)
 
 
 print("Network and evolutionary mode analysis script complete.")
-
-
-
-
-
-
-
-
-
-
