@@ -46,7 +46,8 @@ Python3 script to perform several computations based on Phamerator-derived gene 
 6. compute_gene_specific_mash.py
 
 Python3 script to compute nucleotide distances between homologous (shared) and 
-non-homologous (non-shared) nucleotide sequences using Mash.
+non-homologous (non-shared) nucleotide sequences using Mash. It does not compute all
+pairwise genome comparisons, but only those specified in a required input file.
 
 
 

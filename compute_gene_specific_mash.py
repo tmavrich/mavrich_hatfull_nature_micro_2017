@@ -1,6 +1,5 @@
 #Python3 script to compute mash distances based on gene-specific sequences
 #Travis Mavrich
-#20170105
 
 
 
@@ -25,7 +24,7 @@ except:
         This is a Python3 script to compute mash distances based on gene-specific sequences\n\
         Execute script in any working directory\n\
         Script requires three arguments:\n\n\
-        First argument: fasta file directory file (fasta-formatted)\n\
+        First argument: fasta file directory (fasta-formatted)\n\
             \n\
         Second argument: gene file (csv-formatted)\n\
             0 PhageID\n\
@@ -41,7 +40,7 @@ except:
             \n")
 
 
-        
+
     sys.exit(1)
 
 
@@ -178,13 +177,12 @@ def compute_pairwise_mash(fasta1_filename,fasta2_filename):
     mash_input_handle.close()
 
     #Remove all files
-    #input('About to delete mash files')
     os.remove(fasta1_filename)
     os.remove(fasta2_filename)
     os.remove(fasta1_sketch_file_name)
     os.remove(fasta2_sketch_file_name)
     os.remove(mash_output_file)
-    
+
 
     return mash_input_list
 
@@ -215,12 +213,12 @@ for filename in files:
     #The filename should contain the phageID that will be used to match to other data
     fasta_phageID = filename.split('.')[0]
     seqFile = fasta_file_dir + filename
-    
+
     if fasta_phageID in fasta_dict:
         print("Error: %s is a duplicate fasta phageID. Skipping %s fasta record." % (fasta_phageID,filename))
         input("Press ENTER to continue")
         continue
-    
+
     #Create a fasta record and store in the fasta dictionary
     fasta_record = SeqIO.read(seqFile, "fasta")
     fasta_dict[fasta_phageID] = fasta_record
@@ -268,7 +266,8 @@ os.chdir(new_dir)
 #This will serve as a record of all phages that will be used in the analysis.
 #This will be used to:
 #1. verify that all comparison phageIDs match to fasta record phageIDs and gene data phageIDs
-#2. determine which genomes from the fasta records actually will be used to extract gene sequences (in case there are fasta records that are unused in the analysis)
+#2. determine which genomes from the fasta records actually will be used to
+#extract gene sequences (in case there are fasta records that are unused in the analysis).
 print("Creating comparison phageID set")
 comparison_phageID_set = set()
 for comparison_data in comparison_data_list:
@@ -366,20 +365,12 @@ for comparison_phageID in comparison_phageID_set:
         #Slicing includes the first coordinate and excludes the last
         #The coordinates in the input file are expected to be 1-based indexing of the first and last nucleotides
         #Therefore, the start coordinate needs to be reduced by 1, and the slice should extract the expected sequence
-        gene_sequence = fasta_seq.seq[int(gene_data[2]) - 1:int(gene_data[3])]        
+        gene_sequence = fasta_seq.seq[int(gene_data[2]) - 1:int(gene_data[3])]
         gene_sequence = str(gene_sequence).upper() #Convert to string to get rid of seq object
-        
-        #Print the details of the sequence extraction to ensure it's working correctly
-        #print(gene_data[0])
-        #print(gene_data[1])
-        #print(int(gene_data[2]))
-        #print(int(gene_data[3]))
-        #print(len(gene_sequence))
-        #print(gene_sequence)
-        #input()
-        
+
+
         #Now create a new list of gene data, including the sequence and append to list of all gene data for that phage
-        gene_sequence_data = []        
+        gene_sequence_data = []
         gene_sequence_data.append(gene_data[0])
         gene_sequence_data.append(gene_data[1])
         gene_sequence_data.append(gene_data[4])
@@ -444,7 +435,7 @@ print("Computing all, shared, and unshared mash distances")
 #33 phage1 all genes GC content
 #34 phage1 shared genes GC content
 #35 phage1 unshared genes GC content
-    
+
 #36 phage2 # unshared phams
 #37 phage2 # all phams
 #38 phage2 # shared genes
@@ -543,11 +534,11 @@ for comparison_data in comparison_data_list:
 
     comparison_count += 1
     print("Computing shared and unshared mash distances for comparison #%s" % comparison_count)
-    #input("Press ENTER to continue")
+
 
     phage1_pham_set = phage_pham_dict[phage1]
     phage1_gene_sequence_list = phage_gene_sequence_dict[phage1]
-    
+
     phage2_pham_set = phage_pham_dict[phage2]
     phage2_gene_sequence_list = phage_gene_sequence_dict[phage2]
 
@@ -561,7 +552,7 @@ for comparison_data in comparison_data_list:
     if len(phage2_pham_set) == 0:
         print("Phage %s contains no phams." % phage2)
         continue
-    
+
     #If both phages to compare are the same, then skip this genome
     if phage1 == phage2:
         print("Phages %s and %s are the same." % (phage1,phage2))
@@ -571,7 +562,7 @@ for comparison_data in comparison_data_list:
 
     phage1_unshared_pham_set = phage1_pham_set - phage2_pham_set
     phage2_unshared_pham_set = phage2_pham_set - phage1_pham_set
-    
+
     intersection_set = phage1_pham_set & phage2_pham_set
     union_set = phage1_pham_set | phage2_pham_set
 
@@ -589,17 +580,18 @@ for comparison_data in comparison_data_list:
     if len(phage1_unshared_pham_set) + len(phage2_unshared_pham_set) + len(intersection_set) != len(union_set):
         print("Error in calculating shared and unshared pham sets for %s" % phage1_phage2)
         continue
-    
 
 
-    #Retrieve all genes for each group of shared and unshared phams, and concatenate into a single long sequence
+
+    #Retrieve all genes for each group of shared and unshared phams,
+    #and concatenate into a single long sequence
     phage1_all_gene_sequence = ""
     phage2_all_gene_sequence = ""
 
     phage1_shared_gene_sequence = ""
     phage2_shared_gene_sequence = ""
 
-    phage1_unshared_gene_sequence = ""    
+    phage1_unshared_gene_sequence = ""
     phage2_unshared_gene_sequence = ""
 
     phage1_all_gene_lengths = []
@@ -625,16 +617,16 @@ for comparison_data in comparison_data_list:
 
     for phage_gene_data in phage1_gene_sequence_list:
 
-        phage1_all_gene_count += 1        
+        phage1_all_gene_count += 1
         phage1_all_gene_sequence = phage1_all_gene_sequence + phage_gene_data[3]
         phage1_all_gene_lengths.append(len(phage_gene_data[3]))
 
-        
+
         if phage_gene_data[2] in intersection_set:
             phage1_shared_gene_count += 1
             phage1_shared_gene_lengths.append(len(phage_gene_data[3]))
             phage1_shared_gene_sequence = phage1_shared_gene_sequence + phage_gene_data[3]
-    
+
         if phage_gene_data[2] in phage1_unshared_pham_set:
             phage1_unshared_gene_count += 1
             phage1_unshared_gene_lengths.append(len(phage_gene_data[3]))
@@ -643,16 +635,16 @@ for comparison_data in comparison_data_list:
 
     for phage_gene_data in phage2_gene_sequence_list:
 
-        phage2_all_gene_count += 1        
+        phage2_all_gene_count += 1
         phage2_all_gene_sequence = phage2_all_gene_sequence + phage_gene_data[3]
         phage2_all_gene_lengths.append(len(phage_gene_data[3]))
 
-        
+
         if phage_gene_data[2] in intersection_set:
             phage2_shared_gene_count += 1
             phage2_shared_gene_lengths.append(len(phage_gene_data[3]))
             phage2_shared_gene_sequence = phage2_shared_gene_sequence + phage_gene_data[3]
-    
+
         if phage_gene_data[2] in phage2_unshared_pham_set:
             phage2_unshared_gene_count += 1
             phage2_unshared_gene_lengths.append(len(phage_gene_data[3]))
@@ -665,30 +657,12 @@ for comparison_data in comparison_data_list:
 
     if phage1_all_gene_count > 0:
         phage1_all_genes_ave_length = phage1_all_genes_total_length/len(phage1_all_gene_lengths)
-        
-        
-        #Print details to ensure it is working correctly
-        #print(phage1)
-        #print(phage1_all_gene_lengths)
-        #print(len(phage1_all_gene_lengths))
-        #print(phage1_all_genes_total_length)
-        #print(phage1_all_genes_ave_length)
-        #input()
-        
+
     else:
         phage1_all_genes_ave_length = 0
 
     if phage2_all_gene_count > 0:
         phage2_all_genes_ave_length = phage2_all_genes_total_length/len(phage2_all_gene_lengths)
-
-        #Print details to ensure it is working correctly
-        #print(phage2)
-        #print(phage2_all_gene_lengths)
-        #print(len(phage2_all_gene_lengths))
-        #print(phage2_all_genes_total_length)
-        #print(phage2_all_genes_ave_length)
-        #input()
-
 
     else:
         phage2_all_genes_ave_length = 0
@@ -701,29 +675,11 @@ for comparison_data in comparison_data_list:
     if phage1_shared_gene_count > 0:
         phage1_shared_genes_ave_length = phage1_shared_genes_total_length/len(phage1_shared_gene_lengths)
 
-        #Print details to ensure it is working correctly
-        #print(phage1)
-        #print(phage1_shared_gene_lengths)
-        #print(len(phage1_shared_gene_lengths))
-        #print(phage1_shared_genes_total_length)
-        #print(phage1_shared_genes_ave_length)
-        #input()
-
-
     else:
         phage1_shared_genes_ave_length = 0
 
     if phage2_shared_gene_count > 0:
         phage2_shared_genes_ave_length = phage2_shared_genes_total_length/len(phage2_shared_gene_lengths)
-
-        #Print details to ensure it is working correctly
-        #print(phage2)
-        #print(phage2_shared_gene_lengths)
-        #print(len(phage2_shared_gene_lengths))
-        #print(phage2_shared_genes_total_length)
-        #print(phage2_shared_genes_ave_length)
-        #input()
-
 
     else:
         phage2_shared_genes_ave_length = 0
@@ -740,30 +696,11 @@ for comparison_data in comparison_data_list:
     if phage1_unshared_gene_count > 0:
         phage1_unshared_genes_ave_length = phage1_unshared_genes_total_length/len(phage1_unshared_gene_lengths)
 
-        #Print details to ensure it is working correctly
-        #print(phage1)
-        #print(phage1_unshared_gene_lengths)
-        #print(len(phage1_unshared_gene_lengths))
-        #print(phage1_unshared_genes_total_length)
-        #print(phage1_unshared_genes_ave_length)
-        #input()
-
-
-
     else:
         phage1_unshared_genes_ave_length = 0
 
     if phage2_unshared_gene_count > 0:
         phage2_unshared_genes_ave_length = phage2_unshared_genes_total_length/len(phage2_unshared_gene_lengths)
-
-        #Print details to ensure it is working correctly
-        #print(phage2)
-        #print(phage2_unshared_gene_lengths)
-        #print(len(phage2_unshared_gene_lengths))
-        #print(phage2_unshared_genes_total_length)
-        #print(phage2_unshared_genes_ave_length)
-        #input()
-
 
     else:
         phage2_unshared_genes_ave_length = 0
@@ -777,7 +714,8 @@ for comparison_data in comparison_data_list:
 
 
     #Compute GC content for all concatenated sequences
-    #Be sure to test the length of the nucleotide sequence before computing GC%, since some shared or unshared sequences make have length of zero
+    #Be sure to test the length of the nucleotide sequence before computing GC%,
+    #since some shared or unshared sequences make have length of zero
 
     if len(phage1_all_gene_sequence) > 0:
         phage1_all_gene_GC_content = (phage1_all_gene_sequence.count('G') + phage1_all_gene_sequence.count('C'))/len(phage1_all_gene_sequence)
@@ -800,14 +738,14 @@ for comparison_data in comparison_data_list:
         phage2_shared_gene_GC_content = (phage2_shared_gene_sequence.count('G') + phage2_shared_gene_sequence.count('C'))/len(phage2_shared_gene_sequence)
     else:
         phage2_shared_gene_GC_content = 0
-    
-    
-    
+
+
+
     if len(phage1_unshared_gene_sequence) > 0:
         phage1_unshared_gene_GC_content = (phage1_unshared_gene_sequence.count('G') + phage1_unshared_gene_sequence.count('C'))/len(phage1_unshared_gene_sequence)
     else:
         phage1_unshared_gene_GC_content = 0
-        
+
     if len(phage2_unshared_gene_sequence) > 0:
         phage2_unshared_gene_GC_content = (phage2_unshared_gene_sequence.count('G') + phage2_unshared_gene_sequence.count('C'))/len(phage2_unshared_gene_sequence)
     else:
@@ -829,7 +767,8 @@ for comparison_data in comparison_data_list:
 
 
 
-    #Compute mash distances of all, shared, unshared, and combined shared-combined unshared gene sequences
+    #Compute mash distances of all, shared, unshared, and
+    #combined shared-combined unshared gene sequences
 
 
     #Distance between whole genome sequences
@@ -908,39 +847,39 @@ for comparison_data in comparison_data_list:
     #Prepare data for export
     shared_unshared_gene_data_results.append(phage1_phage2)
     shared_unshared_gene_data_results.append(phage1)
-    shared_unshared_gene_data_results.append(phage2)    
-   
+    shared_unshared_gene_data_results.append(phage2)
+
     shared_unshared_gene_data_results.append(len(intersection_set))
-    shared_unshared_gene_data_results.append(round(gene_content_dissimilarity_general,4))    
+    shared_unshared_gene_data_results.append(round(gene_content_dissimilarity_general,4))
     shared_unshared_gene_data_results.append(round(gene_content_dissimilarity_jaccard,4))
 
 
     shared_unshared_gene_data_results.append(round(all_sequence_mash_result[0][2],4))
-    shared_unshared_gene_data_results.append(round(all_sequence_mash_result[0][3],4))    
+    shared_unshared_gene_data_results.append(round(all_sequence_mash_result[0][3],4))
     shared_unshared_gene_data_results.append(all_sequence_mash_result[0][4])
     shared_unshared_gene_data_results.append(round(shared_sequence_mash_result[0][2],4))
-    shared_unshared_gene_data_results.append(round(shared_sequence_mash_result[0][3],4))    
+    shared_unshared_gene_data_results.append(round(shared_sequence_mash_result[0][3],4))
     shared_unshared_gene_data_results.append(shared_sequence_mash_result[0][4])
     shared_unshared_gene_data_results.append(round(unshared_sequence_mash_result[0][2],4))
-    shared_unshared_gene_data_results.append(round(unshared_sequence_mash_result[0][3],4))    
+    shared_unshared_gene_data_results.append(round(unshared_sequence_mash_result[0][3],4))
     shared_unshared_gene_data_results.append(unshared_sequence_mash_result[0][4])
 
     shared_unshared_gene_data_results.append(round(shared_unshared_sequence_mash_result[0][2],4))
-    shared_unshared_gene_data_results.append(round(shared_unshared_sequence_mash_result[0][3],4))    
+    shared_unshared_gene_data_results.append(round(shared_unshared_sequence_mash_result[0][3],4))
     shared_unshared_gene_data_results.append(shared_unshared_sequence_mash_result[0][4])
     shared_unshared_gene_data_results.append(phage1_phage2_shared_gene_sequence_total_length)
     shared_unshared_gene_data_results.append(phage1_phage2_unshared_gene_sequence_total_length)
     shared_unshared_gene_data_results.append(phage1_phage2_shared_gene_GC_content)
     shared_unshared_gene_data_results.append(phage1_phage2_unshared_gene_GC_content)
-    
+
     shared_unshared_gene_data_results.append(phage1_unshared_size)
     shared_unshared_gene_data_results.append(len(phage1_pham_set))
     shared_unshared_gene_data_results.append(phage1_all_gene_count)
-    shared_unshared_gene_data_results.append(phage1_shared_gene_count)    
+    shared_unshared_gene_data_results.append(phage1_shared_gene_count)
     shared_unshared_gene_data_results.append(phage1_unshared_gene_count)
     shared_unshared_gene_data_results.append(round(phage1_all_genes_ave_length,4))
     shared_unshared_gene_data_results.append(round(phage1_shared_genes_ave_length,4))
-    shared_unshared_gene_data_results.append(round(phage1_unshared_genes_ave_length,4))    
+    shared_unshared_gene_data_results.append(round(phage1_unshared_genes_ave_length,4))
     shared_unshared_gene_data_results.append(phage1_all_genes_total_length)
     shared_unshared_gene_data_results.append(phage1_shared_genes_total_length)
     shared_unshared_gene_data_results.append(phage1_unshared_genes_total_length)
@@ -951,38 +890,19 @@ for comparison_data in comparison_data_list:
     shared_unshared_gene_data_results.append(phage2_unshared_size)
     shared_unshared_gene_data_results.append(len(phage2_pham_set))
     shared_unshared_gene_data_results.append(phage2_all_gene_count)
-    shared_unshared_gene_data_results.append(phage2_shared_gene_count)    
+    shared_unshared_gene_data_results.append(phage2_shared_gene_count)
     shared_unshared_gene_data_results.append(phage2_unshared_gene_count)
     shared_unshared_gene_data_results.append(round(phage2_all_genes_ave_length,4))
     shared_unshared_gene_data_results.append(round(phage2_shared_genes_ave_length,4))
-    shared_unshared_gene_data_results.append(round(phage2_unshared_genes_ave_length,4))    
+    shared_unshared_gene_data_results.append(round(phage2_unshared_genes_ave_length,4))
     shared_unshared_gene_data_results.append(phage2_all_genes_total_length)
     shared_unshared_gene_data_results.append(phage2_shared_genes_total_length)
     shared_unshared_gene_data_results.append(phage2_unshared_genes_total_length)
     shared_unshared_gene_data_results.append(round(phage2_all_gene_GC_content,4))
-    shared_unshared_gene_data_results.append(round(phage2_shared_gene_GC_content,4))    
+    shared_unshared_gene_data_results.append(round(phage2_shared_gene_GC_content,4))
     shared_unshared_gene_data_results.append(round(phage2_unshared_gene_GC_content,4))
 
     output_writer.writerow(shared_unshared_gene_data_results)
-
-
-
-    
-    
-
-    
-    
-
-    
-    
-
-
-
-
-
-
-
-
 
 
 
@@ -991,6 +911,3 @@ output_csvfile.close()
 
 
 print("Shared/unshared gene analysis completed.")
-
-
-
