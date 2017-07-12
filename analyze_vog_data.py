@@ -1,6 +1,5 @@
 #Python3 script to analyze Viral Orthologous Group (VOG) data
 #Travis Mavrich
-#20170220
 
 
 
@@ -8,7 +7,6 @@
 import time, sys, os, csv, statistics
 
 
-#Import third-party modules
 
 
 
@@ -39,7 +37,7 @@ except:
 
 
 
-        
+
     sys.exit(1)
 
 
@@ -174,7 +172,7 @@ for accession in genome_data_dict.keys():
     vog_sum1 = genome_data_list[3]
     matched_vog_list = accession_vog_dict[accession]
     matched_vog_set = set(matched_vog_list)
-    
+
     if vog_sum1 != len(matched_vog_set):
         print("Error for accession %s: VOG sum of %s in genome data does not match VOG sum of %s in VOG data."\
          %(accession,vog_sum1,len(matched_vog_set)))
@@ -221,7 +219,7 @@ for phage1 in genome_data_dict.keys():
 
     for phage2 in genome_data_dict.keys():
 
-        
+
         #If both phages to compare are the same, then skip this genome
         if phage1 == phage2:
             print("Phages %s and %s are the same." % (phage1,phage2))
@@ -241,11 +239,16 @@ for phage1 in genome_data_dict.keys():
         intersection_set = phage1_vog_set & phage2_vog_set
         phage1_unshared_vog_set = phage1_vog_set - intersection_set
         phage2_unshared_vog_set = phage2_vog_set - intersection_set
+
+
+        #Since not all genes are given a gene VOG, it is not possible to
+        #compute the exact equivalent values as with pham data.
+        #As an alternative, compute the total number of genes in
+        #each genome that have been grouped into any of the VOGs that are
+        #shared between the two genomes.
+        #Now that total gene numbers are used, and not VOG numbers,
+        #gene dissimilarity is computed using the total number of genes in the genome
         
-        
-        #Since not all genes are given a gene VOG, I can't compute the equivalent values as I did with pham data
-        #As an alternative, I need to compute the total number of genes in each genome that have been grouped into any of the VOGs that are shared between the two genomes
-        #Now that I work with total gene numbers, and not VOG numbers, I can compute gene dissimilarity using the total number of genes in the genome
         phage1_shared_vog_gene_tally = 0
         phage1_unshared_vog_gene_tally = 0
         for vog in phage1_vog_list:
@@ -266,7 +269,7 @@ for phage1 in genome_data_dict.keys():
 
         phage1_unshared_other_gene_tally = phage1_total_genes - phage1_shared_vog_gene_tally - phage1_unshared_vog_gene_tally
         phage2_unshared_other_gene_tally = phage2_total_genes - phage2_shared_vog_gene_tally - phage2_unshared_vog_gene_tally
-        
+
         phage1_shared_vog_gene_proportion = phage1_shared_vog_gene_tally/phage1_total_genes
         phage2_shared_vog_gene_proportion = phage2_shared_vog_gene_tally/phage2_total_genes
         ave_proportion = (phage1_shared_vog_gene_proportion + phage2_shared_vog_gene_proportion)/2
@@ -297,10 +300,10 @@ for phage1 in genome_data_dict.keys():
                                     len(intersection_set),\
                                     round(ave_proportion,2),\
                                     round(gene_content_dissimilarity,2)])
-        
-        
-        
-        
+
+
+
+
 #Output shared VOG proportion data
 print("Exporting proportion data to csv file")
 columns = [\
@@ -348,5 +351,3 @@ if len(error_list) > 0:
         print(element)
 
 print("\n\n\nVOG analysis completed.")
-
-
