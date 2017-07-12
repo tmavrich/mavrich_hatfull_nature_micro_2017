@@ -1,12 +1,6 @@
 #! /bin/bash
 #Bash script to compute pairwise genomic distances using Mash
 #Travis Mavrich
-#version 2
-#20150708
-
-
-
-
 
 #Verify the correct arguments are provided, otherwise print description of the script and its required arguments.
 if ! [[ $1 && $2 ]]
@@ -56,7 +50,7 @@ do
     echo $genome_name >> ${currentdate}_${sketch}sketch_${kmer}kmer_mash_names.csv
 	mash sketch -s $sketch -k $kmer ${working_dir}/input_data/${fasta_file}
 	mv ${working_dir}/input_data/${fasta_file}.msh $sketch_dir
-	
+
 done
 
 
@@ -66,9 +60,9 @@ echo Computing distances...
 for first_sketch in `ls $sketch_dir`
 do
 	for second_sketch in `ls $sketch_dir`
-	do	
+	do
 		mash dist ${sketch_dir}/${first_sketch} ${sketch_dir}/${second_sketch} >> $output_file
-	done	
+	done
 done
 
 mv $output_file $output_dir
