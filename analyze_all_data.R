@@ -392,21 +392,56 @@ mash_table2$phage_predicted_temperate_compare <- as.factor(mash_table2$phage_pre
 
 
 
+###All dsDNA phages
+bacteria <- subset(mash_table2,mash_table2$host_superkingdom_compare == "Bacteria")
+type_dsDNA <- subset(bacteria,bacteria$phage_viral_type_compare == "dsDNA")
 
-
-
-
-
-
-
-###Check Eukaryotic controls
-euk_check <- subset(mash_table2,mash_table2$ref_host_superkingdom == "Eukaryota" | mash_table2$query_host_superkingdom == "Eukaryota")
-euk_check <- subset(euk_check,euk_check$ref_host_superkingdom == "Bacteria" | euk_check$query_host_superkingdom == "Bacteria")
-
-compute_sector_distribution(euk_check)
-
+#Fig. 1a
 par(mar=c(4,8,4,4))
-plot(euk_check$modified_mash_distance,euk_check$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+plot(type_dsDNA$modified_mash_distance,type_dsDNA$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+#Fig. 1a
+par(mar=c(4,8,15,4))
+hist(type_dsDNA$modified_mash_distance,breaks=((range(type_dsDNA$modified_mash_distance)[2]-range(type_dsDNA$modified_mash_distance)[1]) * 100),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(0,0.5),ylim=c(0,3e4),col="black",cex.axis=2)
+
+#Fig. 1a
+par(mar=c(4,4,15,4))
+hist(type_dsDNA$pham_pham_dissimilarity,breaks=((range(type_dsDNA$pham_pham_dissimilarity)[2]-range(type_dsDNA$pham_pham_dissimilarity)[1]) * 100 +1),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(1,0),col="black",cex.axis=2,ylim=c(0,2e3),yaxt="n")
+axis(side=4,pos=0,cex.axis=2)
+
+
+
+
+
+
+
+
+
+
+
+###Check by empirical lifestyle.
+type <- subset(mash_table2,mash_table2$phage_viral_type_compare != "different")
+type_dsDNA <- subset(type,type$phage_viral_type_compare == "dsDNA")
+
+all_temperate <- subset(type_dsDNA,type_dsDNA$phage_temperate_compare == "yes")
+all_lytic <- subset(type_dsDNA,type_dsDNA$phage_temperate_compare == "no")
+all_different <- subset(type_dsDNA,type_dsDNA$phage_temperate_compare == "different")
+
+
+#Fig. 1c
+par(mar=c(4,8,4,4))
+plot(all_temperate$modified_mash_distance,all_temperate$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+#Fig. 1c
+par(mar=c(4,8,4,4))
+plot(all_lytic$modified_mash_distance,all_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+#Fig. 1c
+par(mar=c(4,8,4,4))
+plot(all_different$modified_mash_distance,all_different$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
 abline(0,2,lty=2,lwd=3,col="grey")
 
 
@@ -414,25 +449,572 @@ abline(0,2,lty=2,lwd=3,col="grey")
 
 
 
-###Check archaea controls
-controls <- mash_table2
-controls$archaea_one_or_two <- ifelse(controls$ref_host_superkingdom == "Archaea" | controls$query_host_superkingdom == "Archaea",TRUE,FALSE)
-controls$archaea_both <- ifelse(controls$ref_host_superkingdom == "Archaea" & controls$query_host_superkingdom == "Archaea",TRUE,FALSE)
-controls$archaea_one <- ifelse(controls$archaea_one_or_two == TRUE & controls$archaea_both == FALSE,TRUE,FALSE)
-controls$bacteria_one_or_two <- ifelse(controls$ref_host_superkingdom == "Bacteria" | controls$query_host_superkingdom == "Bacteria",TRUE,FALSE)
-controls$archaea_one_bacteria_one <- ifelse(controls$archaea_one == TRUE & controls$bacteria_one_or_two == TRUE,TRUE,FALSE)
 
 
-archaea_check <- subset(controls,controls$archaea_one_bacteria_one == TRUE)
-compute_sector_distribution(archaea_check)
 
-#Supp Fig. 5a
+###Cluster-specific analysis
+plot_cluster_specific_profiles <- function(table,cluster){
+  
+  table$cluster_specific_one_or_two <- ifelse(table$ref_phage_cluster == cluster | table$query_phage_cluster == cluster,TRUE,FALSE)
+  table$cluster_specific_both <- ifelse(table$ref_phage_cluster == cluster & table$query_phage_cluster == cluster,TRUE,FALSE)
+  table$cluster_specific_one <- ifelse(table$cluster_specific_one_or_two == TRUE & table$cluster_specific_both == FALSE,TRUE,FALSE)
+  cluster_specific_one <- subset(table,table$cluster_specific_one == TRUE)
+  cluster_specific_both <- subset(table,table$cluster_specific_both == TRUE)
+  
+  
+  
+  
+  par(mar=c(4,8,4,4))
+  plot(cluster_specific_both$modified_mash_distance,cluster_specific_both$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="orange")
+  par(new=TRUE)
+  plot(cluster_specific_one$modified_mash_distance,cluster_specific_one$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="black")
+  abline(0,2,lty=2,lwd=3,col="grey")
+  return(nrow(cluster_specific_one) + nrow(cluster_specific_both))
+  
+}
+type <- subset(mash_table2,mash_table2$phage_viral_type_compare != "different")
+type_dsDNA <- subset(type,type$phage_viral_type_compare == "dsDNA")
+cluster_actino <- subset(type_dsDNA,type_dsDNA$phage_cluster_source_compare == "actino")
+
+#Fig. 2a
+dev.off()
+plot_cluster_specific_profiles(cluster_actino,"F")
+
+#Fig. 2a
+dev.off()
+plot_cluster_specific_profiles(cluster_actino,"K")
+
+#Fig. 2a
+dev.off()
+plot_cluster_specific_profiles(cluster_actino,"AO")
+
+#Fig. 2a
+dev.off()
+plot_cluster_specific_profiles(cluster_actino,"B")
+
+#Fig. 2a
+dev.off()
+plot_cluster_specific_profiles(cluster_actino,"BU")
+
+#Fig. 2a
+dev.off()
+plot_cluster_specific_profiles(cluster_actino,"BD")
+
+#Supp. Fig. 11c
+dev.off()
+plot_cluster_specific_profiles(cluster_actino,"N")
+
+
+
+
+
+
+
+###Check A1 and non-A1 distances to other non-A phages
+#Since only actino phages that have been clustered are used, all rows should have cluster data.
+#However, not all rows necessarily have subcluster data, so you have to take this into account.
+type <- subset(mash_table2,mash_table2$phage_viral_type_compare != "different")
+type_dsDNA <- subset(type,type$phage_viral_type_compare == "dsDNA")
+cluster_actino <- subset(type_dsDNA,type_dsDNA$phage_cluster_source_compare == "actino")
+
+
+
+cluster_actino$subcluster_A1_one_or_two <- ifelse((cluster_actino$ref_phage_subcluster == "A1" | cluster_actino$query_phage_subcluster == "A1") == FALSE | is.na(cluster_actino$ref_phage_subcluster == "A1" | cluster_actino$query_phage_subcluster == "A1") == TRUE,FALSE,TRUE)
+cluster_actino$subcluster_A1_neither <- ifelse((cluster_actino$ref_phage_subcluster == "A1" | cluster_actino$query_phage_subcluster == "A1") == FALSE | is.na(cluster_actino$ref_phage_subcluster == "A1" | cluster_actino$query_phage_subcluster == "A1") == TRUE,TRUE,FALSE)
+cluster_actino$subcluster_A1_both <- ifelse((cluster_actino$ref_phage_subcluster == "A1" & cluster_actino$query_phage_subcluster == "A1") == FALSE | is.na(cluster_actino$ref_phage_subcluster == "A1" & cluster_actino$query_phage_subcluster == "A1") == TRUE,FALSE,TRUE)
+cluster_actino$subcluster_A1_one <- ifelse(cluster_actino$subcluster_A1_one_or_two == TRUE & cluster_actino$subcluster_A1_both == FALSE,TRUE,FALSE)
+
+cluster_actino$cluster_A_one_or_two <- ifelse(cluster_actino$ref_phage_cluster == "A" | cluster_actino$query_phage_cluster == "A",TRUE,FALSE)
+cluster_actino$cluster_A_both <- ifelse(cluster_actino$ref_phage_cluster == "A" & cluster_actino$query_phage_cluster == "A",TRUE,FALSE)
+cluster_actino$cluster_A_both_but_notA1 <- ifelse(cluster_actino$cluster_A_both == TRUE & cluster_actino$subcluster_A1_neither == TRUE,TRUE,FALSE)
+cluster_actino$cluster_A_one <- ifelse(cluster_actino$cluster_A_one_or_two == TRUE & cluster_actino$cluster_A_both == FALSE,TRUE,FALSE)
+cluster_actino$cluster_A_one_but_notA1 <- ifelse(cluster_actino$cluster_A_one == TRUE & cluster_actino$subcluster_A1_neither == TRUE,TRUE,FALSE)
+
+
+#Subset of all comparisons with at least one A1 phage
+subcluster_A1_one_or_two_all <- subset(cluster_actino,cluster_actino$subcluster_A1_one_or_two == TRUE)
+
+#Subset of all A1 comparisons
+subcluster_A1_both <- subset(subcluster_A1_one_or_two_all,subcluster_A1_one_or_two_all$phage_subcluster_compare == "A1")
+
+#Subset of all comparisons with one and only one A1 phage
+subcluster_A1_one_all <- subset(subcluster_A1_one_or_two_all,subcluster_A1_one_or_two_all$subcluster_A1_one == TRUE)
+
+#Subset of all comparisons with one and only one A1 phage, and the other phage is a Cluster A phage
+subcluster_A1_one_clusterA <- subset(subcluster_A1_one_all,subcluster_A1_one_all$phage_cluster_compare == "A")
+
+#Subset of all comparisons with one and only one A1 phage, and the other phage is NOT a Cluster A phage
+#The phage_cluster_compare should NOT be "A", but it can be "NA" (since some phages are not clustered), or it can be "different"
+subcluster_A1_one_other_not_clusterA <- subset(subcluster_A1_one_all,is.na(subcluster_A1_one_all$phage_cluster_compare) | subcluster_A1_one_all$phage_cluster_compare == "different")
+
+
+
+#Subset of all comparisons with one and only non-A1, and no other cluster A
+cluster_A_one_but_notA1 <- subset(cluster_actino,cluster_actino$cluster_A_one_but_notA1 == TRUE)
+
+#Subset of all comparisons with both A, but no A1
+cluster_A_both_but_notA1 <- subset(cluster_actino,cluster_actino$cluster_A_both_but_notA1 == TRUE)
+
+
+#Fig. 3a (left)
 par(mar=c(4,8,4,4))
-plot(archaea_check$modified_mash_distance,archaea_check$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+plot(cluster_A_both_but_notA1$modified_mash_distance,cluster_A_both_but_notA1$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
+par(new=TRUE)
+plot(subcluster_A1_both$modified_mash_distance,subcluster_A1_both$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="cyan")
+par(new=TRUE)
+plot(subcluster_A1_one_clusterA$modified_mash_distance,subcluster_A1_one_clusterA$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="purple")#422
+par(new=TRUE)
+plot(subcluster_A1_one_other_not_clusterA$modified_mash_distance,subcluster_A1_one_other_not_clusterA$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="black")
+par(new=TRUE)
+plot(cluster_A_one_but_notA1$modified_mash_distance,cluster_A_one_but_notA1$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="grey")
 abline(0,2,lty=2,lwd=3,col="grey")
 
 
 
+
+
+
+
+
+
+
+
+###Misc clusters genometrics
+
+#Format
+#0 = phage
+#1 = phage_cluster
+#2 = size
+#3 = total_gene_count
+#4 = Unspecified_gene_count
+#5 = lysis_gene_count
+#6 = lysogeny_gene_count 
+#7 = recombination_replication_gene_count
+#8 = structure_assembly_gene_count
+misc_clusters_genometrics <- read.csv("misc_clusters_genometrics.csv",sep=",",header=TRUE)
+misc_clusters_genometrics$phage_cluster <- factor(misc_clusters_genometrics$phage_cluster,c("A1","F","BD","K","non-A1","B"))
+
+
+#Format
+#0 = phageName
+#1 = cluster
+#2 = GC
+misc_clusters_gc <- read.csv("misc_clusters_gc.csv",sep=",",header=TRUE)
+misc_clusters_gc$Cluster <- factor(misc_clusters_gc$Cluster,c("A1","F","BD","K","non-A1","B"))
+
+
+#Fig. 3f
+par(mar=c(8,24,4,4))
+boxplot(misc_clusters_genometrics$size ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
+stripchart(misc_clusters_genometrics$size ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
+
+#Fig. 3f
+par(mar=c(8,24,4,4))
+boxplot(misc_clusters_genometrics$total_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
+stripchart(misc_clusters_genometrics$total_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
+
+#Fig. 3f
+par(mar=c(8,24,4,4))
+boxplot(misc_clusters_genometrics$Unspecified_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
+stripchart(misc_clusters_genometrics$Unspecified_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
+
+#Fig. 3f
+par(mar=c(8,24,4,4))
+boxplot(misc_clusters_genometrics$lysis_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
+stripchart(misc_clusters_genometrics$lysis_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
+
+#Fig. 3f
+par(mar=c(8,24,4,4))
+boxplot(misc_clusters_genometrics$lysogeny_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
+stripchart(misc_clusters_genometrics$lysogeny_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
+
+#Fig. 3f
+par(mar=c(8,24,4,4))
+boxplot(misc_clusters_genometrics$recombination_replication_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
+stripchart(misc_clusters_genometrics$recombination_replication_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
+
+#Fig. 3f
+par(mar=c(8,24,4,4))
+boxplot(misc_clusters_genometrics$structure_assembly_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
+stripchart(misc_clusters_genometrics$structure_assembly_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
+
+#Fig. 3f
+par(mar=c(8,24,4,4))
+boxplot(misc_clusters_gc$GC ~ misc_clusters_gc$Cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
+stripchart(misc_clusters_gc$GC ~ misc_clusters_gc$Cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###By host phylum, then by lifestyle
+#Only focus on dsDNA phages, so remove other phage types.
+bacteria <- subset(mash_table2,mash_table2$host_superkingdom_compare == "Bacteria")
+type_dsDNA <- subset(bacteria,bacteria$phage_viral_type_compare == "dsDNA")
+
+host_phylum <- subset(type_dsDNA,type_dsDNA$host_phylum_compare != "different")
+host_phylum_diff <- subset(type_dsDNA,type_dsDNA$host_phylum_compare == "different")
+
+actino <- subset(host_phylum,host_phylum$host_phylum_compare == "Actinobacteria")
+bacter <- subset(host_phylum,host_phylum$host_phylum_compare == "Bacteroidetes")
+cyano <- subset(host_phylum,host_phylum$host_phylum_compare == "Cyanobacteria")
+firm <- subset(host_phylum,host_phylum$host_phylum_compare == "Firmicutes")
+proteo <- subset(host_phylum,host_phylum$host_phylum_compare == "Proteobacteria")
+
+
+
+
+
+
+
+
+#Same phylum
+#Scatter plots of Mash vs Pham distances by host phyla
+
+
+#Fig 4a
+par(mar=c(4,8,4,4))
+plot(actino$modified_mash_distance,actino$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+#Fig 4b
+par(mar=c(4,8,4,4))
+plot(bacter$modified_mash_distance,bacter$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+#Fig 4c
+par(mar=c(4,8,4,4))
+plot(cyano$modified_mash_distance,cyano$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+#Fig 4d
+par(mar=c(4,8,4,4))
+plot(firm$modified_mash_distance,firm$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+#Fig 4e
+par(mar=c(4,8,4,4))
+plot(proteo$modified_mash_distance,proteo$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+
+
+
+#Truncated histogram distributions of mash distances
+
+#Fig 4a
+par(mar=c(4,8,15,4))
+hist(actino$modified_mash_distance,breaks=((range(actino$modified_mash_distance)[2]-range(actino$modified_mash_distance)[1]) * 100),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(0,0.5),ylim=c(0,3e4),col="black",cex.axis=2)
+
+#Fig 4b
+par(mar=c(4,8,15,4))
+hist(bacter$modified_mash_distance,breaks=((range(bacter$modified_mash_distance)[2]-range(bacter$modified_mash_distance)[1]) * 100),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(0,0.5),ylim=c(0,50),col="black",cex.axis=2)
+
+#Fig 4c
+par(mar=c(4,8,15,4))
+hist(cyano$modified_mash_distance,breaks=((range(cyano$modified_mash_distance)[2]-range(cyano$modified_mash_distance)[1]) * 100),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(0,0.5),ylim=c(0,100),col="black",cex.axis=2)
+
+#Fig 4d
+par(mar=c(4,8,15,4))
+hist(firm$modified_mash_distance,breaks=((range(firm$modified_mash_distance)[2]-range(firm$modified_mash_distance)[1]) * 100),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(0,0.5),ylim=c(0,2e3),col="black",cex.axis=2)
+
+#Fig 4e
+par(mar=c(4,8,15,4))
+hist(proteo$modified_mash_distance,breaks=((range(proteo$modified_mash_distance)[2]-range(proteo$modified_mash_distance)[1]) * 100),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(0,0.5),ylim=c(0,2e3),col="black",cex.axis=2)
+
+
+
+
+
+#Truncated histogram distribution of gene content dissimilarities
+
+#Fig 4a
+par(mar=c(4,4,15,4))
+hist(actino$pham_pham_dissimilarity,breaks=((range(actino$pham_pham_dissimilarity)[2]-range(actino$pham_pham_dissimilarity)[1]) * 100 +1),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(1,0),col="black",cex.axis=2,ylim=c(0,2e3),yaxt="n")
+axis(side=4,pos=0,cex.axis=2)
+
+#Fig 4b
+par(mar=c(4,4,15,4))
+hist(bacter$pham_pham_dissimilarity,breaks=((range(bacter$pham_pham_dissimilarity)[2]-range(bacter$pham_pham_dissimilarity)[1]) * 100 +1),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(1,0),col="black",cex.axis=2,ylim=c(0,500),yaxt="n")
+axis(side=4,pos=0,cex.axis=2)
+
+#Fig 4c
+par(mar=c(4,4,15,4))
+hist(cyano$pham_pham_dissimilarity,breaks=((range(cyano$pham_pham_dissimilarity)[2]-range(cyano$pham_pham_dissimilarity)[1]) * 100 +1),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(1,0),col="black",cex.axis=2,ylim=c(0,100),yaxt="n")
+axis(side=4,pos=0,cex.axis=2)
+
+#Fig 4d
+par(mar=c(4,4,15,4))
+hist(firm$pham_pham_dissimilarity,breaks=((range(firm$pham_pham_dissimilarity)[2]-range(firm$pham_pham_dissimilarity)[1]) * 100 +1),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(1,0),col="black",cex.axis=2,ylim=c(0,2e3),yaxt="n")
+axis(side=4,pos=0,cex.axis=2)
+
+#Fig 4e
+par(mar=c(4,4,15,4))
+hist(proteo$pham_pham_dissimilarity,breaks=((range(proteo$pham_pham_dissimilarity)[2]-range(proteo$pham_pham_dissimilarity)[1]) * 100 +1),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(1,0),col="black",cex.axis=2,ylim=c(0,2e3),yaxt="n")
+axis(side=4,pos=0,cex.axis=2)
+
+
+
+
+#Different phyla
+#Supp. Fig. 5c
+par(mar=c(4,8,4,4))
+plot(host_phylum_diff$modified_mash_distance,host_phylum_diff$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###pham general vs jaccard dissimilarity
+
+type <- subset(mash_table2,mash_table2$phage_viral_type_compare != "different")
+type_dsDNA <- subset(type,type$phage_viral_type_compare == "dsDNA")
+bacteria_dsDNA <- subset(type_dsDNA,type_dsDNA$host_superkingdom_compare == 'Bacteria')
+
+
+#Check how correlated pham dissimilarity and jaccard dissimilarity are
+#Supp. Fig. 2a
+par(mar=c(4,8,4,4))
+plot(mash_table2$pham_jaccard_dissimilarity,mash_table2$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,1,lty=2,lwd=3,col="grey")
+
+
+#Mash vs Pham plot using jaccard
+#Supp. Fig. 2b
+par(mar=c(4,8,4,4))
+plot(bacteria_dsDNA$modified_mash_distance,bacteria_dsDNA$pham_jaccard_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+
+
+
+
+
+
+###ANI vs Pham Dissimilarity data
+#Import ANI data from the 79 genome optimization test to show ANI vs Pham Distance
+#Data contains complete matrix of 79 x 79 comparisons, including self comparisons and duplicate (reciprocal) comparisons
+#Format
+#0 = ref_query
+#1 = ref_phage_identifier
+#2 = query_phage_identifier
+#3 = ani_distance
+ani79_data <- read.csv("ani_79_data.csv",sep=",",header=TRUE)
+
+names(ani79_data) <- c("ani79_ref_query","ani79_ref_phage_identifier","ani79_query_phage_identifier","ani79_ani_distance")
+
+#Merge tables
+#The main mash table contains non-redundant comparisona and no self comparisons
+ani79_analysis <- merge(mash_table2,ani79_data,by.x="mash_ref_query",by.y="ani79_ref_query")
+
+#Supp. Fig. 2c
+par(mar=c(4,8,4,4))
+plot(ani79_analysis$modified_mash_distance,ani79_analysis$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+#Supp. Fig. 2c
+par(mar=c(4,8,4,4))
+plot(ani79_analysis$ani79_ani_distance,ani79_analysis$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+
+
+
+
+
+
+###Compare Mash to ANI
+#Compare patterns from pham-mash and pham-ani comparisons
+ani_mash <- subset(mash_table2,complete.cases(mash_table2$ani_distance))
+
+#Colored plot by assigned evolutionary mode 
+ani_mash_hgcf <- subset(ani_mash,ani_mash$gene_flux_category == "high" & ani_mash$phage_predicted_temperate_compare == "yes")
+ani_mash_lgcf <- subset(ani_mash,ani_mash$gene_flux_category == "low" & ani_mash$phage_predicted_temperate_compare == "yes")
+ani_mash_lytic <- subset(ani_mash,ani_mash$phage_predicted_temperate_compare == "no")
+
+
+#Supp. Fig. 2d
+par(mar=c(4,8,4,4))
+plot(ani_mash_hgcf$modified_mash_distance,ani_mash_hgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
+par(new=TRUE)
+plot(ani_mash_lgcf$modified_mash_distance,ani_mash_lgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
+par(new=TRUE)
+plot(ani_mash_lytic$modified_mash_distance,ani_mash_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
+
+#Supp. Fig. 2d
+par(mar=c(4,8,4,4))
+plot(ani_mash_hgcf$ani_distance,ani_mash_hgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
+par(new=TRUE)
+plot(ani_mash_lgcf$ani_distance,ani_mash_lgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
+par(new=TRUE)
+plot(ani_mash_lytic$ani_distance,ani_mash_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
+
+
+
+
+
+
+
+
+
+###VOG analysis
+#Format
+#0 = phage1_name
+#1 = phage1_accession
+#2 = phage1_number_of_genes
+#3 = phage1_number_of_vogs
+#4 = phage1_number_of_unshared_vogs
+#5 = phage1_number_of_shared_vog_genes
+#6 = phage1_number_of_unshared_vog_genes
+#7 = phage1_number_of_unshared_other_genes
+#8 = phage1_shared_vog_gene_proportion
+#9 = phage2_name
+#10 = phage2_accession
+#11 = phage2_number_of_genes
+#12 = phage2_number_of_vogs
+#13 = phage2_number_of_unshared_vogs
+#14 = phage2_number_of_shared_vog_genes
+#15 = phage2_number_of_unshared_vog_genes
+#16 = phage2_number_of_unshared_other_genes
+#17 = phage2_shared_vog_gene_proportion
+#18 = number_of_shared_vogs
+#19 = average_shared_vog_gene_proportion
+#20 = gene_content_dissimilarity
+vog_table <- read.csv("pairwise_vog_proportions.csv",sep=",",header=TRUE)
+
+names(vog_table) <- c("vog_reference","vog_ref_accession","vog_ref_number_of_genes","vog_ref_number_of_vogs",
+                      "vog_ref_number_of_unshared_vogs","vog_ref_number_of_shared_vog_genes","vog_ref_number_of_unshared_vog_genes","vog_ref_number_of_unshared_other_genes",
+                      "vog_ref_shared_vog_gene_proportion","vog_query","vog_query_accession","vog_query_number_of_genes",
+                      "vog_query_number_of_vogs","vog_query_number_of_unshared_vogs","vog_query_number_of_shared_vog_genes","vog_query_number_of_unshared_vog_genes",
+                      "vog_query_number_of_unshared_other_genes","vog_query_shared_vog_gene_proportion",
+                      "vog_number_of_shared_vogs","vog_average_shared_vog_gene_proportion","vog_gene_content_dissimilarity")
+
+vog_table$vog_ref_query <- paste(vog_table$vog_reference,vog_table$vog_query,sep="_")
+vog_table$vog_ref_query <- as.factor(vog_table$vog_ref_query)
+
+
+
+
+#VOG data is based on 1877 genomes that are present in the merged2333 dataset.
+#But the VOG data contains redundant data rows, where each comparison is represented twice, with the ref and query reversed
+#So when merged to mash_table2, no need to keep all rows in either table - it is expected there will be fewer rows than in both tables
+#Also, there are 2 genomes (vb_paem_c1-14-ab28__NC_026600 and pv94__NC_027368) that contain no annotated genes. These are not in the pham data,
+#so even though they are present in the VOG data, I am unable to compare these two genomes. This results in 1875 genomes.
+mash_table2_vog <- merge(mash_table2,vog_table,by.x="mash_ref_query",by.y="vog_ref_query")
+mash_table2_vog$mash_reference <- factor(mash_table2_vog$mash_reference)
+mash_table2_vog$mash_query <- factor(mash_table2_vog$mash_query)
+
+
+
+bacteria_dsDNA <- subset(mash_table2_vog,mash_table2_vog$host_superkingdom_compare == 'Bacteria' & mash_table2_vog$phage_viral_type_compare == 'dsDNA')
+temperate_both <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_temperate_compare == 'yes')
+temperate_neither <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_temperate_compare == 'no')
+
+
+
+
+
+#How well do pham-based gcd and vog-based gcd correlate?
+#Supp. Fig. 2e
+par(mar=c(4,8,4,4))
+plot(bacteria_dsDNA$pham_pham_dissimilarity,bacteria_dsDNA$vog_gene_content_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,1,lty=2,lwd=3,col="grey")
+
+
+
+#Compare pham-based and vog-based bacteria dsDNA phage lifestyle plots 
+par(mar=c(4,8,4,4))
+plot(temperate_both$modified_mash_distance,temperate_both$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+#Supp Fig. 2f
+par(mar=c(4,8,4,4))
+plot(temperate_both$modified_mash_distance,temperate_both$vog_gene_content_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+par(mar=c(4,8,4,4))
+plot(temperate_neither$modified_mash_distance,temperate_neither$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+#Supp Fig. 2f
+par(mar=c(4,8,4,4))
+plot(temperate_neither$modified_mash_distance,temperate_neither$vog_gene_content_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
 
 
 
@@ -489,27 +1071,77 @@ abline(0,2,lty=2,lwd=3,col="grey")
 
 
 
-###Compute distance of all Actinobacteriophage Singletons from other Actinobacteriophages
-#Histogram = Mash distances for all Actino785 comparisons containing at least one Singleton
-actino785_data <- subset(mash_table2,mash_table2$phage_cluster_source_compare == "actino")
-actino785_data_same <- subset(actino785_data,actino785_data$phage_cluster_compare != "different")
-actino785_data_diff <- subset(actino785_data,actino785_data$phage_cluster_compare == "different")
-actino785_data_diff$query_singleton <- grepl("^Singleton",actino785_data_diff$query_phage_cluster)
-actino785_data_diff$ref_singleton <- grepl("^Singleton",actino785_data_diff$ref_phage_cluster)
-actino785_data_diff$singleton_one_or_two <- ifelse(actino785_data_diff$ref_singleton == TRUE | actino785_data_diff$query_singleton == TRUE,TRUE,FALSE)
 
-actino785_singleton_one_or_two <- subset(actino785_data_diff,actino785_data_diff$singleton_one_or_two == TRUE)
+###Check Eukaryotic controls
+euk_check <- subset(mash_table2,mash_table2$ref_host_superkingdom == "Eukaryota" | mash_table2$query_host_superkingdom == "Eukaryota")
+euk_check <- subset(euk_check,euk_check$ref_host_superkingdom == "Bacteria" | euk_check$query_host_superkingdom == "Bacteria")
 
-compute_sector_distribution(actino785_singleton_one_or_two)
+compute_sector_distribution(euk_check)
 
-#Supp Fig. 5f
+#No figure
 par(mar=c(4,8,4,4))
-plot(actino785_singleton_one_or_two$modified_mash_distance,actino785_singleton_one_or_two$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+plot(euk_check$modified_mash_distance,euk_check$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+
+
+###Check archaea controls
+controls <- mash_table2
+controls$archaea_one_or_two <- ifelse(controls$ref_host_superkingdom == "Archaea" | controls$query_host_superkingdom == "Archaea",TRUE,FALSE)
+controls$archaea_both <- ifelse(controls$ref_host_superkingdom == "Archaea" & controls$query_host_superkingdom == "Archaea",TRUE,FALSE)
+controls$archaea_one <- ifelse(controls$archaea_one_or_two == TRUE & controls$archaea_both == FALSE,TRUE,FALSE)
+controls$bacteria_one_or_two <- ifelse(controls$ref_host_superkingdom == "Bacteria" | controls$query_host_superkingdom == "Bacteria",TRUE,FALSE)
+controls$archaea_one_bacteria_one <- ifelse(controls$archaea_one == TRUE & controls$bacteria_one_or_two == TRUE,TRUE,FALSE)
+
+
+archaea_check <- subset(controls,controls$archaea_one_bacteria_one == TRUE)
+compute_sector_distribution(archaea_check)
+
+#Supp Fig. 5a
+par(mar=c(4,8,4,4))
+plot(archaea_check$modified_mash_distance,archaea_check$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
 abline(0,2,lty=2,lwd=3,col="grey")
 
 
 
 
+
+
+
+
+###By cluster and subcluster
+type <- subset(mash_table2,mash_table2$phage_viral_type_compare != "different")
+type_dsDNA <- subset(type,type$phage_viral_type_compare == "dsDNA")
+cluster_actino <- subset(type_dsDNA,type_dsDNA$phage_cluster_source_compare == "actino")
+cluster_actino_same <- subset(cluster_actino,cluster_actino$phage_cluster_compare != "different")
+cluster_actino_diff <- subset(cluster_actino,cluster_actino$phage_cluster_compare == "different")
+subcluster_actino_same <- subset(cluster_actino_same,cluster_actino_same$phage_subcluster_compare != "different")
+subcluster_actino_diff <- subset(cluster_actino_same,cluster_actino_same$phage_subcluster_compare == "different")
+
+compute_sector_distribution(cluster_actino_same)
+compute_sector_distribution(cluster_actino_diff)
+compute_sector_distribution(subcluster_actino_same)
+compute_sector_distribution(subcluster_actino_diff)
+
+#Supp. Fig. 5d
+par(mar=c(4,8,4,4))
+plot(cluster_actino_same$modified_mash_distance,cluster_actino_same$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="orange")
+abline(0,2,lty=2,lwd=3,col="grey")
+
+#Supp. Fig. 5d
+par(mar=c(4,8,4,4))
+plot(cluster_actino_diff$modified_mash_distance,cluster_actino_diff$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="black")
+abline(0,2,lty=2,lwd=3,col="grey")
+
+#Supp. Fig. 5d
+par(mar=c(4,8,4,4))
+plot(subcluster_actino_same$modified_mash_distance,subcluster_actino_same$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="orange")
+abline(0,2,lty=2,lwd=3,col="grey")
+
+#Supp. Fig. 5d
+par(mar=c(4,8,4,4))
+plot(subcluster_actino_diff$modified_mash_distance,subcluster_actino_diff$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="orange")
+abline(0,2,lty=2,lwd=3,col="grey")
 
 
 
@@ -538,6 +1170,97 @@ compute_sector_distribution(actino785_data_same_cluster_neither_subclustered)
 par(mar=c(4,8,4,4))
 plot(actino785_data_same_cluster_neither_subclustered$modified_mash_distance,actino785_data_same_cluster_neither_subclustered$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="orange")
 abline(0,2,lty=2,lwd=3,col="grey")
+
+
+
+
+
+
+###Compute distance of all Actinobacteriophage Singletons from other Actinobacteriophages
+#Histogram = Mash distances for all Actino785 comparisons containing at least one Singleton
+actino785_data <- subset(mash_table2,mash_table2$phage_cluster_source_compare == "actino")
+actino785_data_same <- subset(actino785_data,actino785_data$phage_cluster_compare != "different")
+actino785_data_diff <- subset(actino785_data,actino785_data$phage_cluster_compare == "different")
+actino785_data_diff$query_singleton <- grepl("^Singleton",actino785_data_diff$query_phage_cluster)
+actino785_data_diff$ref_singleton <- grepl("^Singleton",actino785_data_diff$ref_phage_cluster)
+actino785_data_diff$singleton_one_or_two <- ifelse(actino785_data_diff$ref_singleton == TRUE | actino785_data_diff$query_singleton == TRUE,TRUE,FALSE)
+
+actino785_singleton_one_or_two <- subset(actino785_data_diff,actino785_data_diff$singleton_one_or_two == TRUE)
+
+compute_sector_distribution(actino785_singleton_one_or_two)
+
+#Supp Fig. 5f
+par(mar=c(4,8,4,4))
+plot(actino785_singleton_one_or_two$modified_mash_distance,actino785_singleton_one_or_two$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+
+
+
+
+
+
+
+
+
+###Analyze predicted lifestyle data
+lifestyle_analysis <- mash_table2
+
+bacteria_dsDNA <- subset(lifestyle_analysis,lifestyle_analysis$host_superkingdom_compare == 'Bacteria' & lifestyle_analysis$phage_viral_type_compare == 'dsDNA')
+
+lifestyle_predicted_temperate <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_predicted_temperate_compare == 'yes')
+lifestyle_predicted_lytic <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_predicted_temperate_compare == 'no')
+
+#Supp. Fig. 6b
+par(mar=c(4,8,4,4))
+plot(lifestyle_predicted_temperate$modified_mash_distance,lifestyle_predicted_temperate$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+#Supp. Fig. 6b
+par(mar=c(4,8,4,4))
+plot(lifestyle_predicted_lytic$modified_mash_distance,lifestyle_predicted_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+
+
+
+
+###Predict evolutionary mode
+
+data_for_mode_prediction <- subset(mash_table2,mash_table2$host_superkingdom_compare == "Bacteria" &
+                                     mash_table2$phage_viral_type_compare == "dsDNA" &
+                                     mash_table2$modified_mash_distance < 0.42 &
+                                     mash_table2$pham_pham_dissimilarity < 0.89)
+data_for_mode_prediction <- subset(data_for_mode_prediction,select=c("mash_reference","mash_query","modified_mash_distance","pham_pham_dissimilarity"))
+write.table(data_for_mode_prediction,"/Users/Hatfull_Lab/Desktop/Project_phage_classification/7_merged2333_analysis/20170315_data_for_mode_prediction.csv",sep=",",row.names = FALSE,col.names = FALSE,quote=FALSE)
+
+#Run the data through the analyze_mash_network_script to predict the evolutionary mode
+
+
+
+#Then import the mode prediction back into R
+#Format
+#0 = phage
+#1 = hgcf_tally
+#2 = lgcf_tally
+#3 = out_of_range_tally
+#4 = hgcf_percent
+#5 = lgcf_percent"
+#6 = mode"
+mode_prediction_table <- read.csv("mode_prediction.csv",sep=",",header=TRUE)
+
+names(mode_prediction_table) <- c("phage_identifier",
+                                  "mode_prediction_hgcf_tally","mode_prediction_lgcf_tally","mode_prediction_out_of_range_tally",
+                                  "mode_prediction_hgcf_percent","mode_prediction_lgcf_percent","mode_prediction_mode")
+
+#Supp. Fig. 6d
+par(mar=c(4,8,4,4))
+hist(mode_prediction_table$mode_prediction_hgcf_percent,col="black",breaks=25,cex.axis=2,ann=FALSE,las=1,ylim=c(0,1400))
+
+
+
+
+
 
 
 
@@ -682,138 +1405,49 @@ abline(0,2,lty=2,lwd=3,col="grey")
 
 
 
-###All dsDNA phages
-bacteria <- subset(mash_table2,mash_table2$host_superkingdom_compare == "Bacteria")
-type_dsDNA <- subset(bacteria,bacteria$phage_viral_type_compare == "dsDNA")
 
-#Fig. 1a
-par(mar=c(4,8,4,4))
-plot(type_dsDNA$modified_mash_distance,type_dsDNA$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
 
-#Fig. 1a
-par(mar=c(4,8,15,4))
-hist(type_dsDNA$modified_mash_distance,breaks=((range(type_dsDNA$modified_mash_distance)[2]-range(type_dsDNA$modified_mash_distance)[1]) * 100),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(0,0.5),ylim=c(0,3e4),col="black",cex.axis=2)
 
-#Fig. 1a
-par(mar=c(4,4,15,4))
-hist(type_dsDNA$pham_pham_dissimilarity,breaks=((range(type_dsDNA$pham_pham_dissimilarity)[2]-range(type_dsDNA$pham_pham_dissimilarity)[1]) * 100 +1),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(1,0),col="black",cex.axis=2,ylim=c(0,2e3),yaxt="n")
-axis(side=4,pos=0,cex.axis=2)
 
 
 
 
 
-###By host phylum, then by lifestyle
-#Only focus on dsDNA phages, so remove other phage types.
-bacteria <- subset(mash_table2,mash_table2$host_superkingdom_compare == "Bacteria")
-type_dsDNA <- subset(bacteria,bacteria$phage_viral_type_compare == "dsDNA")
 
-host_phylum <- subset(type_dsDNA,type_dsDNA$host_phylum_compare != "different")
-host_phylum_diff <- subset(type_dsDNA,type_dsDNA$host_phylum_compare == "different")
 
-actino <- subset(host_phylum,host_phylum$host_phylum_compare == "Actinobacteria")
-bacter <- subset(host_phylum,host_phylum$host_phylum_compare == "Bacteroidetes")
-cyano <- subset(host_phylum,host_phylum$host_phylum_compare == "Cyanobacteria")
-firm <- subset(host_phylum,host_phylum$host_phylum_compare == "Firmicutes")
-proteo <- subset(host_phylum,host_phylum$host_phylum_compare == "Proteobacteria")
 
 
 
 
-#Different phyla
-#Supp. Fig. 5c
-par(mar=c(4,8,4,4))
-plot(host_phylum_diff$modified_mash_distance,host_phylum_diff$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
 
 
 
 
-#Same phylum
-#Scatter plots of Mash vs Pham distances by host phyla
 
 
-#Fig 4a
-par(mar=c(4,8,4,4))
-plot(actino$modified_mash_distance,actino$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
 
-#Fig 4b
-par(mar=c(4,8,4,4))
-plot(bacter$modified_mash_distance,bacter$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
 
-#Fig 4c
-par(mar=c(4,8,4,4))
-plot(cyano$modified_mash_distance,cyano$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
 
-#Fig 4d
-par(mar=c(4,8,4,4))
-plot(firm$modified_mash_distance,firm$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
 
-#Fig 4e
-par(mar=c(4,8,4,4))
-plot(proteo$modified_mash_distance,proteo$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
 
 
 
 
-#Truncated histogram distributions of mash distances
 
-#Fig 4a
-par(mar=c(4,8,15,4))
-hist(actino$modified_mash_distance,breaks=((range(actino$modified_mash_distance)[2]-range(actino$modified_mash_distance)[1]) * 100),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(0,0.5),ylim=c(0,3e4),col="black",cex.axis=2)
 
-#Fig 4b
-par(mar=c(4,8,15,4))
-hist(bacter$modified_mash_distance,breaks=((range(bacter$modified_mash_distance)[2]-range(bacter$modified_mash_distance)[1]) * 100),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(0,0.5),ylim=c(0,50),col="black",cex.axis=2)
 
-#Fig 4c
-par(mar=c(4,8,15,4))
-hist(cyano$modified_mash_distance,breaks=((range(cyano$modified_mash_distance)[2]-range(cyano$modified_mash_distance)[1]) * 100),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(0,0.5),ylim=c(0,100),col="black",cex.axis=2)
 
-#Fig 4d
-par(mar=c(4,8,15,4))
-hist(firm$modified_mash_distance,breaks=((range(firm$modified_mash_distance)[2]-range(firm$modified_mash_distance)[1]) * 100),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(0,0.5),ylim=c(0,2e3),col="black",cex.axis=2)
 
-#Fig 4e
-par(mar=c(4,8,15,4))
-hist(proteo$modified_mash_distance,breaks=((range(proteo$modified_mash_distance)[2]-range(proteo$modified_mash_distance)[1]) * 100),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(0,0.5),ylim=c(0,2e3),col="black",cex.axis=2)
 
 
 
 
 
-#Truncated histogram distribution of gene content dissimilarities
 
-#Fig 4a
-par(mar=c(4,4,15,4))
-hist(actino$pham_pham_dissimilarity,breaks=((range(actino$pham_pham_dissimilarity)[2]-range(actino$pham_pham_dissimilarity)[1]) * 100 +1),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(1,0),col="black",cex.axis=2,ylim=c(0,2e3),yaxt="n")
-axis(side=4,pos=0,cex.axis=2)
 
-#Fig 4b
-par(mar=c(4,4,15,4))
-hist(bacter$pham_pham_dissimilarity,breaks=((range(bacter$pham_pham_dissimilarity)[2]-range(bacter$pham_pham_dissimilarity)[1]) * 100 +1),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(1,0),col="black",cex.axis=2,ylim=c(0,500),yaxt="n")
-axis(side=4,pos=0,cex.axis=2)
 
-#Fig 4c
-par(mar=c(4,4,15,4))
-hist(cyano$pham_pham_dissimilarity,breaks=((range(cyano$pham_pham_dissimilarity)[2]-range(cyano$pham_pham_dissimilarity)[1]) * 100 +1),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(1,0),col="black",cex.axis=2,ylim=c(0,100),yaxt="n")
-axis(side=4,pos=0,cex.axis=2)
 
-#Fig 4d
-par(mar=c(4,4,15,4))
-hist(firm$pham_pham_dissimilarity,breaks=((range(firm$pham_pham_dissimilarity)[2]-range(firm$pham_pham_dissimilarity)[1]) * 100 +1),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(1,0),col="black",cex.axis=2,ylim=c(0,2e3),yaxt="n")
-axis(side=4,pos=0,cex.axis=2)
 
-#Fig 4e
-par(mar=c(4,4,15,4))
-hist(proteo$pham_pham_dissimilarity,breaks=((range(proteo$pham_pham_dissimilarity)[2]-range(proteo$pham_pham_dissimilarity)[1]) * 100 +1),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(1,0),col="black",cex.axis=2,ylim=c(0,2e3),yaxt="n")
-axis(side=4,pos=0,cex.axis=2)
 
 
 
@@ -823,608 +1457,9 @@ axis(side=4,pos=0,cex.axis=2)
 
 
 
-###Check by empirical lifestyle.
-type <- subset(mash_table2,mash_table2$phage_viral_type_compare != "different")
-type_dsDNA <- subset(type,type$phage_viral_type_compare == "dsDNA")
 
-all_temperate <- subset(type_dsDNA,type_dsDNA$phage_temperate_compare == "yes")
-all_lytic <- subset(type_dsDNA,type_dsDNA$phage_temperate_compare == "no")
-all_different <- subset(type_dsDNA,type_dsDNA$phage_temperate_compare == "different")
 
 
-#Fig. 1c
-par(mar=c(4,8,4,4))
-plot(all_temperate$modified_mash_distance,all_temperate$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-#Fig. 1c
-par(mar=c(4,8,4,4))
-plot(all_lytic$modified_mash_distance,all_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-#Fig. 1c
-par(mar=c(4,8,4,4))
-plot(all_different$modified_mash_distance,all_different$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-###By cluster and subcluster
-type <- subset(mash_table2,mash_table2$phage_viral_type_compare != "different")
-type_dsDNA <- subset(type,type$phage_viral_type_compare == "dsDNA")
-cluster_actino <- subset(type_dsDNA,type_dsDNA$phage_cluster_source_compare == "actino")
-cluster_actino_same <- subset(cluster_actino,cluster_actino$phage_cluster_compare != "different")
-cluster_actino_diff <- subset(cluster_actino,cluster_actino$phage_cluster_compare == "different")
-subcluster_actino_same <- subset(cluster_actino_same,cluster_actino_same$phage_subcluster_compare != "different")
-subcluster_actino_diff <- subset(cluster_actino_same,cluster_actino_same$phage_subcluster_compare == "different")
-
-compute_sector_distribution(cluster_actino_same)
-compute_sector_distribution(cluster_actino_diff)
-compute_sector_distribution(subcluster_actino_same)
-compute_sector_distribution(subcluster_actino_diff)
-
-#Supp. Fig. 5d
-par(mar=c(4,8,4,4))
-plot(cluster_actino_same$modified_mash_distance,cluster_actino_same$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="orange")
-abline(0,2,lty=2,lwd=3,col="grey")
-
-#Supp. Fig. 5d
-par(mar=c(4,8,4,4))
-plot(cluster_actino_diff$modified_mash_distance,cluster_actino_diff$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="black")
-abline(0,2,lty=2,lwd=3,col="grey")
-
-#Supp. Fig. 5d
-par(mar=c(4,8,4,4))
-plot(subcluster_actino_same$modified_mash_distance,subcluster_actino_same$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="orange")
-abline(0,2,lty=2,lwd=3,col="grey")
-
-#Supp. Fig. 5d
-par(mar=c(4,8,4,4))
-plot(subcluster_actino_diff$modified_mash_distance,subcluster_actino_diff$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="orange")
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
-
-
-
-
-
-
-###Check A1 and non-A1 distances to other non-A phages
-#Since only actino phages that have been clustered are used, all rows should have cluster data.
-#However, not all rows necessarily have subcluster data, so you have to take this into account.
-type <- subset(mash_table2,mash_table2$phage_viral_type_compare != "different")
-type_dsDNA <- subset(type,type$phage_viral_type_compare == "dsDNA")
-cluster_actino <- subset(type_dsDNA,type_dsDNA$phage_cluster_source_compare == "actino")
-
-
-
-cluster_actino$subcluster_A1_one_or_two <- ifelse((cluster_actino$ref_phage_subcluster == "A1" | cluster_actino$query_phage_subcluster == "A1") == FALSE | is.na(cluster_actino$ref_phage_subcluster == "A1" | cluster_actino$query_phage_subcluster == "A1") == TRUE,FALSE,TRUE)
-cluster_actino$subcluster_A1_neither <- ifelse((cluster_actino$ref_phage_subcluster == "A1" | cluster_actino$query_phage_subcluster == "A1") == FALSE | is.na(cluster_actino$ref_phage_subcluster == "A1" | cluster_actino$query_phage_subcluster == "A1") == TRUE,TRUE,FALSE)
-cluster_actino$subcluster_A1_both <- ifelse((cluster_actino$ref_phage_subcluster == "A1" & cluster_actino$query_phage_subcluster == "A1") == FALSE | is.na(cluster_actino$ref_phage_subcluster == "A1" & cluster_actino$query_phage_subcluster == "A1") == TRUE,FALSE,TRUE)
-cluster_actino$subcluster_A1_one <- ifelse(cluster_actino$subcluster_A1_one_or_two == TRUE & cluster_actino$subcluster_A1_both == FALSE,TRUE,FALSE)
-
-cluster_actino$cluster_A_one_or_two <- ifelse(cluster_actino$ref_phage_cluster == "A" | cluster_actino$query_phage_cluster == "A",TRUE,FALSE)
-cluster_actino$cluster_A_both <- ifelse(cluster_actino$ref_phage_cluster == "A" & cluster_actino$query_phage_cluster == "A",TRUE,FALSE)
-cluster_actino$cluster_A_both_but_notA1 <- ifelse(cluster_actino$cluster_A_both == TRUE & cluster_actino$subcluster_A1_neither == TRUE,TRUE,FALSE)
-cluster_actino$cluster_A_one <- ifelse(cluster_actino$cluster_A_one_or_two == TRUE & cluster_actino$cluster_A_both == FALSE,TRUE,FALSE)
-cluster_actino$cluster_A_one_but_notA1 <- ifelse(cluster_actino$cluster_A_one == TRUE & cluster_actino$subcluster_A1_neither == TRUE,TRUE,FALSE)
-
-
-#Subset of all comparisons with at least one A1 phage
-subcluster_A1_one_or_two_all <- subset(cluster_actino,cluster_actino$subcluster_A1_one_or_two == TRUE)
-
-#Subset of all A1 comparisons
-subcluster_A1_both <- subset(subcluster_A1_one_or_two_all,subcluster_A1_one_or_two_all$phage_subcluster_compare == "A1")
-
-#Subset of all comparisons with one and only one A1 phage
-subcluster_A1_one_all <- subset(subcluster_A1_one_or_two_all,subcluster_A1_one_or_two_all$subcluster_A1_one == TRUE)
-
-#Subset of all comparisons with one and only one A1 phage, and the other phage is a Cluster A phage
-subcluster_A1_one_clusterA <- subset(subcluster_A1_one_all,subcluster_A1_one_all$phage_cluster_compare == "A")
-
-#Subset of all comparisons with one and only one A1 phage, and the other phage is NOT a Cluster A phage
-#The phage_cluster_compare should NOT be "A", but it can be "NA" (since some phages are not clustered), or it can be "different"
-subcluster_A1_one_other_not_clusterA <- subset(subcluster_A1_one_all,is.na(subcluster_A1_one_all$phage_cluster_compare) | subcluster_A1_one_all$phage_cluster_compare == "different")
-
-
-
-#Subset of all comparisons with one and only non-A1, and no other cluster A
-cluster_A_one_but_notA1 <- subset(cluster_actino,cluster_actino$cluster_A_one_but_notA1 == TRUE)
-
-#Subset of all comparisons with both A, but no A1
-cluster_A_both_but_notA1 <- subset(cluster_actino,cluster_actino$cluster_A_both_but_notA1 == TRUE)
-
-
-#Fig. 3a (left)
-par(mar=c(4,8,4,4))
-plot(cluster_A_both_but_notA1$modified_mash_distance,cluster_A_both_but_notA1$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
-par(new=TRUE)
-plot(subcluster_A1_both$modified_mash_distance,subcluster_A1_both$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="cyan")
-par(new=TRUE)
-plot(subcluster_A1_one_clusterA$modified_mash_distance,subcluster_A1_one_clusterA$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="purple")#422
-par(new=TRUE)
-plot(subcluster_A1_one_other_not_clusterA$modified_mash_distance,subcluster_A1_one_other_not_clusterA$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="black")
-par(new=TRUE)
-plot(cluster_A_one_but_notA1$modified_mash_distance,cluster_A_one_but_notA1$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="grey")
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-###Compare Mash to ANI
-#Compare patterns from pham-mash and pham-ani comparisons
-ani_mash <- subset(mash_table2,complete.cases(mash_table2$ani_distance))
-
-#Colored plot by assigned evolutionary mode 
-ani_mash_hgcf <- subset(ani_mash,ani_mash$gene_flux_category == "high" & ani_mash$phage_predicted_temperate_compare == "yes")
-ani_mash_lgcf <- subset(ani_mash,ani_mash$gene_flux_category == "low" & ani_mash$phage_predicted_temperate_compare == "yes")
-ani_mash_lytic <- subset(ani_mash,ani_mash$phage_predicted_temperate_compare == "no")
-
-
-#Supp. Fig. 2d
-par(mar=c(4,8,4,4))
-plot(ani_mash_hgcf$modified_mash_distance,ani_mash_hgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-par(new=TRUE)
-plot(ani_mash_lgcf$modified_mash_distance,ani_mash_lgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-par(new=TRUE)
-plot(ani_mash_lytic$modified_mash_distance,ani_mash_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-#Supp. Fig. 2d
-par(mar=c(4,8,4,4))
-plot(ani_mash_hgcf$ani_distance,ani_mash_hgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-par(new=TRUE)
-plot(ani_mash_lgcf$ani_distance,ani_mash_lgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-par(new=TRUE)
-plot(ani_mash_lytic$ani_distance,ani_mash_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-###pham general vs jaccard dissimilarity
-
-type <- subset(mash_table2,mash_table2$phage_viral_type_compare != "different")
-type_dsDNA <- subset(type,type$phage_viral_type_compare == "dsDNA")
-bacteria_dsDNA <- subset(type_dsDNA,type_dsDNA$host_superkingdom_compare == 'Bacteria')
-
-
-#Check how correlated pham dissimilarity and jaccard dissimilarity are
-#Supp. Fig. 2a
-par(mar=c(4,8,4,4))
-plot(mash_table2$pham_jaccard_dissimilarity,mash_table2$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,1,lty=2,lwd=3,col="grey")
-
-
-#Mash vs Pham plot using jaccard
-#Supp. Fig. 2b
-par(mar=c(4,8,4,4))
-plot(bacteria_dsDNA$modified_mash_distance,bacteria_dsDNA$pham_jaccard_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
-
-
-
-
-
-
-###Cluster-specific analysis
-plot_cluster_specific_profiles <- function(table,cluster){
-  
-  table$cluster_specific_one_or_two <- ifelse(table$ref_phage_cluster == cluster | table$query_phage_cluster == cluster,TRUE,FALSE)
-  table$cluster_specific_both <- ifelse(table$ref_phage_cluster == cluster & table$query_phage_cluster == cluster,TRUE,FALSE)
-  table$cluster_specific_one <- ifelse(table$cluster_specific_one_or_two == TRUE & table$cluster_specific_both == FALSE,TRUE,FALSE)
-  cluster_specific_one <- subset(table,table$cluster_specific_one == TRUE)
-  cluster_specific_both <- subset(table,table$cluster_specific_both == TRUE)
-  
-  
-  
-  
-  par(mar=c(4,8,4,4))
-  plot(cluster_specific_both$modified_mash_distance,cluster_specific_both$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="orange")
-  par(new=TRUE)
-  plot(cluster_specific_one$modified_mash_distance,cluster_specific_one$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="black")
-  abline(0,2,lty=2,lwd=3,col="grey")
-  return(nrow(cluster_specific_one) + nrow(cluster_specific_both))
-  
-}
-type <- subset(mash_table2,mash_table2$phage_viral_type_compare != "different")
-type_dsDNA <- subset(type,type$phage_viral_type_compare == "dsDNA")
-cluster_actino <- subset(type_dsDNA,type_dsDNA$phage_cluster_source_compare == "actino")
-
-#Fig. 2a
-dev.off()
-plot_cluster_specific_profiles(cluster_actino,"F")
-
-#Fig. 2a
-dev.off()
-plot_cluster_specific_profiles(cluster_actino,"K")
-
-#Fig. 2a
-dev.off()
-plot_cluster_specific_profiles(cluster_actino,"AO")
-
-#Fig. 2a
-dev.off()
-plot_cluster_specific_profiles(cluster_actino,"B")
-
-#Fig. 2a
-dev.off()
-plot_cluster_specific_profiles(cluster_actino,"BU")
-
-#Fig. 2a
-dev.off()
-plot_cluster_specific_profiles(cluster_actino,"BD")
-
-#Supp. Fig. 11c
-dev.off()
-plot_cluster_specific_profiles(cluster_actino,"N")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-###ANI vs Pham Dissimilarity data
-#Import ANI data from the 79 genome optimization test to show ANI vs Pham Distance
-#Data contains complete matrix of 79 x 79 comparisons, including self comparisons and duplicate (reciprocal) comparisons
-#Format
-#0 = ref_query
-#1 = ref_phage_identifier
-#2 = query_phage_identifier
-#3 = ani_distance
-ani79_data <- read.csv("ani_79_data.csv",sep=",",header=TRUE)
-
-names(ani79_data) <- c("ani79_ref_query","ani79_ref_phage_identifier","ani79_query_phage_identifier","ani79_ani_distance")
-
-#Merge tables
-#The main mash table contains non-redundant comparisona and no self comparisons
-ani79_analysis <- merge(mash_table2,ani79_data,by.x="mash_ref_query",by.y="ani79_ref_query")
-
-#Supp. Fig. 2c
-par(mar=c(4,8,4,4))
-plot(ani79_analysis$modified_mash_distance,ani79_analysis$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-#Supp. Fig. 2c
-par(mar=c(4,8,4,4))
-plot(ani79_analysis$ani79_ani_distance,ani79_analysis$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
-
-
-
-
-
-
-
-
-
-
-
-###Scatter plot of all comparisons involving lambda
-#Phage identifier for lambda:lambda__nc_001416
-#Copy main data table then determine which comparisons involve lambda. Since no self comparisons are present in the dataset, only need to compute if there's 'one' lambda, instead of 'one_or_two' or 'both'
-lambda_figure <- mash_table2
-lambda_figure$lambda_one <- ifelse(lambda_figure$mash_reference == 'lambda__nc_001416' | lambda_figure$mash_query == 'lambda__nc_001416',TRUE,FALSE)
-lambda_comparisons <- subset(lambda_figure,lambda_figure$lambda_one == TRUE)
-
-#Supp. Fig. 11a
-par(mar=c(4,8,4,4))
-plot(lambda_comparisons$modified_mash_distance,lambda_comparisons$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
-
-
-
-###Toxic phage analysis
-mash_table2_toxic <- mash_table2
-mash_table2_toxic$toxic_one_or_two <- ifelse(mash_table2_toxic$ref_toxic == "yes" | mash_table2_toxic$query_toxic == "yes",TRUE,FALSE)
-mash_table2_toxic$toxic_both <- ifelse(mash_table2_toxic$ref_toxic == "yes" & mash_table2_toxic$query_toxic == "yes",TRUE,FALSE)
-toxic_one_or_two <- subset(mash_table2_toxic,mash_table2_toxic$toxic_one_or_two == TRUE)
-
-#Supp. Fig. 11b
-par(mar=c(4,8,4,4))
-plot(toxic_one_or_two$modified_mash_distance,toxic_one_or_two$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
-
-
-
-
-
-
-
-
-###VOG analysis
-#Format
-#0 = phage1_name
-#1 = phage1_accession
-#2 = phage1_number_of_genes
-#3 = phage1_number_of_vogs
-#4 = phage1_number_of_unshared_vogs
-#5 = phage1_number_of_shared_vog_genes
-#6 = phage1_number_of_unshared_vog_genes
-#7 = phage1_number_of_unshared_other_genes
-#8 = phage1_shared_vog_gene_proportion
-#9 = phage2_name
-#10 = phage2_accession
-#11 = phage2_number_of_genes
-#12 = phage2_number_of_vogs
-#13 = phage2_number_of_unshared_vogs
-#14 = phage2_number_of_shared_vog_genes
-#15 = phage2_number_of_unshared_vog_genes
-#16 = phage2_number_of_unshared_other_genes
-#17 = phage2_shared_vog_gene_proportion
-#18 = number_of_shared_vogs
-#19 = average_shared_vog_gene_proportion
-#20 = gene_content_dissimilarity
-vog_table <- read.csv("pairwise_vog_proportions.csv",sep=",",header=TRUE)
-
-names(vog_table) <- c("vog_reference","vog_ref_accession","vog_ref_number_of_genes","vog_ref_number_of_vogs",
-                      "vog_ref_number_of_unshared_vogs","vog_ref_number_of_shared_vog_genes","vog_ref_number_of_unshared_vog_genes","vog_ref_number_of_unshared_other_genes",
-                      "vog_ref_shared_vog_gene_proportion","vog_query","vog_query_accession","vog_query_number_of_genes",
-                      "vog_query_number_of_vogs","vog_query_number_of_unshared_vogs","vog_query_number_of_shared_vog_genes","vog_query_number_of_unshared_vog_genes",
-                      "vog_query_number_of_unshared_other_genes","vog_query_shared_vog_gene_proportion",
-                      "vog_number_of_shared_vogs","vog_average_shared_vog_gene_proportion","vog_gene_content_dissimilarity")
-
-vog_table$vog_ref_query <- paste(vog_table$vog_reference,vog_table$vog_query,sep="_")
-vog_table$vog_ref_query <- as.factor(vog_table$vog_ref_query)
-
-
-
-
-#VOG data is based on 1877 genomes that are present in the merged2333 dataset.
-#But the VOG data contains redundant data rows, where each comparison is represented twice, with the ref and query reversed
-#So when merged to mash_table2, no need to keep all rows in either table - it is expected there will be fewer rows than in both tables
-#Also, there are 2 genomes (vb_paem_c1-14-ab28__NC_026600 and pv94__NC_027368) that contain no annotated genes. These are not in the pham data,
-#so even though they are present in the VOG data, I am unable to compare these two genomes. This results in 1875 genomes.
-mash_table2_vog <- merge(mash_table2,vog_table,by.x="mash_ref_query",by.y="vog_ref_query")
-mash_table2_vog$mash_reference <- factor(mash_table2_vog$mash_reference)
-mash_table2_vog$mash_query <- factor(mash_table2_vog$mash_query)
-
-
-
-bacteria_dsDNA <- subset(mash_table2_vog,mash_table2_vog$host_superkingdom_compare == 'Bacteria' & mash_table2_vog$phage_viral_type_compare == 'dsDNA')
-temperate_both <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_temperate_compare == 'yes')
-temperate_neither <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_temperate_compare == 'no')
-
-
-
-
-
-#How well do pham-based gcd and vog-based gcd correlate?
-#Supp. Fig. 2e
-par(mar=c(4,8,4,4))
-plot(bacteria_dsDNA$pham_pham_dissimilarity,bacteria_dsDNA$vog_gene_content_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,1,lty=2,lwd=3,col="grey")
-
-
-
-#Compare pham-based and vog-based bacteria dsDNA phage lifestyle plots 
-par(mar=c(4,8,4,4))
-plot(temperate_both$modified_mash_distance,temperate_both$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-#Supp Fig. 2f
-par(mar=c(4,8,4,4))
-plot(temperate_both$modified_mash_distance,temperate_both$vog_gene_content_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-par(mar=c(4,8,4,4))
-plot(temperate_neither$modified_mash_distance,temperate_neither$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-#Supp Fig. 2f
-par(mar=c(4,8,4,4))
-plot(temperate_neither$modified_mash_distance,temperate_neither$vog_gene_content_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
-
-
-
-
-
-
-
-
-###Analyze predicted lifestyle data
-lifestyle_analysis <- mash_table2
-
-bacteria_dsDNA <- subset(lifestyle_analysis,lifestyle_analysis$host_superkingdom_compare == 'Bacteria' & lifestyle_analysis$phage_viral_type_compare == 'dsDNA')
-
-lifestyle_predicted_temperate <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_predicted_temperate_compare == 'yes')
-lifestyle_predicted_lytic <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_predicted_temperate_compare == 'no')
-
-#Supp. Fig. 6b
-par(mar=c(4,8,4,4))
-plot(lifestyle_predicted_temperate$modified_mash_distance,lifestyle_predicted_temperate$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-#Supp. Fig. 6b
-par(mar=c(4,8,4,4))
-plot(lifestyle_predicted_lytic$modified_mash_distance,lifestyle_predicted_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
-
-
-
-###Predict evolutionary mode
-
-data_for_mode_prediction <- subset(mash_table2,mash_table2$host_superkingdom_compare == "Bacteria" &
-                                     mash_table2$phage_viral_type_compare == "dsDNA" &
-                                     mash_table2$modified_mash_distance < 0.42 &
-                                     mash_table2$pham_pham_dissimilarity < 0.89)
-data_for_mode_prediction <- subset(data_for_mode_prediction,select=c("mash_reference","mash_query","modified_mash_distance","pham_pham_dissimilarity"))
-write.table(data_for_mode_prediction,"/Users/Hatfull_Lab/Desktop/Project_phage_classification/7_merged2333_analysis/20170315_data_for_mode_prediction.csv",sep=",",row.names = FALSE,col.names = FALSE,quote=FALSE)
-
-#Run the data through the analyze_mash_network_script to predict the evolutionary mode
-
-
-
-#Then import the mode prediction back into R
-#Format
-#0 = phage
-#1 = hgcf_tally
-#2 = lgcf_tally
-#3 = out_of_range_tally
-#4 = hgcf_percent
-#5 = lgcf_percent"
-#6 = mode"
-mode_prediction_table <- read.csv("mode_prediction.csv",sep=",",header=TRUE)
-
-names(mode_prediction_table) <- c("phage_identifier",
-                                  "mode_prediction_hgcf_tally","mode_prediction_lgcf_tally","mode_prediction_out_of_range_tally",
-                                  "mode_prediction_hgcf_percent","mode_prediction_lgcf_percent","mode_prediction_mode")
-
-#Supp. Fig. 6d
-par(mar=c(4,8,4,4))
-hist(mode_prediction_table$mode_prediction_hgcf_percent,col="black",breaks=25,cex.axis=2,ann=FALSE,las=1,ylim=c(0,1400))
-
-
-
-
-
-
-
-
-
-
-
-###Misc clusters genometrics
-
-#Format
-#0 = phage
-#1 = phage_cluster
-#2 = size
-#3 = total_gene_count
-#4 = Unspecified_gene_count
-#5 = lysis_gene_count
-#6 = lysogeny_gene_count 
-#7 = recombination_replication_gene_count
-#8 = structure_assembly_gene_count
-misc_clusters_genometrics <- read.csv("misc_clusters_genometrics.csv",sep=",",header=TRUE)
-misc_clusters_genometrics$phage_cluster <- factor(misc_clusters_genometrics$phage_cluster,c("A1","F","BD","K","non-A1","B"))
-
-
-#Format
-#0 = phageName
-#1 = cluster
-#2 = GC
-misc_clusters_gc <- read.csv("misc_clusters_gc.csv",sep=",",header=TRUE)
-misc_clusters_gc$Cluster <- factor(misc_clusters_gc$Cluster,c("A1","F","BD","K","non-A1","B"))
-
-
-#Fig. 3f
-par(mar=c(8,24,4,4))
-boxplot(misc_clusters_genometrics$size ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
-stripchart(misc_clusters_genometrics$size ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
-
-#Fig. 3f
-par(mar=c(8,24,4,4))
-boxplot(misc_clusters_genometrics$total_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
-stripchart(misc_clusters_genometrics$total_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
-
-#Fig. 3f
-par(mar=c(8,24,4,4))
-boxplot(misc_clusters_genometrics$Unspecified_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
-stripchart(misc_clusters_genometrics$Unspecified_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
-
-#Fig. 3f
-par(mar=c(8,24,4,4))
-boxplot(misc_clusters_genometrics$lysis_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
-stripchart(misc_clusters_genometrics$lysis_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
-
-#Fig. 3f
-par(mar=c(8,24,4,4))
-boxplot(misc_clusters_genometrics$lysogeny_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
-stripchart(misc_clusters_genometrics$lysogeny_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
-
-#Fig. 3f
-par(mar=c(8,24,4,4))
-boxplot(misc_clusters_genometrics$recombination_replication_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
-stripchart(misc_clusters_genometrics$recombination_replication_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
-
-#Fig. 3f
-par(mar=c(8,24,4,4))
-boxplot(misc_clusters_genometrics$structure_assembly_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
-stripchart(misc_clusters_genometrics$structure_assembly_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
-
-#Fig. 3f
-par(mar=c(8,24,4,4))
-boxplot(misc_clusters_gc$GC ~ misc_clusters_gc$Cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
-stripchart(misc_clusters_gc$GC ~ misc_clusters_gc$Cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
 
 
 
@@ -2151,6 +2186,46 @@ plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###Scatter plot of all comparisons involving lambda
+#Phage identifier for lambda:lambda__nc_001416
+#Copy main data table then determine which comparisons involve lambda. Since no self comparisons are present in the dataset, only need to compute if there's 'one' lambda, instead of 'one_or_two' or 'both'
+lambda_figure <- mash_table2
+lambda_figure$lambda_one <- ifelse(lambda_figure$mash_reference == 'lambda__nc_001416' | lambda_figure$mash_query == 'lambda__nc_001416',TRUE,FALSE)
+lambda_comparisons <- subset(lambda_figure,lambda_figure$lambda_one == TRUE)
+
+#Supp. Fig. 11a
+par(mar=c(4,8,4,4))
+plot(lambda_comparisons$modified_mash_distance,lambda_comparisons$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+
+
+
+
+###Toxic phage analysis
+mash_table2_toxic <- mash_table2
+mash_table2_toxic$toxic_one_or_two <- ifelse(mash_table2_toxic$ref_toxic == "yes" | mash_table2_toxic$query_toxic == "yes",TRUE,FALSE)
+mash_table2_toxic$toxic_both <- ifelse(mash_table2_toxic$ref_toxic == "yes" & mash_table2_toxic$query_toxic == "yes",TRUE,FALSE)
+toxic_one_or_two <- subset(mash_table2_toxic,mash_table2_toxic$toxic_one_or_two == TRUE)
+
+#Supp. Fig. 11b
+par(mar=c(4,8,4,4))
+plot(toxic_one_or_two$modified_mash_distance,toxic_one_or_two$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
 
 
 
