@@ -1064,166 +1064,7 @@ abline(0,2,lty=2,lwd=3,col="grey")
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-####STILL NEED TO REVIEW THIS
-
-####NOT SURE IF I NEED THIS. IT INCLUDES CODE FOR GENOME SIZE DISPARITY RUNMEAN
-####BUT IT DOES NOT FOCUS ONLY ON INTRA-CLUSTER DATA
-
-
-###Gene flux analysis on all data, not just SEA-PHAGES final status phages
-type <- subset(mash_table2,mash_table2$phage_viral_type_compare != "different")
-bacteria <- subset(type,type$host_superkingdom_compare == "Bacteria")
-dsDNA <- subset(bacteria,bacteria$phage_viral_type_compare == "dsDNA")
-
-
-
-#Subset data to plot
-dsDNA_temperate <- subset(dsDNA,dsDNA$phage_temperate_compare == "yes")
-dsDNA_lytic <- subset(dsDNA,dsDNA$phage_temperate_compare == "no")
-
-dsDNA_temperate_hgf <- subset(dsDNA_temperate,dsDNA_temperate$gene_flux_category == "high")
-dsDNA_temperate_lgf <- subset(dsDNA_temperate,dsDNA_temperate$gene_flux_category == "low")
-
-dsDNA_lytic_hgf <- subset(dsDNA_lytic,dsDNA_lytic$gene_flux_category == "high")
-dsDNA_lytic_lgf <- subset(dsDNA_lytic,dsDNA_lytic$gene_flux_category == "low")
-
-
-#Scatter plot of each subset of data
-par(mar=c(4,8,4,4))
-plot(dsDNA_temperate_hgf$modified_mash_distance,dsDNA_temperate_hgf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-par(mar=c(4,8,4,4))
-plot(dsDNA_temperate_lgf$modified_mash_distance,dsDNA_temperate_lgf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-par(mar=c(4,8,4,4))
-plot(dsDNA_lytic_hgf$modified_mash_distance,dsDNA_lytic_hgf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-par(mar=c(4,8,4,4))
-plot(dsDNA_lytic_lgf$modified_mash_distance,dsDNA_lytic_lgf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
-
-
-
-
-par(mar=c(4,8,4,4))
-plot(dsDNA_temperate_hgf$modified_mash_distance,dsDNA_temperate_hgf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-abline(0,2,lty=2,lwd=3,col="grey")
-par(new=TRUE)
-plot(dsDNA_temperate_lgf$modified_mash_distance,dsDNA_temperate_lgf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-par(new=TRUE)
-plot(dsDNA_lytic$modified_mash_distance,dsDNA_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-
-
-
-#sliding window average
-library(caTools)
-dsDNA_temp_hgf_mmdsort <- dsDNA_temperate_hgf[order(dsDNA_temperate_hgf$modified_mash_distance),]
-dsDNA_temp_hgf_mmdsort$gene_count_disparity_runmean <- runmean(dsDNA_temp_hgf_mmdsort$gene_count_disparity,101)
-dsDNA_temp_hgf_mmdsort$size_diff_runmean <- runmean(dsDNA_temp_hgf_mmdsort$size_diff,101)
-dsDNA_temp_hgf_mmdsort$size_diff_ave_percent_runmean <- runmean(dsDNA_temp_hgf_mmdsort$size_diff_ave_percent,101)
-dsDNA_temp_hgf_mmdsort$gene_count_disparity_ave_percent_runmean <- runmean(dsDNA_temp_hgf_mmdsort$gene_count_disparity_ave_percent,101)
-dsDNA_temp_hgf_mmdsort$size_diff_max_percent_runmean <- runmean(dsDNA_temp_hgf_mmdsort$size_diff_max_percent,101)
-
-dsDNA_temp_lgf_mmdsort <- dsDNA_temperate_lgf[order(dsDNA_temperate_lgf$modified_mash_distance),]
-dsDNA_temp_lgf_mmdsort$gene_count_disparity_runmean <- runmean(dsDNA_temp_lgf_mmdsort$gene_count_disparity,101)
-dsDNA_temp_lgf_mmdsort$size_diff_runmean <- runmean(dsDNA_temp_lgf_mmdsort$size_diff,101)
-dsDNA_temp_lgf_mmdsort$size_diff_ave_percent_runmean <- runmean(dsDNA_temp_lgf_mmdsort$size_diff_ave_percent,101)
-dsDNA_temp_lgf_mmdsort$gene_count_disparity_ave_percent_runmean <- runmean(dsDNA_temp_lgf_mmdsort$gene_count_disparity_ave_percent,101)
-dsDNA_temp_lgf_mmdsort$size_diff_max_percent_runmean <- runmean(dsDNA_temp_lgf_mmdsort$size_diff_max_percent,101)
-
-
-dsDNA_lytic_mmdsort <- dsDNA_lytic[order(dsDNA_lytic$modified_mash_distance),]
-dsDNA_lytic_mmdsort$gene_count_disparity_runmean <- runmean(dsDNA_lytic_mmdsort$gene_count_disparity,101)
-dsDNA_lytic_mmdsort$size_diff_runmean <- runmean(dsDNA_lytic_mmdsort$size_diff,101)
-dsDNA_lytic_mmdsort$size_diff_ave_percent_runmean <- runmean(dsDNA_lytic_mmdsort$size_diff_ave_percent,101)
-dsDNA_lytic_mmdsort$gene_count_disparity_ave_percent_runmean <- runmean(dsDNA_lytic_mmdsort$gene_count_disparity_ave_percent,101)
-dsDNA_lytic_mmdsort$size_diff_max_percent_runmean <- runmean(dsDNA_lytic_mmdsort$size_diff_max_percent,101)
-
-
-
-par(mar=c(4,8,4,4))
-plot(dsDNA_lytic_mmdsort$modified_mash_distance,dsDNA_lytic_mmdsort$gene_count_disparity_runmean,xlim=c(0,0.5),ylim=c(0,60),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-par(new=TRUE)
-plot(dsDNA_temp_lgf_mmdsort$modified_mash_distance,dsDNA_temp_lgf_mmdsort$gene_count_disparity_runmean,xlim=c(0,0.5),ylim=c(0,60),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-par(new=TRUE)
-plot(dsDNA_temp_hgf_mmdsort$modified_mash_distance,dsDNA_temp_hgf_mmdsort$gene_count_disparity_runmean,xlim=c(0,0.5),ylim=c(0,60),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-
-par(mar=c(4,8,4,4))
-plot(dsDNA_lytic_mmdsort$modified_mash_distance,dsDNA_lytic_mmdsort$size_diff_runmean,xlim=c(0,0.5),ylim=c(0,25000),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-par(new=TRUE)
-plot(dsDNA_temp_lgf_mmdsort$modified_mash_distance,dsDNA_temp_lgf_mmdsort$size_diff_runmean,xlim=c(0,0.5),ylim=c(0,25000),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-par(new=TRUE)
-plot(dsDNA_temp_hgf_mmdsort$modified_mash_distance,dsDNA_temp_hgf_mmdsort$size_diff_runmean,xlim=c(0,0.5),ylim=c(0,25000),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-
-par(mar=c(4,8,4,4))
-plot(dsDNA_lytic_mmdsort$modified_mash_distance,dsDNA_lytic_mmdsort$size_diff_ave_percent_runmean,xlim=c(0,0.5),ylim=c(0,0.4),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-par(new=TRUE)
-plot(dsDNA_temp_lgf_mmdsort$modified_mash_distance,dsDNA_temp_lgf_mmdsort$size_diff_ave_percent_runmean,xlim=c(0,0.5),ylim=c(0,0.4),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-par(new=TRUE)
-plot(dsDNA_temp_hgf_mmdsort$modified_mash_distance,dsDNA_temp_hgf_mmdsort$size_diff_ave_percent_runmean,xlim=c(0,0.5),ylim=c(0,0.4),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-
-par(mar=c(4,8,4,4))
-plot(dsDNA_lytic_mmdsort$modified_mash_distance,dsDNA_lytic_mmdsort$size_diff_max_percent_runmean,xlim=c(0,0.5),ylim=c(0,0.4),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-par(new=TRUE)
-plot(dsDNA_temp_lgf_mmdsort$modified_mash_distance,dsDNA_temp_lgf_mmdsort$size_diff_max_percent_runmean,xlim=c(0,0.5),ylim=c(0,0.4),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-par(new=TRUE)
-plot(dsDNA_temp_hgf_mmdsort$modified_mash_distance,dsDNA_temp_hgf_mmdsort$size_diff_max_percent_runmean,xlim=c(0,0.5),ylim=c(0,0.4),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-
-
-par(mar=c(4,8,4,4))
-plot(dsDNA_lytic_mmdsort$modified_mash_distance,dsDNA_lytic_mmdsort$gene_count_disparity_ave_percent_runmean,xlim=c(0,0.5),ylim=c(0,0.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-par(new=TRUE)
-plot(dsDNA_temp_lgf_mmdsort$modified_mash_distance,dsDNA_temp_lgf_mmdsort$gene_count_disparity_ave_percent_runmean,xlim=c(0,0.5),ylim=c(0,0.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-par(new=TRUE)
-plot(dsDNA_temp_hgf_mmdsort$modified_mash_distance,dsDNA_temp_hgf_mmdsort$gene_count_disparity_ave_percent_runmean,xlim=c(0,0.5),ylim=c(0,0.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-
-
-####STILL NEED TO REVIEW ABOVE
-
-
-
-
-
-
-
-
-
-#Fig. 2a?
-###Cluster-specific colored analysis
+###Cluster-specific analysis
 plot_cluster_specific_profiles <- function(table,cluster){
   
   table$cluster_specific_one_or_two <- ifelse(table$ref_phage_cluster == cluster | table$query_phage_cluster == cluster,TRUE,FALSE)
@@ -1271,63 +1112,9 @@ plot_cluster_specific_profiles(cluster_actino,"BU")
 dev.off()
 plot_cluster_specific_profiles(cluster_actino,"BD")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-###Toxic phage analysis
-
-mash_table2_toxic <- mash_table2
-mash_table2_toxic$toxic_one_or_two <- ifelse(mash_table2_toxic$ref_toxic == "yes" | mash_table2_toxic$query_toxic == "yes",TRUE,FALSE)
-mash_table2_toxic$toxic_both <- ifelse(mash_table2_toxic$ref_toxic == "yes" & mash_table2_toxic$query_toxic == "yes",TRUE,FALSE)
-toxic_one_or_two <- subset(mash_table2_toxic,mash_table2_toxic$toxic_one_or_two == TRUE)
-
-par(mar=c(4,8,4,4))
-plot(toxic_one_or_two$modified_mash_distance,toxic_one_or_two$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
-
-
-
-
-
-
-
-
+#Supp. Fig. 11c
+dev.off()
+plot_cluster_specific_profiles(cluster_actino,"N")
 
 
 
@@ -1347,6 +1134,11 @@ abline(0,2,lty=2,lwd=3,col="grey")
 ###ANI vs Pham Dissimilarity data
 #Import ANI data from the 79 genome optimization test to show ANI vs Pham Distance
 #Data contains complete matrix of 79 x 79 comparisons, including self comparisons and duplicate (reciprocal) comparisons
+#Format
+#0 = ref_query
+#1 = ref_phage_identifier
+#2 = query_phage_identifier
+#3 = ani_distance
 ani79_data <- read.csv("ani_79_data.csv",sep=",",header=TRUE)
 
 names(ani79_data) <- c("ani79_ref_query","ani79_ref_phage_identifier","ani79_query_phage_identifier","ani79_ani_distance")
@@ -1355,13 +1147,21 @@ names(ani79_data) <- c("ani79_ref_query","ani79_ref_phage_identifier","ani79_que
 #The main mash table contains non-redundant comparisona and no self comparisons
 ani79_analysis <- merge(mash_table2,ani79_data,by.x="mash_ref_query",by.y="ani79_ref_query")
 
+#Supp. Fig. 2c
 par(mar=c(4,8,4,4))
 plot(ani79_analysis$modified_mash_distance,ani79_analysis$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
 abline(0,2,lty=2,lwd=3,col="grey")
 
+#Supp. Fig. 2c
 par(mar=c(4,8,4,4))
 plot(ani79_analysis$ani79_ani_distance,ani79_analysis$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
 abline(0,2,lty=2,lwd=3,col="grey")
+
+
+
+
+
+
 
 
 
@@ -1376,8 +1176,24 @@ lambda_figure <- mash_table2
 lambda_figure$lambda_one <- ifelse(lambda_figure$mash_reference == 'lambda__nc_001416' | lambda_figure$mash_query == 'lambda__nc_001416',TRUE,FALSE)
 lambda_comparisons <- subset(lambda_figure,lambda_figure$lambda_one == TRUE)
 
+#Supp. Fig. 11a
 par(mar=c(4,8,4,4))
 plot(lambda_comparisons$modified_mash_distance,lambda_comparisons$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+
+
+
+
+###Toxic phage analysis
+mash_table2_toxic <- mash_table2
+mash_table2_toxic$toxic_one_or_two <- ifelse(mash_table2_toxic$ref_toxic == "yes" | mash_table2_toxic$query_toxic == "yes",TRUE,FALSE)
+mash_table2_toxic$toxic_both <- ifelse(mash_table2_toxic$ref_toxic == "yes" & mash_table2_toxic$query_toxic == "yes",TRUE,FALSE)
+toxic_one_or_two <- subset(mash_table2_toxic,mash_table2_toxic$toxic_one_or_two == TRUE)
+
+#Supp. Fig. 11b
+par(mar=c(4,8,4,4))
+plot(toxic_one_or_two$modified_mash_distance,toxic_one_or_two$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
 abline(0,2,lty=2,lwd=3,col="grey")
 
 
@@ -1388,6 +1204,227 @@ abline(0,2,lty=2,lwd=3,col="grey")
 
 
 
+
+###VOG analysis
+#Format
+#0 = phage1_name
+#1 = phage1_accession
+#2 = phage1_number_of_genes
+#3 = phage1_number_of_vogs
+#4 = phage1_number_of_unshared_vogs
+#5 = phage1_number_of_shared_vog_genes
+#6 = phage1_number_of_unshared_vog_genes
+#7 = phage1_number_of_unshared_other_genes
+#8 = phage1_shared_vog_gene_proportion
+#9 = phage2_name
+#10 = phage2_accession
+#11 = phage2_number_of_genes
+#12 = phage2_number_of_vogs
+#13 = phage2_number_of_unshared_vogs
+#14 = phage2_number_of_shared_vog_genes
+#15 = phage2_number_of_unshared_vog_genes
+#16 = phage2_number_of_unshared_other_genes
+#17 = phage2_shared_vog_gene_proportion
+#18 = number_of_shared_vogs
+#19 = average_shared_vog_gene_proportion
+#20 = gene_content_dissimilarity
+vog_table <- read.csv("pairwise_vog_proportions.csv",sep=",",header=TRUE)
+
+names(vog_table) <- c("vog_reference","vog_ref_accession","vog_ref_number_of_genes","vog_ref_number_of_vogs",
+                      "vog_ref_number_of_unshared_vogs","vog_ref_number_of_shared_vog_genes","vog_ref_number_of_unshared_vog_genes","vog_ref_number_of_unshared_other_genes",
+                      "vog_ref_shared_vog_gene_proportion","vog_query","vog_query_accession","vog_query_number_of_genes",
+                      "vog_query_number_of_vogs","vog_query_number_of_unshared_vogs","vog_query_number_of_shared_vog_genes","vog_query_number_of_unshared_vog_genes",
+                      "vog_query_number_of_unshared_other_genes","vog_query_shared_vog_gene_proportion",
+                      "vog_number_of_shared_vogs","vog_average_shared_vog_gene_proportion","vog_gene_content_dissimilarity")
+
+vog_table$vog_ref_query <- paste(vog_table$vog_reference,vog_table$vog_query,sep="_")
+vog_table$vog_ref_query <- as.factor(vog_table$vog_ref_query)
+
+
+
+
+#VOG data is based on 1877 genomes that are present in the merged2333 dataset.
+#But the VOG data contains redundant data rows, where each comparison is represented twice, with the ref and query reversed
+#So when merged to mash_table2, no need to keep all rows in either table - it is expected there will be fewer rows than in both tables
+#Also, there are 2 genomes (vb_paem_c1-14-ab28__NC_026600 and pv94__NC_027368) that contain no annotated genes. These are not in the pham data,
+#so even though they are present in the VOG data, I am unable to compare these two genomes. This results in 1875 genomes.
+mash_table2_vog <- merge(mash_table2,vog_table,by.x="mash_ref_query",by.y="vog_ref_query")
+mash_table2_vog$mash_reference <- factor(mash_table2_vog$mash_reference)
+mash_table2_vog$mash_query <- factor(mash_table2_vog$mash_query)
+
+
+
+bacteria_dsDNA <- subset(mash_table2_vog,mash_table2_vog$host_superkingdom_compare == 'Bacteria' & mash_table2_vog$phage_viral_type_compare == 'dsDNA')
+temperate_both <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_temperate_compare == 'yes')
+temperate_neither <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_temperate_compare == 'no')
+
+
+
+
+
+#How well do pham-based gcd and vog-based gcd correlate?
+#Supp. Fig. 2e
+par(mar=c(4,8,4,4))
+plot(bacteria_dsDNA$pham_pham_dissimilarity,bacteria_dsDNA$vog_gene_content_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,1,lty=2,lwd=3,col="grey")
+
+
+
+#Compare pham-based and vog-based bacteria dsDNA phage lifestyle plots 
+par(mar=c(4,8,4,4))
+plot(temperate_both$modified_mash_distance,temperate_both$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+#Supp Fig. 2f
+par(mar=c(4,8,4,4))
+plot(temperate_both$modified_mash_distance,temperate_both$vog_gene_content_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+par(mar=c(4,8,4,4))
+plot(temperate_neither$modified_mash_distance,temperate_neither$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+#Supp Fig. 2f
+par(mar=c(4,8,4,4))
+plot(temperate_neither$modified_mash_distance,temperate_neither$vog_gene_content_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+
+
+
+
+
+
+
+
+
+###Analyze predicted lifestyle data
+lifestyle_analysis <- mash_table2
+
+bacteria_dsDNA <- subset(lifestyle_analysis,lifestyle_analysis$host_superkingdom_compare == 'Bacteria' & lifestyle_analysis$phage_viral_type_compare == 'dsDNA')
+
+lifestyle_predicted_temperate <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_predicted_temperate_compare == 'yes')
+lifestyle_predicted_lytic <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_predicted_temperate_compare == 'no')
+
+#Supp. Fig. 6b
+par(mar=c(4,8,4,4))
+plot(lifestyle_predicted_temperate$modified_mash_distance,lifestyle_predicted_temperate$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+#Supp. Fig. 6b
+par(mar=c(4,8,4,4))
+plot(lifestyle_predicted_lytic$modified_mash_distance,lifestyle_predicted_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+abline(0,2,lty=2,lwd=3,col="grey")
+
+
+
+
+
+###Predict evolutionary mode
+
+data_for_mode_prediction <- subset(mash_table2,mash_table2$host_superkingdom_compare == "Bacteria" &
+                                     mash_table2$phage_viral_type_compare == "dsDNA" &
+                                     mash_table2$modified_mash_distance < 0.42 &
+                                     mash_table2$pham_pham_dissimilarity < 0.89)
+data_for_mode_prediction <- subset(data_for_mode_prediction,select=c("mash_reference","mash_query","modified_mash_distance","pham_pham_dissimilarity"))
+write.table(data_for_mode_prediction,"/Users/Hatfull_Lab/Desktop/Project_phage_classification/7_merged2333_analysis/20170315_data_for_mode_prediction.csv",sep=",",row.names = FALSE,col.names = FALSE,quote=FALSE)
+
+#Run the data through the analyze_mash_network_script to predict the evolutionary mode
+
+
+
+#Then import the mode prediction back into R
+#Format
+#0 = phage
+#1 = hgcf_tally
+#2 = lgcf_tally
+#3 = out_of_range_tally
+#4 = hgcf_percent
+#5 = lgcf_percent"
+#6 = mode"
+mode_prediction_table <- read.csv("mode_prediction.csv",sep=",",header=TRUE)
+
+names(mode_prediction_table) <- c("phage_identifier",
+                                  "mode_prediction_hgcf_tally","mode_prediction_lgcf_tally","mode_prediction_out_of_range_tally",
+                                  "mode_prediction_hgcf_percent","mode_prediction_lgcf_percent","mode_prediction_mode")
+
+#Supp. Fig. 6d
+par(mar=c(4,8,4,4))
+hist(mode_prediction_table$mode_prediction_hgcf_percent,col="black",breaks=25,cex.axis=2,ann=FALSE,las=1,ylim=c(0,1400))
+
+
+
+
+
+
+
+
+
+
+
+###Misc clusters genometrics
+
+#Format
+#0 = phage
+#1 = phage_cluster
+#2 = size
+#3 = total_gene_count
+#4 = Unspecified_gene_count
+#5 = lysis_gene_count
+#6 = lysogeny_gene_count 
+#7 = recombination_replication_gene_count
+#8 = structure_assembly_gene_count
+misc_clusters_genometrics <- read.csv("misc_clusters_genometrics.csv",sep=",",header=TRUE)
+misc_clusters_genometrics$phage_cluster <- factor(misc_clusters_genometrics$phage_cluster,c("A1","F","BD","K","non-A1","B"))
+
+
+#Format
+#0 = phageName
+#1 = cluster
+#2 = GC
+misc_clusters_gc <- read.csv("misc_clusters_gc.csv",sep=",",header=TRUE)
+misc_clusters_gc$Cluster <- factor(misc_clusters_gc$Cluster,c("A1","F","BD","K","non-A1","B"))
+
+
+#Fig. 3f
+par(mar=c(8,24,4,4))
+boxplot(misc_clusters_genometrics$size ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
+stripchart(misc_clusters_genometrics$size ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
+
+#Fig. 3f
+par(mar=c(8,24,4,4))
+boxplot(misc_clusters_genometrics$total_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
+stripchart(misc_clusters_genometrics$total_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
+
+#Fig. 3f
+par(mar=c(8,24,4,4))
+boxplot(misc_clusters_genometrics$Unspecified_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
+stripchart(misc_clusters_genometrics$Unspecified_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
+
+#Fig. 3f
+par(mar=c(8,24,4,4))
+boxplot(misc_clusters_genometrics$lysis_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
+stripchart(misc_clusters_genometrics$lysis_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
+
+#Fig. 3f
+par(mar=c(8,24,4,4))
+boxplot(misc_clusters_genometrics$lysogeny_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
+stripchart(misc_clusters_genometrics$lysogeny_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
+
+#Fig. 3f
+par(mar=c(8,24,4,4))
+boxplot(misc_clusters_genometrics$recombination_replication_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
+stripchart(misc_clusters_genometrics$recombination_replication_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
+
+#Fig. 3f
+par(mar=c(8,24,4,4))
+boxplot(misc_clusters_genometrics$structure_assembly_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
+stripchart(misc_clusters_genometrics$structure_assembly_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
+
+#Fig. 3f
+par(mar=c(8,24,4,4))
+boxplot(misc_clusters_gc$GC ~ misc_clusters_gc$Cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
+stripchart(misc_clusters_gc$GC ~ misc_clusters_gc$Cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
 
 
 
@@ -1428,22 +1465,61 @@ gene_specific_mash_table <- bacteria_dsDNA_nuc042_gene089
 
 
 #Now import the gsm data
-gene_specific_mash_data <- read.csv("gene_specific_mash_analysis.csv",sep=",",header=TRUE)
+#Format:
+#0 = phage1_phage2
+#1 = phage1
+#2 = phage2
+#3 = phage1_phage2 # shared phams
+#4 = phage1_phage2 gene content dissimilarity (general index)
+#5 = phage1_phage2 gene content dissimilarity (jaccard index)
+#6 = phage1_phage2 all genes mash distance
+#7 = phage1_phage2 all genes mash p-value
+#8 = phage1_phage2 all genes mash kmer count
+#9 = phage1_phage2 shared genes mash distance
+#10 = phage1_phage2 shared genes mash p-value
+#11 = phage1_phage2 shared genes mash kmer count
+#12 = phage1_phage2 unshared genes mash distance
+#13 = phage1_phage2 unshared genes mash p-value
+#14 = phage1_phage2 unshared genes mash kmer count
+#15 = phage1_phage2 shared-unshared mash distance
+#16 = phage1_phage2 shared-unshared mash p-value
+#17 = phage1_phage2 shared-unshared mash kmer count
+#18 = phage1_phage2 total length of combined shared sequence
+#19 = phage1_phage2 total length of combined unshared sequence
+#20 = phage1_phage2 combined shared gene GC content
+#21 = phage1_phage2 combined unshared gene GC content
+#22 = phage1 # unshared phams
+#23 = phage1 # all phams
+#24 = phage1 # all genes
+#25 = phage1 # shared genes
+#26 = phage1 # unshared genes
+#27 = phage1 average length of all genes
+#28 = phage1 average length of shared genes
+#29 = phage1 average length of unshared genes
+#30 = phage1 total length of all genes
+#31 = phage1 total length of shared genes
+#32 = phage1 total length of unshared genes
+#33 = phage1 all genes GC content
+#34 = phage1 shared genes GC content
+#35 = phage1 unshared genes GC content
+#36 = phage2 # unshared phams
+#37 = phage2 # all phams
+#38 = phage2 # all genes
+#39 = phage2 # shared genes
+#40 = phage2 # unshared genes
+#41 = phage2 average length of all genes
+#42 = phage2 average length of shared genes
+#43 = phage2 average length of unshared genes
+#44 = phage2 total length of all genes
+#45 = phage2 total length of shared genes
+#46 = phage2 total length of unshared genes
+#47 = phage2 all genes GC content
+#48 = phage2 shared genes GC content
+#49 = phage2 unshared genes GC content
 
-#Original column headers
-#"phage1_phage2","phage1","phage2","phage1_phage2","# shared phams",
-#"phage1_phage2 gene content dissimilarity (general index)","phage1_phage2 gene content dissimilarity (jaccard index)",
-#"phage1_phage2 all genes mash distance","phage1_phage2 all genes mash p-value","phage1_phage2 all genes kmer count",
-#"phage1_phage2 shared genes mash distance","phage1_phage2 shared genes mash p-value","phage1_phage2 shared genes kmer count",
-#"phage1_phage2 unshared genes mash distance","phage1_phage2 unshared genes mash p-value","phage1_phage2 unshared genes kmer count",
-#"phage1 # unshared phams","phage1 # all phams","phage1 # shared genes","phage1 # unshared genes","phage1 # all genes",
-#"phage1 - average length of all genes","phage1 average length of shared genes","phage1 average length of unshared genes",
-#"phage1 total length of all genes","phage1 total length of shared genes","phage1 total length of unshared genes",
-#"phage1 - all genes GC content","phage1 - shared genes GC content","ref - unshared genes GC content","phage2 # unshared phams",
-#"phage2 # all phams","phage2 # shared genes","phage2 # unshared genes","phage2 # all genes","phage2 - average length of all genes",
-#"phage2 average length of shared genes","phage2 average length of unshared genes","phage2 total length of all genes",
-#"phage2 total length of shared genes","phage2 total length of unshared genes","phage2 - all genes GC content",
-#"phage2 - shared genes GC content","phage2 - unshared genes GC content"
+
+
+gene_specific_mash_data <- read.csv("gene_specific_mash_data.csv",sep=",",header=TRUE)
 
 names(gene_specific_mash_data) = c("gsm_mash_ref_query","gsm_ref","gsm_query","gsm_num_shared_phams","gsm_pham_dissimilarity","gsm_pham_jaccard_dissimilarity",
                                     "gsm_all_mash_distance","gsm_all_mash_pvalue","gsm_all_mash_count",
@@ -1490,9 +1566,6 @@ gene_specific_mash_table$gsm_shared_unshared_mash_filter <- ifelse(gene_specific
 
 
 #Compute modified values
-#At this point, the max mash distance of all filtered gsm_all_mash_distance comparisons = 0.5095.
-#At this point, the max mash distance of all filtered gsm_shared_mash_distance comparisons = 0.52160
-#At this point, the max mash distance of all filtered gsm_unshared_mash_distance comparisons = 0.5365
 
 #Create modified data for mash
 gene_specific_mash_table$gsm_all_modified_mash_distance <- ifelse(gene_specific_mash_table$gsm_all_mash_filter == TRUE,gene_specific_mash_table$gsm_all_mash_distance,0.6)
@@ -1500,6 +1573,8 @@ gene_specific_mash_table$gsm_shared_modified_mash_distance <- ifelse(gene_specif
 gene_specific_mash_table$gsm_unshared_modified_mash_distance <- ifelse(gene_specific_mash_table$gsm_unshared_mash_filter == TRUE,gene_specific_mash_table$gsm_unshared_mash_distance,0.6)
 gene_specific_mash_table$gsm_shared_unshared_modified_mash_distance <- ifelse(gene_specific_mash_table$gsm_shared_unshared_mash_filter == TRUE,gene_specific_mash_table$gsm_shared_unshared_mash_distance,0.6)
 
+
+####PROBABLY CAN DELETE THIS AFTER CHECKING AVE GENE SIZE MATH
 #Create modified data for average gene size
 gene_specific_mash_table$gsm_ref_all_modified_ave_size <- ifelse(gene_specific_mash_table$gsm_ref_num_all_genes > 0,gene_specific_mash_table$gsm_ref_all_ave_size,NA)
 gene_specific_mash_table$gsm_ref_shared_modified_ave_size <- ifelse(gene_specific_mash_table$gsm_ref_num_shared_genes > 0,gene_specific_mash_table$gsm_ref_shared_ave_size,NA)
@@ -1507,40 +1582,7 @@ gene_specific_mash_table$gsm_ref_unshared_modified_ave_size <- ifelse(gene_speci
 gene_specific_mash_table$gsm_query_all_modified_ave_size <- ifelse(gene_specific_mash_table$gsm_query_num_all_genes > 0,gene_specific_mash_table$gsm_query_all_ave_size,NA)
 gene_specific_mash_table$gsm_query_shared_modified_ave_size <- ifelse(gene_specific_mash_table$gsm_query_num_shared_genes > 0,gene_specific_mash_table$gsm_query_shared_ave_size,NA)
 gene_specific_mash_table$gsm_query_unshared_modified_ave_size <- ifelse(gene_specific_mash_table$gsm_query_num_unshared_genes > 0,gene_specific_mash_table$gsm_query_unshared_ave_size,NA)
-
-#Create modified data for GC content
-gene_specific_mash_table$gsm_ref_all_modified_GC <- ifelse(gene_specific_mash_table$gsm_ref_all_total_size > 0,gene_specific_mash_table$gsm_ref_all_GC,NA)
-gene_specific_mash_table$gsm_ref_shared_modified_GC <- ifelse(gene_specific_mash_table$gsm_ref_shared_total_size > 0,gene_specific_mash_table$gsm_ref_shared_GC,NA)
-gene_specific_mash_table$gsm_ref_unshared_modified_GC <- ifelse(gene_specific_mash_table$gsm_ref_unshared_total_size > 0,gene_specific_mash_table$gsm_ref_unshared_GC,NA)
-gene_specific_mash_table$gsm_query_all_modified_GC <- ifelse(gene_specific_mash_table$gsm_query_all_total_size > 0,gene_specific_mash_table$gsm_query_all_GC,NA)
-gene_specific_mash_table$gsm_query_shared_modified_GC <- ifelse(gene_specific_mash_table$gsm_query_shared_total_size > 0,gene_specific_mash_table$gsm_query_shared_GC,NA)
-gene_specific_mash_table$gsm_query_unshared_modified_GC <- ifelse(gene_specific_mash_table$gsm_query_unshared_total_size > 0,gene_specific_mash_table$gsm_query_unshared_GC,NA)
-gene_specific_mash_table$gsm_shared_modified_GC <- ifelse(gene_specific_mash_table$gsm_shared_total_size > 0,gene_specific_mash_table$gsm_shared_GC,NA)
-gene_specific_mash_table$gsm_unshared_modified_GC <- ifelse(gene_specific_mash_table$gsm_unshared_total_size > 0,gene_specific_mash_table$gsm_unshared_GC,NA)
-
-
-
-
-
-  
-
-
-#QC and Analysis values to compute, now that the gene-specific mash data has been added
-#Misc
-gene_specific_mash_table$gsm_num_unshared_phams <- gene_specific_mash_table$gsm_ref_num_unshared_phams + gene_specific_mash_table$gsm_query_num_unshared_phams
-
-gene_specific_mash_table$gsm_num_all_genes <- gene_specific_mash_table$gsm_ref_num_all_genes + gene_specific_mash_table$gsm_query_num_all_genes
-gene_specific_mash_table$gsm_num_shared_genes <- gene_specific_mash_table$gsm_ref_num_shared_genes + gene_specific_mash_table$gsm_query_num_shared_genes
-gene_specific_mash_table$gsm_num_unshared_genes <- gene_specific_mash_table$gsm_ref_num_unshared_genes + gene_specific_mash_table$gsm_query_num_unshared_genes
-
-#Difference between number of genes and number of phams
-gene_specific_mash_table$gsm_ref_all_pham_gene_disparity <- gene_specific_mash_table$gsm_ref_num_all_genes - gene_specific_mash_table$gsm_ref_num_all_phams
-gene_specific_mash_table$gsm_ref_shared_pham_gene_disparity <- gene_specific_mash_table$gsm_ref_num_shared_genes - gene_specific_mash_table$gsm_num_shared_phams
-gene_specific_mash_table$gsm_ref_unshared_pham_gene_disparity <- gene_specific_mash_table$gsm_ref_num_unshared_genes - gene_specific_mash_table$gsm_ref_num_unshared_phams
-
-gene_specific_mash_table$gsm_query_all_pham_gene_disparity <- gene_specific_mash_table$gsm_query_num_all_genes - gene_specific_mash_table$gsm_query_num_all_phams
-gene_specific_mash_table$gsm_query_shared_pham_gene_disparity <- gene_specific_mash_table$gsm_query_num_shared_genes - gene_specific_mash_table$gsm_num_shared_phams
-gene_specific_mash_table$gsm_query_unshared_pham_gene_disparity <- gene_specific_mash_table$gsm_query_num_unshared_genes - gene_specific_mash_table$gsm_query_num_unshared_phams
+####
 
 
 #Estimate of the proportion of coding sequence per genome
@@ -1549,75 +1591,36 @@ gene_specific_mash_table$gsm_query_unshared_pham_gene_disparity <- gene_specific
 
 gene_specific_mash_table$gsm_all_total_size <- gene_specific_mash_table$gsm_ref_all_total_size + gene_specific_mash_table$gsm_query_all_total_size
 
-
-gene_specific_mash_table$gsm_ref_all_coding_potential <- gene_specific_mash_table$gsm_ref_all_total_size/gene_specific_mash_table$ref_size
-gene_specific_mash_table$gsm_query_all_coding_potential <- gene_specific_mash_table$gsm_query_all_total_size/gene_specific_mash_table$query_size
-
-gene_specific_mash_table$gsm_all_coding_potential <- (gene_specific_mash_table$gsm_ref_all_coding_potential + gene_specific_mash_table$gsm_query_all_coding_potential)/2
-
-
-gene_specific_mash_table$gsm_ref_shared_coding_potential <- gene_specific_mash_table$gsm_ref_shared_total_size/gene_specific_mash_table$gsm_ref_all_total_size
-gene_specific_mash_table$gsm_query_shared_coding_potential <- gene_specific_mash_table$gsm_query_shared_total_size/gene_specific_mash_table$gsm_query_all_total_size
-
 gene_specific_mash_table$gsm_ref_unshared_coding_potential <- gene_specific_mash_table$gsm_ref_unshared_total_size/gene_specific_mash_table$gsm_ref_all_total_size
 gene_specific_mash_table$gsm_query_unshared_coding_potential <- gene_specific_mash_table$gsm_query_unshared_total_size/gene_specific_mash_table$gsm_query_all_total_size
 
-gene_specific_mash_table$gsm_shared_coding_potential <- gene_specific_mash_table$gsm_shared_total_size / gene_specific_mash_table$gsm_all_total_size
 gene_specific_mash_table$gsm_unshared_coding_potential <- gene_specific_mash_table$gsm_unshared_total_size / gene_specific_mash_table$gsm_all_total_size
 
 
 
-
-
-#Differences in GC content
-gene_specific_mash_table$gsm_modified_gc_diff_all_all <- abs(gene_specific_mash_table$gsm_ref_all_modified_GC - gene_specific_mash_table$gsm_query_all_modified_GC)
-gene_specific_mash_table$gsm_modified_gc_diff_shared_shared <- abs(gene_specific_mash_table$gsm_ref_shared_modified_GC - gene_specific_mash_table$gsm_query_shared_modified_GC)
-gene_specific_mash_table$gsm_modified_gc_diff_unshared_unshared <- abs(gene_specific_mash_table$gsm_ref_unshared_modified_GC - gene_specific_mash_table$gsm_query_unshared_modified_GC)
-gene_specific_mash_table$gsm_modified_gc_diff_shared_unshared <- abs(gene_specific_mash_table$gsm_shared_modified_GC - gene_specific_mash_table$gsm_unshared_modified_GC)
-
-
-
-
-
-#Difference in shared and unshared mash distances
-gene_specific_mash_table$gsm_mash_distance_diff_unshared_shared <- gene_specific_mash_table$gsm_unshared_modified_mash_distance - gene_specific_mash_table$gsm_shared_modified_mash_distance
-
-
-#Compute gene content dissimilarity by shared genes instead of shared phams
-gene_specific_mash_table$gsm_gene_dissimilarity <- 1 - ((gene_specific_mash_table$gsm_ref_num_shared_genes/gene_specific_mash_table$gsm_ref_num_all_genes) + (gene_specific_mash_table$gsm_query_num_shared_genes/gene_specific_mash_table$gsm_query_num_all_genes))/2
-
-
-
-
+####VERIFY THIS MATH IS CORRECT!
 #Average gene sizes
 #This data does not use the modified gene size data, because if there are no shared/unshared genes, the default ave size is 0, and this is fine to use to compute averages
-gene_specific_mash_table$gsm_ave_size_all_all <- (gene_specific_mash_table$gsm_ref_all_ave_size + gene_specific_mash_table$gsm_query_all_ave_size)/2
 gene_specific_mash_table$gsm_ave_size_shared_shared <- (gene_specific_mash_table$gsm_ref_shared_ave_size + gene_specific_mash_table$gsm_query_shared_ave_size)/2
 gene_specific_mash_table$gsm_ave_size_unshared_unshared <- (gene_specific_mash_table$gsm_ref_unshared_ave_size + gene_specific_mash_table$gsm_query_unshared_ave_size)/2
 
 
-#Average GC
-#This data uses the raw and modified GC content. The script default if there are no shared/unshared genes, is to set GC content to 0, but this could be confused with a biologically relevant result.
-#Get around this with a two-step process:
-#First, check if EITHER modified GC content = NA. If it is, simply use only the other genome's data. If neither are NA, then average them.
-#Second, check if BOTH modified GC contents = NA. If they do, set to NA.
-gene_specific_mash_table$gsm_ave_gc_all_all <- ifelse(is.na(gene_specific_mash_table$gsm_ref_all_modified_GC) == TRUE | is.na(gene_specific_mash_table$gsm_query_all_modified_GC) == TRUE,
-                                                                 (gene_specific_mash_table$gsm_ref_all_GC + gene_specific_mash_table$gsm_query_all_GC),
-                                                                 (gene_specific_mash_table$gsm_ref_all_GC + gene_specific_mash_table$gsm_query_all_GC)/2)
-gene_specific_mash_table$gsm_ave_gc_all_all <- ifelse(is.na(gene_specific_mash_table$gsm_ref_all_modified_GC) == TRUE & is.na(gene_specific_mash_table$gsm_query_all_modified_GC) == TRUE,
-                                                           NA,gene_specific_mash_table$gsm_ave_gc_all_all)
 
-gene_specific_mash_table$gsm_ave_gc_shared_shared <- ifelse(is.na(gene_specific_mash_table$gsm_ref_shared_modified_GC) == TRUE | is.na(gene_specific_mash_table$gsm_query_shared_modified_GC) == TRUE,
-                                                                 (gene_specific_mash_table$gsm_ref_shared_GC + gene_specific_mash_table$gsm_query_shared_GC),
-                                                                 (gene_specific_mash_table$gsm_ref_shared_GC + gene_specific_mash_table$gsm_query_shared_GC)/2)
-gene_specific_mash_table$gsm_ave_gc_shared_shared <- ifelse(is.na(gene_specific_mash_table$gsm_ref_shared_modified_GC) == TRUE & is.na(gene_specific_mash_table$gsm_query_shared_modified_GC) == TRUE,
-                                                           NA,gene_specific_mash_table$gsm_ave_gc_shared_shared)
 
-gene_specific_mash_table$gsm_ave_gc_unshared_unshared <- ifelse(is.na(gene_specific_mash_table$gsm_ref_unshared_modified_GC) == TRUE | is.na(gene_specific_mash_table$gsm_query_unshared_modified_GC) == TRUE,
-                                                                 (gene_specific_mash_table$gsm_ref_unshared_GC + gene_specific_mash_table$gsm_query_unshared_GC),
-                                                                 (gene_specific_mash_table$gsm_ref_unshared_GC + gene_specific_mash_table$gsm_query_unshared_GC)/2)
-gene_specific_mash_table$gsm_ave_gc_unshared_unshared <- ifelse(is.na(gene_specific_mash_table$gsm_ref_unshared_modified_GC) == TRUE & is.na(gene_specific_mash_table$gsm_query_unshared_modified_GC) == TRUE,
-                                                           NA,gene_specific_mash_table$gsm_ave_gc_unshared_unshared)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1627,56 +1630,12 @@ gene_specific_mash_table[gene_specific_mash_table == "Unspecified"] <- NA
 
 
 
-
-
-
-#Analysis before splitting into gene flux mode
-
-#Compare whole genome mash distance to gene-specific distance
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table$modified_mash_distance,gene_specific_mash_table$gsm_all_modified_mash_distance,xlim=c(0,0.6),ylim=c(0,0.6))
-abline(0,1,lty=2,lwd=3,col="grey")
-
-#Compare gene content dissimilarity based on pham counts or gene counts
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table$pham_pham_dissimilarity,gene_specific_mash_table$gsm_gene_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,1,lty=2,lwd=3,col="grey")
-
-
-#Compare shared and unshared distances
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table$gsm_shared_modified_mash_distance,gene_specific_mash_table$gsm_unshared_modified_mash_distance,xlim=c(0,0.6),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,1,lty=2,lwd=3,col="grey")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #Make backup table before subsetting
 gene_specific_mash_table_complete <- gene_specific_mash_table
 
-gene_specific_mash_table <- gene_specific_mash_table_complete
-
-#Now decide to retain only SEA-PHAGES annotated genomes or not
-gene_specific_mash_table <- subset(gene_specific_mash_table,gene_specific_mash_table$phage_cluster_source_compare == 'actino' & gene_specific_mash_table$phage_cluster_compare != 'different')
 
 
 
-
-
-#Analysis after splitting into gene flux modes
 
 #Split into HGCF and LGCF datasets
 
@@ -1689,41 +1648,43 @@ gene_specific_mash_table_lytic <- subset(gene_specific_mash_table,gene_specific_
 
 
 
+#Analysis after splitting into gene flux modes
 
 #Compare average gene sizes
-temp_temperate_hgcf_shared <- subset(gene_specific_mash_table_temperate_hgcf,select=c("gsm_ave_size_shared_shared"))
-temp_temperate_lgcf_shared <- subset(gene_specific_mash_table_temperate_lgcf,select=c("gsm_ave_size_shared_shared"))
-temp_lytic_shared <- subset(gene_specific_mash_table_lytic,select=c("gsm_ave_size_shared_shared"))
+gsm_temperate_hgcf_shared <- subset(gene_specific_mash_table_temperate_hgcf,select=c("gsm_ave_size_shared_shared"))
+gsm_temperate_lgcf_shared <- subset(gene_specific_mash_table_temperate_lgcf,select=c("gsm_ave_size_shared_shared"))
+gsm_lytic_shared <- subset(gene_specific_mash_table_lytic,select=c("gsm_ave_size_shared_shared"))
 
-temp_temperate_hgcf_unshared <- subset(gene_specific_mash_table_temperate_hgcf,select=c("gsm_ave_size_unshared_unshared"))
-temp_temperate_lgcf_unshared <- subset(gene_specific_mash_table_temperate_lgcf,select=c("gsm_ave_size_unshared_unshared"))
-temp_lytic_unshared <- subset(gene_specific_mash_table_lytic,select=c("gsm_ave_size_unshared_unshared"))
+gsm_temperate_hgcf_unshared <- subset(gene_specific_mash_table_temperate_hgcf,select=c("gsm_ave_size_unshared_unshared"))
+gsm_temperate_lgcf_unshared <- subset(gene_specific_mash_table_temperate_lgcf,select=c("gsm_ave_size_unshared_unshared"))
+gsm_lytic_unshared <- subset(gene_specific_mash_table_lytic,select=c("gsm_ave_size_unshared_unshared"))
 
-names(temp_temperate_hgcf_shared) <- c("ave_gene_size")
-names(temp_temperate_lgcf_shared) <- c("ave_gene_size")
-names(temp_lytic_shared) <- c("ave_gene_size")
-names(temp_temperate_hgcf_unshared) <- c("ave_gene_size")
-names(temp_temperate_lgcf_unshared) <- c("ave_gene_size")
-names(temp_lytic_unshared) <- c("ave_gene_size")
+names(gsm_temperate_hgcf_shared) <- c("ave_gene_size")
+names(gsm_temperate_lgcf_shared) <- c("ave_gene_size")
+names(gsm_lytic_shared) <- c("ave_gene_size")
+names(gsm_temperate_hgcf_unshared) <- c("ave_gene_size")
+names(gsm_temperate_lgcf_unshared) <- c("ave_gene_size")
+names(gsm_lytic_unshared) <- c("ave_gene_size")
 
-temp_temperate_hgcf_shared$category <- "temperate_HGCF"
-temp_temperate_lgcf_shared$category <- "temperate_LGCF"
-temp_lytic_shared$category <- "lytic"
-temp_temperate_hgcf_unshared$category <- "temperate_HGCF"
-temp_temperate_lgcf_unshared$category <- "temperate_LGCF"
-temp_lytic_unshared$category <- "lytic"
+gsm_temperate_hgcf_shared$category <- "temperate_HGCF"
+gsm_temperate_lgcf_shared$category <- "temperate_LGCF"
+gsm_lytic_shared$category <- "lytic"
+gsm_temperate_hgcf_unshared$category <- "temperate_HGCF"
+gsm_temperate_lgcf_unshared$category <- "temperate_LGCF"
+gsm_lytic_unshared$category <- "lytic"
 
-temp_temperate_hgcf_shared$gene_type <- "shared"
-temp_temperate_lgcf_shared$gene_type <- "shared"
-temp_lytic_shared$gene_type <- "shared"
-temp_temperate_hgcf_unshared$gene_type <- "unshared"
-temp_temperate_lgcf_unshared$gene_type <- "unshared"
-temp_lytic_unshared$gene_type <- "unshared"
+gsm_temperate_hgcf_shared$gene_type <- "shared"
+gsm_temperate_lgcf_shared$gene_type <- "shared"
+gsm_lytic_shared$gene_type <- "shared"
+gsm_temperate_hgcf_unshared$gene_type <- "unshared"
+gsm_temperate_lgcf_unshared$gene_type <- "unshared"
+gsm_lytic_unshared$gene_type <- "unshared"
 
-temp_plotting_table <- rbind(temp_temperate_hgcf_shared,temp_temperate_lgcf_shared,temp_lytic_shared,temp_temperate_hgcf_unshared,temp_temperate_lgcf_unshared,temp_lytic_unshared)
+gsm_plotting_table <- rbind(gsm_temperate_hgcf_shared,gsm_temperate_lgcf_shared,gsm_lytic_shared,gsm_temperate_hgcf_unshared,gsm_temperate_lgcf_unshared,gsm_lytic_unshared)
 
+#Supp. Fig. 8e
 par(mar=c(10,4,4,4))
-boxplot(temp_plotting_table$ave_gene_size ~ temp_plotting_table$category*temp_plotting_table$gene_type,las=2,col=c("dark red","dark blue","dark green","pink","light blue","light green"))
+boxplot(gsm_plotting_table$ave_gene_size ~ gsm_plotting_table$category*gsm_plotting_table$gene_type,las=2,col=c("dark red","dark blue","dark green","pink","light blue","light green"))
 
 
 
@@ -1740,35 +1701,24 @@ boxplot(temp_plotting_table$ave_gene_size ~ temp_plotting_table$category*temp_pl
 #How distant are shared and unshared sequences?
 
 
-
-#Compare shared to unshared
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_lytic$gsm_shared_modified_mash_distance,gene_specific_mash_table_lytic$gsm_unshared_modified_mash_distance,xlim=c(0,0.6),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-abline(0,1,lty=2,lwd=3,col="grey")
-
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_hgcf$gsm_shared_modified_mash_distance,gene_specific_mash_table_temperate_hgcf$gsm_unshared_modified_mash_distance,xlim=c(0,0.6),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-abline(0,1,lty=2,lwd=3,col="grey")
-
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_lgcf$gsm_shared_modified_mash_distance,gene_specific_mash_table_temperate_lgcf$gsm_unshared_modified_mash_distance,xlim=c(0,0.6),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-abline(0,1,lty=2,lwd=3,col="grey")
-# 
-# 
 #Compare all to shared and unshared by mash distance
+
+
+#Supp. Fig. 8b
 par(mar=c(4,8,4,4))
 plot(gene_specific_mash_table_lytic$modified_mash_distance,gene_specific_mash_table_lytic$gsm_shared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
 par(new=TRUE)
 plot(gene_specific_mash_table_lytic$modified_mash_distance,gene_specific_mash_table_lytic$gsm_unshared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
 abline(0,1,lty=2,lwd=3,col="grey")
 
-
+#Supp. Fig. 8b
 par(mar=c(4,8,4,4))
 plot(gene_specific_mash_table_temperate_hgcf$modified_mash_distance,gene_specific_mash_table_temperate_hgcf$gsm_shared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark blue")
 par(new=TRUE)
 plot(gene_specific_mash_table_temperate_hgcf$modified_mash_distance,gene_specific_mash_table_temperate_hgcf$gsm_unshared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
 abline(0,1,lty=2,lwd=3,col="grey")
 
+#Supp. Fig. 8b
 par(mar=c(4,8,4,4))
 plot(gene_specific_mash_table_temperate_lgcf$modified_mash_distance,gene_specific_mash_table_temperate_lgcf$gsm_shared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
 par(new=TRUE)
@@ -1780,115 +1730,19 @@ abline(0,1,lty=2,lwd=3,col="grey")
 
 
 
-
-
-
-
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_lgcf$modified_mash_distance,gene_specific_mash_table_temperate_lgcf$size_diff,xlim=c(0,0.5),ylim=c(0,1e5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_lgcf$modified_mash_distance,gene_specific_mash_table_temperate_lgcf$size_diff,xlim=c(0,0.5),ylim=c(0,1e5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-abline(0,1,lty=2,lwd=3,col="grey")
-
-
-
-
-
-
-
-
-#Compare un-averaged genome size disparity
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_lytic$modified_mash_distance,gene_specific_mash_table_lytic$size_diff,xlim=c(0,0.5),ylim=c(0,10000),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_hgcf$modified_mash_distance,gene_specific_mash_table_temperate_hgcf$size_diff,xlim=c(0,0.5),ylim=c(0,10000),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_lgcf$modified_mash_distance,gene_specific_mash_table_temperate_lgcf$size_diff,xlim=c(0,0.5),ylim=c(0,10000),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-abline(0,1,lty=2,lwd=3,col="grey")
-
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_hgcf$modified_mash_distance,gene_specific_mash_table_temperate_hgcf$size_diff_ave_percent,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_lgcf$modified_mash_distance,gene_specific_mash_table_temperate_lgcf$size_diff_ave_percent,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-par(new=TRUE)
-plot(gene_specific_mash_table_lytic$modified_mash_distance,gene_specific_mash_table_lytic$size_diff_ave_percent,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-abline(0,1,lty=2,lwd=3,col="grey")
-
-
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_lytic$modified_mash_distance,gene_specific_mash_table_lytic$size_diff_ave_percent,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_hgcf$modified_mash_distance,gene_specific_mash_table_temperate_hgcf$size_diff_ave_percent,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_lgcf$modified_mash_distance,gene_specific_mash_table_temperate_lgcf$size_diff_ave_percent,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-
-
-
-
-
-
-
-
-
-#Compare all to shared and unshared by gene content dissimilarity
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_lytic$gsm_shared_modified_mash_distance,gene_specific_mash_table_lytic$pham_pham_dissimilarity,xlim=c(0,0.6),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
-par(new=TRUE)
-plot(gene_specific_mash_table_lytic$gsm_unshared_modified_mash_distance,gene_specific_mash_table_lytic$pham_pham_dissimilarity,xlim=c(0,0.6),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-abline(0,1,lty=2,lwd=3,col="grey")
-
-
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_hgcf$gsm_shared_modified_mash_distance,gene_specific_mash_table_temperate_hgcf$pham_pham_dissimilarity,xlim=c(0,0.6),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark blue")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_hgcf$gsm_unshared_modified_mash_distance,gene_specific_mash_table_temperate_hgcf$pham_pham_dissimilarity,xlim=c(0,0.6),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-abline(0,1,lty=2,lwd=3,col="grey")
-
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_lgcf$gsm_shared_modified_mash_distance,gene_specific_mash_table_temperate_lgcf$pham_pham_dissimilarity,xlim=c(0,0.6),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_lgcf$gsm_unshared_modified_mash_distance,gene_specific_mash_table_temperate_lgcf$pham_pham_dissimilarity,xlim=c(0,0.6),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-abline(0,1,lty=2,lwd=3,col="grey")
-
-
-
-
-
-
-
-
-
 #Coding potential
 
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_lytic$gsm_shared_coding_potential,gene_specific_mash_table_lytic$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_hgcf$gsm_shared_coding_potential,gene_specific_mash_table_temperate_hgcf$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark blue")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_lgcf$gsm_shared_coding_potential,gene_specific_mash_table_temperate_lgcf$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
-abline(0,1,lty=2,lwd=3,col="grey")
-
-
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_lytic$gsm_unshared_coding_potential,gene_specific_mash_table_lytic$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_hgcf$gsm_unshared_coding_potential,gene_specific_mash_table_temperate_hgcf$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_lgcf$gsm_unshared_coding_potential,gene_specific_mash_table_temperate_lgcf$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-abline(0,1,lty=2,lwd=3,col="grey")
-
-
-
+#Supp. Fig. 8d
 par(mar=c(4,8,4,4))
 plot(gene_specific_mash_table_lytic$gsm_unshared_coding_potential,gene_specific_mash_table_lytic$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
 abline(0,1,lty=2,lwd=3,col="grey")
 
+#Supp. Fig. 8d
 par(mar=c(4,8,4,4))
 plot(gene_specific_mash_table_temperate_lgcf$gsm_unshared_coding_potential,gene_specific_mash_table_temperate_lgcf$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
 abline(0,1,lty=2,lwd=3,col="grey")
 
+#Supp. Fig. 8d
 par(mar=c(4,8,4,4))
 plot(gene_specific_mash_table_temperate_hgcf$gsm_unshared_coding_potential,gene_specific_mash_table_temperate_hgcf$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
 abline(0,1,lty=2,lwd=3,col="grey")
@@ -1899,7 +1753,8 @@ abline(0,1,lty=2,lwd=3,col="grey")
 
 
 
-#
+#All data points used in gsm plots
+#Supp. Fig. 8a
 par(mar=c(4,8,4,4))
 plot(gene_specific_mash_table_temperate_hgcf$modified_mash_distance,gene_specific_mash_table_temperate_hgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
 par(new=TRUE)
@@ -1913,196 +1768,23 @@ plot(gene_specific_mash_table_lytic$modified_mash_distance,gene_specific_mash_ta
 
 
 
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_hgcf$modified_mash_distance,gene_specific_mash_table_temperate_hgcf$gsm_ave_size_unshared_unshared,xlim=c(0,0.5),ylim=c(0,1300),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_lgcf$modified_mash_distance,gene_specific_mash_table_temperate_lgcf$gsm_ave_size_unshared_unshared,xlim=c(0,0.5),ylim=c(0,1300),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_lytic$modified_mash_distance,gene_specific_mash_table_lytic$gsm_ave_size_unshared_unshared,xlim=c(0,0.5),ylim=c(0,1300),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-
-
-
-
-#Compare unshared and shared ave gene sizes
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_hgcf$modified_mash_distance,gene_specific_mash_table_temperate_hgcf$gsm_ave_size_shared_shared,xlim=c(0,0.5),ylim=c(0,1500),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark blue")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_hgcf$modified_mash_distance,gene_specific_mash_table_temperate_hgcf$gsm_ave_size_unshared_unshared,xlim=c(0,0.5),ylim=c(0,1500),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-
-
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_lgcf$modified_mash_distance,gene_specific_mash_table_temperate_lgcf$gsm_ave_size_shared_shared,xlim=c(0,0.5),ylim=c(0,1500),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_lgcf$modified_mash_distance,gene_specific_mash_table_temperate_lgcf$gsm_ave_size_unshared_unshared,xlim=c(0,0.5),ylim=c(0,1500),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-
-
-
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_lytic$modified_mash_distance,gene_specific_mash_table_lytic$gsm_ave_size_shared_shared,xlim=c(0,0.5),ylim=c(0,1500),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
-par(new=TRUE)
-plot(gene_specific_mash_table_lytic$modified_mash_distance,gene_specific_mash_table_lytic$gsm_ave_size_unshared_unshared,xlim=c(0,0.5),ylim=c(0,1500),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-
-
-
-
-
-#Compare proportion of shared and unshared coding proportion
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_hgcf$modified_mash_distance,gene_specific_mash_table_temperate_hgcf$gsm_unshared_coding_potential,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_lgcf$modified_mash_distance,gene_specific_mash_table_temperate_lgcf$gsm_unshared_coding_potential,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_lytic$modified_mash_distance,gene_specific_mash_table_lytic$gsm_unshared_coding_potential,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-
-
-
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_hgcf$modified_mash_distance,gene_specific_mash_table_temperate_hgcf$gsm_unshared_coding_potential,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_lgcf$modified_mash_distance,gene_specific_mash_table_temperate_lgcf$gsm_unshared_coding_potential,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-par(new=TRUE)
-plot(gene_specific_mash_table_lytic$modified_mash_distance,gene_specific_mash_table_lytic$gsm_unshared_coding_potential,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #Analysis after splitting into gene flux modes and after computing sliding windows
 #sliding window average
 library(caTools)
 
 gene_specific_mash_table_temperate_hgcf_mmdsort <- gene_specific_mash_table_temperate_hgcf[order(gene_specific_mash_table_temperate_hgcf$modified_mash_distance),]
-gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_shared_modified_mash_distance_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_shared_modified_mash_distance,101)
-gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_unshared_modified_mash_distance_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_unshared_modified_mash_distance,101)
-gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_ave_size_shared_shared_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_ave_size_shared_shared,101)
-gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_ave_size_unshared_unshared_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_ave_size_unshared_unshared,101)
-gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_shared_coding_potential_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_shared_coding_potential,101)
-gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_unshared_coding_potential_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_unshared_coding_potential,101)
-gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_num_shared_genes_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_num_shared_genes,101)
-gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_num_unshared_genes_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_num_unshared_genes,101)
-gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_num_shared_phams_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_num_shared_phams,101)
-gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_num_unshared_phams_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_num_unshared_phams,101)
-gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_all_coding_potential_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_all_coding_potential,101)
 gene_specific_mash_table_temperate_hgcf_mmdsort$size_diff_ave_percent_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_mmdsort$size_diff_ave_percent,101)
-gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_mash_distance_diff_unshared_shared_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_mash_distance_diff_unshared_shared,101)
-gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_shared_unshared_mash_distance_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_shared_unshared_mash_distance,101)
-gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_all_total_size_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_all_total_size,101)
-gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_shared_total_size_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_shared_total_size,101)
-gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_unshared_total_size_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_unshared_total_size,101)
-gene_specific_mash_table_temperate_hgcf_mmdsort$size_diff_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_mmdsort$size_diff,101)
-
-#gene_specific_mash_table_temperate_hgcf_mmdsort$ <- runmean(gene_specific_mash_table_temperate_hgcf_mmdsort$,101)
-
-
-
-
-
-
-
-
-
-
-
-
 
 gene_specific_mash_table_temperate_lgcf_mmdsort <- gene_specific_mash_table_temperate_lgcf[order(gene_specific_mash_table_temperate_lgcf$modified_mash_distance),]
-gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_shared_modified_mash_distance_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_shared_modified_mash_distance,101)
-gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_unshared_modified_mash_distance_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_unshared_modified_mash_distance,101)
-gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_ave_size_shared_shared_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_ave_size_shared_shared,101)
-gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_ave_size_unshared_unshared_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_ave_size_unshared_unshared,101)
-gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_shared_coding_potential_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_shared_coding_potential,101)
-gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_unshared_coding_potential_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_unshared_coding_potential,101)
-gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_num_shared_genes_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_num_shared_genes,101)
-gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_num_unshared_genes_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_num_unshared_genes,101)
-gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_num_shared_phams_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_num_shared_phams,101)
-gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_num_unshared_phams_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_num_unshared_phams,101)
-gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_all_coding_potential_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_all_coding_potential,101)
 gene_specific_mash_table_temperate_lgcf_mmdsort$size_diff_ave_percent_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_mmdsort$size_diff_ave_percent,101)
-gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_mash_distance_diff_unshared_shared_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_mash_distance_diff_unshared_shared,101)
-gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_shared_unshared_mash_distance_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_shared_unshared_mash_distance,101)
-gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_all_total_size_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_all_total_size,101)
-gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_shared_total_size_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_shared_total_size,101)
-gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_unshared_total_size_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_unshared_total_size,101)
-gene_specific_mash_table_temperate_lgcf_mmdsort$size_diff_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_mmdsort$size_diff,101)
-
-
-
-#gene_specific_mash_table_temperate_lgcf_mmdsort$ <- runmean(gene_specific_mash_table_temperate_lgcf_mmdsort$,101)
-
-
-
-
-
-
-
-
-
 
 gene_specific_mash_table_lytic_mmdsort <- gene_specific_mash_table_lytic[order(gene_specific_mash_table_lytic$modified_mash_distance),]
-gene_specific_mash_table_lytic_mmdsort$gsm_shared_modified_mash_distance_runmean <- runmean(gene_specific_mash_table_lytic_mmdsort$gsm_shared_modified_mash_distance,101)
-gene_specific_mash_table_lytic_mmdsort$gsm_unshared_modified_mash_distance_runmean <- runmean(gene_specific_mash_table_lytic_mmdsort$gsm_unshared_modified_mash_distance,101)
-gene_specific_mash_table_lytic_mmdsort$gsm_ave_size_shared_shared_runmean <- runmean(gene_specific_mash_table_lytic_mmdsort$gsm_ave_size_shared_shared,101)
-gene_specific_mash_table_lytic_mmdsort$gsm_ave_size_unshared_unshared_runmean <- runmean(gene_specific_mash_table_lytic_mmdsort$gsm_ave_size_unshared_unshared,101)
-gene_specific_mash_table_lytic_mmdsort$gsm_shared_coding_potential_runmean <- runmean(gene_specific_mash_table_lytic_mmdsort$gsm_shared_coding_potential,101)
-gene_specific_mash_table_lytic_mmdsort$gsm_unshared_coding_potential_runmean <- runmean(gene_specific_mash_table_lytic_mmdsort$gsm_unshared_coding_potential,101)
-gene_specific_mash_table_lytic_mmdsort$gsm_num_shared_genes_runmean <- runmean(gene_specific_mash_table_lytic_mmdsort$gsm_num_shared_genes,101)
-gene_specific_mash_table_lytic_mmdsort$gsm_num_unshared_genes_runmean <- runmean(gene_specific_mash_table_lytic_mmdsort$gsm_num_unshared_genes,101)
-gene_specific_mash_table_lytic_mmdsort$gsm_num_shared_phams_runmean <- runmean(gene_specific_mash_table_lytic_mmdsort$gsm_num_shared_phams,101)
-gene_specific_mash_table_lytic_mmdsort$gsm_num_unshared_phams_runmean <- runmean(gene_specific_mash_table_lytic_mmdsort$gsm_num_unshared_phams,101)
-gene_specific_mash_table_lytic_mmdsort$gsm_all_coding_potential_runmean <- runmean(gene_specific_mash_table_lytic_mmdsort$gsm_all_coding_potential,101)
 gene_specific_mash_table_lytic_mmdsort$size_diff_ave_percent_runmean <- runmean(gene_specific_mash_table_lytic_mmdsort$size_diff_ave_percent,101)
-gene_specific_mash_table_lytic_mmdsort$gsm_mash_distance_diff_unshared_shared_runmean <- runmean(gene_specific_mash_table_lytic_mmdsort$gsm_mash_distance_diff_unshared_shared,101)
-gene_specific_mash_table_lytic_mmdsort$gsm_shared_unshared_mash_distance_runmean <- runmean(gene_specific_mash_table_lytic_mmdsort$gsm_shared_unshared_mash_distance,101)
-gene_specific_mash_table_lytic_mmdsort$gsm_all_total_size_runmean <- runmean(gene_specific_mash_table_lytic_mmdsort$gsm_all_total_size,101)
-gene_specific_mash_table_lytic_mmdsort$gsm_shared_total_size_runmean <- runmean(gene_specific_mash_table_lytic_mmdsort$gsm_shared_total_size,101)
-gene_specific_mash_table_lytic_mmdsort$gsm_unshared_total_size_runmean <- runmean(gene_specific_mash_table_lytic_mmdsort$gsm_unshared_total_size,101)
-gene_specific_mash_table_lytic_mmdsort$size_diff_runmean <- runmean(gene_specific_mash_table_lytic_mmdsort$size_diff,101)
 
-
-#gene_specific_mash_table_lytic_mmdsort$ <- runmean(gene_specific_mash_table_lytic_mmdsort$,101)
-
-
-
-
-
-
-
-
-#Standard plot as a reference
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_lgcf_mmdsort$modified_mash_distance,gene_specific_mash_table_temperate_lgcf_mmdsort$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_hgcf_mmdsort$modified_mash_distance,gene_specific_mash_table_temperate_hgcf_mmdsort$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-par(new=TRUE)
-plot(gene_specific_mash_table_lytic_mmdsort$modified_mash_distance,gene_specific_mash_table_lytic_mmdsort$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-
-
-
-# #Compare all coding potential
-# par(mar=c(4,8,4,4))
-# plot(gene_specific_mash_table_temperate_lgcf_mmdsort$modified_mash_distance,gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_all_coding_potential_runmean,xlim=c(0,0.5),ylim=c(0.9,1),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-# par(new=TRUE)
-# plot(gene_specific_mash_table_temperate_hgcf_mmdsort$modified_mash_distance,gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_all_coding_potential_runmean,xlim=c(0,0.5),ylim=c(0.9,1),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-# par(new=TRUE)
-# plot(gene_specific_mash_table_lytic_mmdsort$modified_mash_distance,gene_specific_mash_table_lytic_mmdsort$gsm_all_coding_potential_runmean,xlim=c(0,0.5),ylim=c(0.9,1),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
 
 #Compare all genome size disparity
+#Supp. Fig. 8a
 par(mar=c(4,8,4,4))
 plot(gene_specific_mash_table_temperate_lgcf_mmdsort$modified_mash_distance,gene_specific_mash_table_temperate_lgcf_mmdsort$size_diff_ave_percent_runmean,xlim=c(0,0.5),ylim=c(0,0.2),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
 par(new=TRUE)
@@ -2112,186 +1794,24 @@ plot(gene_specific_mash_table_lytic_mmdsort$modified_mash_distance,gene_specific
 
 
 
-
-#Compare shared and unshared distances
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_lytic_mmdsort$modified_mash_distance,gene_specific_mash_table_lytic_mmdsort$gsm_shared_modified_mash_distance_runmean,xlim=c(0,0.5),ylim=c(0,0.6),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_lgcf_mmdsort$modified_mash_distance,gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_shared_modified_mash_distance_runmean,xlim=c(0,0.5),ylim=c(0,0.6),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_hgcf_mmdsort$modified_mash_distance,gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_shared_modified_mash_distance_runmean,xlim=c(0,0.5),ylim=c(0,0.6),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark blue")
-par(new=TRUE)
-plot(gene_specific_mash_table_lytic_mmdsort$modified_mash_distance,gene_specific_mash_table_lytic_mmdsort$gsm_unshared_modified_mash_distance_runmean,xlim=c(0,0.5),ylim=c(0,0.6),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_lgcf_mmdsort$modified_mash_distance,gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_unshared_modified_mash_distance_runmean,xlim=c(0,0.5),ylim=c(0,0.6),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_hgcf_mmdsort$modified_mash_distance,gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_unshared_modified_mash_distance_runmean,xlim=c(0,0.5),ylim=c(0,0.6),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-abline(0,1,lty=2,lwd=3,col="grey")
-
-#Compare shared and unshared coding potential
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_lytic_mmdsort$modified_mash_distance,gene_specific_mash_table_lytic_mmdsort$gsm_shared_coding_potential_runmean,xlim=c(0,0.5),ylim=c(0,1),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_lgcf_mmdsort$modified_mash_distance,gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_shared_coding_potential_runmean,xlim=c(0,0.5),ylim=c(0,1),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_hgcf_mmdsort$modified_mash_distance,gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_shared_coding_potential_runmean,xlim=c(0,0.5),ylim=c(0,1),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark blue")
-par(new=TRUE)
-plot(gene_specific_mash_table_lytic_mmdsort$modified_mash_distance,gene_specific_mash_table_lytic_mmdsort$gsm_unshared_coding_potential_runmean,xlim=c(0,0.5),ylim=c(0,1),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_lgcf_mmdsort$modified_mash_distance,gene_specific_mash_table_temperate_lgcf_mmdsort$gsm_unshared_coding_potential_runmean,xlim=c(0,0.5),ylim=c(0,1),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_hgcf_mmdsort$modified_mash_distance,gene_specific_mash_table_temperate_hgcf_mmdsort$gsm_unshared_coding_potential_runmean,xlim=c(0,0.5),ylim=c(0,1),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#sliding window analyis based on gene content and NOT nucleotide distance
+#sliding window analyis based on gene content instead of nucleotide distance
 gene_specific_mash_table_temperate_hgcf_gcdsort <- gene_specific_mash_table_temperate_hgcf[order(gene_specific_mash_table_temperate_hgcf$pham_pham_dissimilarity),]
 gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_shared_modified_mash_distance_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_shared_modified_mash_distance,101)
 gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_unshared_modified_mash_distance_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_unshared_modified_mash_distance,101)
-gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_ave_size_shared_shared_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_ave_size_shared_shared,101)
-gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_ave_size_unshared_unshared_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_ave_size_unshared_unshared,101)
-gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_shared_coding_potential_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_shared_coding_potential,101)
-gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_unshared_coding_potential_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_unshared_coding_potential,101)
-gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_num_shared_genes_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_num_shared_genes,101)
-gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_num_unshared_genes_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_num_unshared_genes,101)
-gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_num_shared_phams_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_num_shared_phams,101)
-gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_num_unshared_phams_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_num_unshared_phams,101)
-gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_all_coding_potential_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_all_coding_potential,101)
-gene_specific_mash_table_temperate_hgcf_gcdsort$size_diff_ave_percent_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_gcdsort$size_diff_ave_percent,101)
-gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_mash_distance_diff_unshared_shared_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_mash_distance_diff_unshared_shared,101)
-gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_shared_unshared_mash_distance_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_shared_unshared_mash_distance,101)
-gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_all_total_size_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_all_total_size,101)
-gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_shared_total_size_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_shared_total_size,101)
-gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_unshared_total_size_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_unshared_total_size,101)
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 gene_specific_mash_table_temperate_lgcf_gcdsort <- gene_specific_mash_table_temperate_lgcf[order(gene_specific_mash_table_temperate_lgcf$pham_pham_dissimilarity),]
 gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_shared_modified_mash_distance_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_shared_modified_mash_distance,101)
 gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_unshared_modified_mash_distance_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_unshared_modified_mash_distance,101)
-gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_ave_size_shared_shared_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_ave_size_shared_shared,101)
-gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_ave_size_unshared_unshared_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_ave_size_unshared_unshared,101)
-gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_shared_coding_potential_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_shared_coding_potential,101)
-gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_unshared_coding_potential_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_unshared_coding_potential,101)
-gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_num_shared_genes_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_num_shared_genes,101)
-gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_num_unshared_genes_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_num_unshared_genes,101)
-gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_num_shared_phams_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_num_shared_phams,101)
-gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_num_unshared_phams_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_num_unshared_phams,101)
-gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_all_coding_potential_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_all_coding_potential,101)
-gene_specific_mash_table_temperate_lgcf_gcdsort$size_diff_ave_percent_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_gcdsort$size_diff_ave_percent,101)
-gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_mash_distance_diff_unshared_shared_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_mash_distance_diff_unshared_shared,101)
-gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_shared_unshared_mash_distance_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_shared_unshared_mash_distance,101)
-gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_all_total_size_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_all_total_size,101)
-gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_shared_total_size_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_shared_total_size,101)
-gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_unshared_total_size_runmean <- runmean(gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_unshared_total_size,101)
-
-
-
-
-
-
-
-
-
-
 
 
 gene_specific_mash_table_lytic_gcdsort <- gene_specific_mash_table_lytic[order(gene_specific_mash_table_lytic$pham_pham_dissimilarity),]
 gene_specific_mash_table_lytic_gcdsort$gsm_shared_modified_mash_distance_runmean <- runmean(gene_specific_mash_table_lytic_gcdsort$gsm_shared_modified_mash_distance,101)
 gene_specific_mash_table_lytic_gcdsort$gsm_unshared_modified_mash_distance_runmean <- runmean(gene_specific_mash_table_lytic_gcdsort$gsm_unshared_modified_mash_distance,101)
-gene_specific_mash_table_lytic_gcdsort$gsm_ave_size_shared_shared_runmean <- runmean(gene_specific_mash_table_lytic_gcdsort$gsm_ave_size_shared_shared,101)
-gene_specific_mash_table_lytic_gcdsort$gsm_ave_size_unshared_unshared_runmean <- runmean(gene_specific_mash_table_lytic_gcdsort$gsm_ave_size_unshared_unshared,101)
-gene_specific_mash_table_lytic_gcdsort$gsm_shared_coding_potential_runmean <- runmean(gene_specific_mash_table_lytic_gcdsort$gsm_shared_coding_potential,101)
-gene_specific_mash_table_lytic_gcdsort$gsm_unshared_coding_potential_runmean <- runmean(gene_specific_mash_table_lytic_gcdsort$gsm_unshared_coding_potential,101)
-gene_specific_mash_table_lytic_gcdsort$gsm_num_shared_genes_runmean <- runmean(gene_specific_mash_table_lytic_gcdsort$gsm_num_shared_genes,101)
-gene_specific_mash_table_lytic_gcdsort$gsm_num_unshared_genes_runmean <- runmean(gene_specific_mash_table_lytic_gcdsort$gsm_num_unshared_genes,101)
-gene_specific_mash_table_lytic_gcdsort$gsm_num_shared_phams_runmean <- runmean(gene_specific_mash_table_lytic_gcdsort$gsm_num_shared_phams,101)
-gene_specific_mash_table_lytic_gcdsort$gsm_num_unshared_phams_runmean <- runmean(gene_specific_mash_table_lytic_gcdsort$gsm_num_unshared_phams,101)
-gene_specific_mash_table_lytic_gcdsort$gsm_all_coding_potential_runmean <- runmean(gene_specific_mash_table_lytic_gcdsort$gsm_all_coding_potential,101)
-gene_specific_mash_table_lytic_gcdsort$size_diff_ave_percent_runmean <- runmean(gene_specific_mash_table_lytic_gcdsort$size_diff_ave_percent,101)
-gene_specific_mash_table_lytic_gcdsort$gsm_mash_distance_diff_unshared_shared_runmean <- runmean(gene_specific_mash_table_lytic_gcdsort$gsm_mash_distance_diff_unshared_shared,101)
-gene_specific_mash_table_lytic_gcdsort$gsm_shared_unshared_mash_distance_runmean <- runmean(gene_specific_mash_table_lytic_gcdsort$gsm_shared_unshared_mash_distance,101)
-gene_specific_mash_table_lytic_gcdsort$gsm_all_total_size_runmean <- runmean(gene_specific_mash_table_lytic_gcdsort$gsm_all_total_size,101)
-gene_specific_mash_table_lytic_gcdsort$gsm_shared_total_size_runmean <- runmean(gene_specific_mash_table_lytic_gcdsort$gsm_shared_total_size,101)
-gene_specific_mash_table_lytic_gcdsort$gsm_unshared_total_size_runmean <- runmean(gene_specific_mash_table_lytic_gcdsort$gsm_unshared_total_size,101)
-
-
-
-
-
 
 
 #Compare shared and unshared distances
-
-
-
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_lytic_gcdsort$pham_pham_dissimilarity,gene_specific_mash_table_lytic_gcdsort$gsm_shared_modified_mash_distance,xlim=c(0,1),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
-par(new=TRUE)
-plot(gene_specific_mash_table_lytic_gcdsort$pham_pham_dissimilarity,gene_specific_mash_table_lytic_gcdsort$gsm_unshared_modified_mash_distance,xlim=c(0,1),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_lgcf_gcdsort$pham_pham_dissimilarity,gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_shared_modified_mash_distance,xlim=c(0,1),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_lgcf_gcdsort$pham_pham_dissimilarity,gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_unshared_modified_mash_distance,xlim=c(0,1),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_hgcf_gcdsort$pham_pham_dissimilarity,gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_shared_modified_mash_distance,xlim=c(0,1),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark blue")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_hgcf_gcdsort$pham_pham_dissimilarity,gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_unshared_modified_mash_distance,xlim=c(0,1),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-
-
-
-
-
-
-
-
-
-#Standard plot for reference
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_lgcf_gcdsort$pham_pham_dissimilarity,gene_specific_mash_table_temperate_lgcf_gcdsort$modified_mash_distance,xlim=c(0,1),ylim=c(0,0.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_hgcf_gcdsort$pham_pham_dissimilarity,gene_specific_mash_table_temperate_hgcf_gcdsort$modified_mash_distance,xlim=c(0,1),ylim=c(0,0.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-par(new=TRUE)
-plot(gene_specific_mash_table_lytic_gcdsort$pham_pham_dissimilarity,gene_specific_mash_table_lytic_gcdsort$modified_mash_distance,xlim=c(0,1),ylim=c(0,0.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-#Compare shared and unshared distances
+#Supp. Fig. 8c
 par(mar=c(4,8,4,4))
 plot(gene_specific_mash_table_lytic_gcdsort$gsm_unshared_modified_mash_distance_runmean,gene_specific_mash_table_lytic_gcdsort$pham_pham_dissimilarity,xlim=c(0,0.6),ylim=c(0,1),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
 par(new=TRUE)
@@ -2307,21 +1827,9 @@ plot(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_shared_modified_mash_di
 
 
 
-#Compare shared and unshared coding potential
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_lytic_gcdsort$gsm_unshared_coding_potential_runmean,gene_specific_mash_table_lytic_gcdsort$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_unshared_coding_potential_runmean,gene_specific_mash_table_temperate_lgcf_gcdsort$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_unshared_coding_potential_runmean,gene_specific_mash_table_temperate_hgcf_gcdsort$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-par(new=TRUE)
-plot(gene_specific_mash_table_lytic_gcdsort$gsm_shared_coding_potential_runmean,gene_specific_mash_table_lytic_gcdsort$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_lgcf_gcdsort$gsm_shared_coding_potential_runmean,gene_specific_mash_table_temperate_lgcf_gcdsort$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_shared_coding_potential_runmean,gene_specific_mash_table_temperate_hgcf_gcdsort$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark blue")
 
 
+####STILL NEED TO FINISH REVIEWING ALL GENE-SPECIFIC-MASH DATA ABOVE
 
 
 
@@ -2343,294 +1851,12 @@ plot(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_shared_coding_potential
 
 
 
-###Export HGCF and LGCF data for analysis in Excel and Phamerator
-
-hgcf_lgcf_data <- mash_table2
-hgcf_lgcf_data <- subset(hgcf_lgcf_data,hgcf_lgcf_data$phage_cluster_source_compare == 'actino' & hgcf_lgcf_data$modified_mash_distance < 0.42 & hgcf_lgcf_data$pham_pham_dissimilarity < 0.89)
-
-temperate_hgcf <- subset(hgcf_lgcf_data,hgcf_lgcf_data$phage_temperate_compare == 'yes' & hgcf_lgcf_data$gene_flux_category == 'high',select=c('mash_reference','mash_query','modified_mash_distance','pham_pham_dissimilarity','ref_phage_cluster','query_phage_cluster'))
-temperate_lgcf <- subset(hgcf_lgcf_data,hgcf_lgcf_data$phage_temperate_compare == 'yes' & hgcf_lgcf_data$gene_flux_category == 'low',select=c('mash_reference','mash_query','modified_mash_distance','pham_pham_dissimilarity','ref_phage_cluster','query_phage_cluster'))
-lytic_hgcf_lgcf <- subset(hgcf_lgcf_data,hgcf_lgcf_data$phage_temperate_compare == 'no',select=c('mash_reference','mash_query','modified_mash_distance','pham_pham_dissimilarity','ref_phage_cluster','query_phage_cluster'))
-
-
-write.table(temperate_hgcf,"/Users/Hatfull_Lab/Desktop/Project_phage_classification/7_merged2333_analysis/current/20170106_actino_temperate_hgcf_output.csv",sep=",")
-write.table(temperate_lgcf,"/Users/Hatfull_Lab/Desktop/Project_phage_classification/7_merged2333_analysis/current/20170106_actino_temperate_lgcf_output.csv",sep=",")
-write.table(lytic_hgcf_lgcf,"/Users/Hatfull_Lab/Desktop/Project_phage_classification/7_merged2333_analysis/current/20170106_actino_lytic_hgcf_lgcf_output.csv",sep=",")
-
-
-par(mar=c(4,8,4,4))
-plot(hgcf_lgcf_data$modified_mash_distance,hgcf_lgcf_data$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-par(mar=c(4,8,4,4))
-plot(temperate_hgcf$modified_mash_distance,temperate_hgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-par(mar=c(4,8,4,4))
-plot(temperate_lgcf$modified_mash_distance,temperate_lgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-par(mar=c(4,8,4,4))
-plot(lytic_hgcf_lgcf$modified_mash_distance,lytic_hgcf_lgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-###Output mash and gene content data for publication
-#Merge the ani79 data as before, but retain all rows
-#Merge the gene-specific mash data as before, but retain all rows
-#Change the column names to be more readable
-output_table <- mash_table2
-
-ani79_data <- read.csv("/Users/Hatfull_Lab/Desktop/Project_phage_classification/7_merged2333_analysis/current/20161006_set2_79_ani_data.csv",sep=",",header=TRUE)
-names(ani79_data) <- c("ani79_ref_query","ani79_ref_phage_identifier","ani79_query_phage_identifier","ani79_ani_distance")
-output_table <- merge(output_table,ani79_data,by.x="mash_ref_query",by.y="ani79_ref_query",all.x=TRUE)
-
-gene_specific_mash_data <- read.csv("/Users/Hatfull_Lab/Desktop/Project_phage_classification/7_merged2333_analysis/current/20170109_gene_specific_mash_analysis.csv",sep=",",header=TRUE)
-names(gene_specific_mash_data) = c("gsm_mash_ref_query","gsm_ref","gsm_query","gsm_num_shared_phams","gsm_pham_dissimilarity","gsm_pham_jaccard_dissimilarity",
-                                   "gsm_all_mash_distance","gsm_all_mash_pvalue","gsm_all_mash_count",
-                                   "gsm_shared_mash_distance","gsm_shared_mash_pvalue","gsm_shared_mash_count",
-                                   "gsm_unshared_mash_distance","gsm_unshared_mash_pvalue","gsm_unshared_mash_count",
-                                   "gsm_shared_unshared_mash_distance","gsm_shared_unshared_mash_pvalue","gsm_shared_unshared_mash_count",
-                                   "gsm_shared_total_size","gsm_unshared_total_size","gsm_shared_GC","gsm_unshared_GC",
-                                   "gsm_ref_num_unshared_phams","gsm_ref_num_all_phams",
-                                   "gsm_ref_num_all_genes","gsm_ref_num_shared_genes","gsm_ref_num_unshared_genes",
-                                   "gsm_ref_all_ave_size","gsm_ref_shared_ave_size","gsm_ref_unshared_ave_size",
-                                   "gsm_ref_all_total_size","gsm_ref_shared_total_size","gsm_ref_unshared_total_size",
-                                   "gsm_ref_all_GC","gsm_ref_shared_GC","gsm_ref_unshared_GC",
-                                   "gsm_query_num_unshared_phams","gsm_query_num_all_phams",
-                                   "gsm_query_num_all_genes","gsm_query_num_shared_genes","gsm_query_num_unshared_genes",
-                                   "gsm_query_all_ave_size","gsm_query_shared_ave_size","gsm_query_unshared_ave_size",
-                                   "gsm_query_all_total_size","gsm_query_shared_total_size","gsm_query_unshared_total_size",
-                                   "gsm_query_all_GC","gsm_query_shared_GC","gsm_query_unshared_GC")
-
-output_table <- merge(output_table,gene_specific_mash_data,by.x="mash_ref_query",by.y="gsm_mash_ref_query",all.x=TRUE)
-output_table_reduced <- subset(output_table,select=c("mash_reference","mash_query","mash_distance","mash_pvalue","pham_pham_dissimilarity",
-                                                     "gsm_shared_mash_distance","gsm_shared_mash_pvalue",
-                                                     "gsm_unshared_mash_distance","gsm_unshared_mash_pvalue"))
-
-#If data truncation is needed to reduce filesize:
-# output_table_reduced$mash_distance <- round(output_table_reduced$mash_distance, digits = 2)
-# output_table_reduced$pham_pham_dissimilarity <- round(output_table_reduced$pham_pham_dissimilarity, digits = 2)
-# output_table_reduced$ani79_ani_distance <- round(output_table_reduced$ani79_ani_distance, digits = 2)
-# output_table_reduced$gsm_shared_mash_distance <- round(output_table_reduced$gsm_shared_mash_distance, digits = 2)
-# output_table_reduced$gsm_unshared_mash_distance <- round(output_table_reduced$gsm_unshared_mash_distance, digits = 2)
-
-names(output_table_reduced) = c("Virus 1","Virus 2",
-                                "Whole genome mash raw distance","Whole genome mash pvalue",
-                                "Gene content dissimilarity",
-                                "Shared gene mash raw distance","Shared gene mash pvalue",
-                                "Unshared gene mash raw distance","Unshared gene mash pvalue")
-write.table(output_table_reduced,"/Users/Hatfull_Lab/Desktop/Project_phage_classification/7_merged2333_analysis/current/phage_evolution_data.csv",sep=",",row.names = FALSE,col.names = TRUE,quote=FALSE)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-###VOG analysis
-
-
-
-
-
-vog_table <- read.csv("shared_vog_proportion_data.csv",sep=",",header=TRUE)
-
-names(vog_table) <- c("vog_reference","vog_ref_accession","vog_ref_number_of_genes","vog_ref_number_of_vogs",
-          "vog_ref_number_of_unshared_vogs","vog_ref_number_of_shared_vog_genes","vog_ref_number_of_unshared_vog_genes","vog_ref_number_of_unshared_other_genes",
-          "vog_ref_shared_vog_gene_proportion","vog_query","vog_query_accession","vog_query_number_of_genes",
-          "vog_query_number_of_vogs","vog_query_number_of_unshared_vogs","vog_query_number_of_shared_vog_genes","vog_query_number_of_unshared_vog_genes",
-          "vog_query_number_of_unshared_other_genes","vog_query_shared_vog_gene_proportion",
-          "vog_number_of_shared_vogs","vog_average_shared_vog_gene_proportion","vog_gene_content_dissimilarity")
-
-vog_table$vog_ref_query <- paste(vog_table$vog_reference,vog_table$vog_query,sep="_")
-vog_table$vog_ref_query <- as.factor(vog_table$vog_ref_query)
-
-
-
-
-#VOG data is based on 1877 genomes that are present in the merged2333 dataset.
-#But the VOG data contains redundant data rows, where each comparison is represented twice, with the ref and query reversed
-#So when merged to mash_table2, no need to keep all rows in either table - it is expected there will be fewer rows than in both tables
-#Also, there are 2 genomes (vb_paem_c1-14-ab28__NC_026600 and pv94__NC_027368) that contain no annotated genes. These are not in the pham data,
-#so even though they are present in the VOG data, I am unable to compare these two genomes. This results in 1875 genomes.
-mash_table2_vog <- merge(mash_table2,vog_table,by.x="mash_ref_query",by.y="vog_ref_query")
-mash_table2_vog$mash_reference <- factor(mash_table2_vog$mash_reference)
-mash_table2_vog$mash_query <- factor(mash_table2_vog$mash_query)
-
-
-
-bacteria_dsDNA <- subset(mash_table2_vog,mash_table2_vog$host_superkingdom_compare == 'Bacteria' & mash_table2_vog$phage_viral_type_compare == 'dsDNA')
-temperate_both <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_temperate_compare == 'yes')
-temperate_neither <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_temperate_compare == 'no')
-
-
-
-
-
-#How well do pham-based gcd and vog-based gcd correlate?
-par(mar=c(4,8,4,4))
-plot(bacteria_dsDNA$pham_pham_dissimilarity,bacteria_dsDNA$vog_gene_content_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,1,lty=2,lwd=3,col="grey")
-
-
-#Compare pham-based and vog-based bacteria dsDNA phage plots 
-par(mar=c(4,8,4,4))
-plot(bacteria_dsDNA$modified_mash_distance,bacteria_dsDNA$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-par(mar=c(4,8,4,4))
-plot(bacteria_dsDNA$modified_mash_distance,bacteria_dsDNA$vog_gene_content_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
-
-#Compare pham-based and vog-based bacteria dsDNA phage lifestyle plots 
-par(mar=c(4,8,4,4))
-plot(temperate_both$modified_mash_distance,temperate_both$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-par(mar=c(4,8,4,4))
-plot(temperate_both$modified_mash_distance,temperate_both$vog_gene_content_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
-par(mar=c(4,8,4,4))
-plot(temperate_neither$modified_mash_distance,temperate_neither$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-par(mar=c(4,8,4,4))
-plot(temperate_neither$modified_mash_distance,temperate_neither$vog_gene_content_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
-
-
-
-
-
-
-#Add phylogenetic data if needed
-phylogeny_data <- read.csv("phylogeny_data.csv",sep=",",header=TRUE)
-
-
-phylogeny_vog_analysis <- merge(bacteria_dsDNA,phylogeny_data,by.x="mash_ref_query",by.y="ref_query")
-
-phylogeny_vog_hgcf <- subset(phylogeny_vog_analysis,phylogeny_vog_analysis$phage_cluster_compare == 'F' |
-                           (phylogeny_vog_analysis$phage_cluster_compare == 'A' & phylogeny_vog_analysis$phage_subcluster_compare == 'A1'))
-
-
-phylogeny_vog_lgcf <- subset(phylogeny_vog_analysis,
-                             phylogeny_vog_analysis$phage_cluster_compare == 'K' |
-                               phylogeny_vog_analysis$phage_cluster_compare == 'BD' |
-                           (phylogeny_vog_analysis$phage_cluster_compare == 'A' & phylogeny_vog_analysis$phage_subcluster_compare != 'A1'))
-
-
-phylogeny_vog_lytic <- subset(phylogeny_vog_analysis,phylogeny_vog_analysis$phage_cluster_compare == 'B')
-
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_vog_hgcf$modified_mash_distance,phylogeny_vog_hgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-par(new=TRUE)
-plot(phylogeny_vog_lgcf$modified_mash_distance,phylogeny_vog_lgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-par(new=TRUE)
-plot(phylogeny_vog_lytic$modified_mash_distance,phylogeny_vog_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_vog_hgcf$phylogeny_distance,phylogeny_vog_hgcf$pham_pham_dissimilarity,xlim=c(0,2.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-par(new=TRUE)
-plot(phylogeny_vog_lgcf$phylogeny_distance,phylogeny_vog_lgcf$pham_pham_dissimilarity,xlim=c(0,2.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-par(new=TRUE)
-plot(phylogeny_vog_lytic$phylogeny_distance,phylogeny_vog_lytic$pham_pham_dissimilarity,xlim=c(0,2.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_vog_hgcf$phylogeny_distance,phylogeny_vog_hgcf$vog_gene_content_dissimilarity,xlim=c(0,2.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-par(new=TRUE)
-plot(phylogeny_vog_lgcf$phylogeny_distance,phylogeny_vog_lgcf$vog_gene_content_dissimilarity,xlim=c(0,2.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-par(new=TRUE)
-plot(phylogeny_vog_lytic$phylogeny_distance,phylogeny_vog_lytic$vog_gene_content_dissimilarity,xlim=c(0,2.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-
-
-
-
-
-
-
-
-
-###Analyze predicted lifestyle data
-
-
-lifestyle_analysis <- mash_table2
-
-
-bacteria_dsDNA <- subset(lifestyle_analysis,lifestyle_analysis$host_superkingdom_compare == 'Bacteria' & lifestyle_analysis$phage_viral_type_compare == 'dsDNA')
-
-
-lifestyle_predicted_temperate <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_predicted_temperate_compare == 'yes')
-lifestyle_predicted_lytic <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_predicted_temperate_compare == 'no')
-
-
-par(mar=c(4,8,4,4))
-plot(lifestyle_predicted_temperate$modified_mash_distance,lifestyle_predicted_temperate$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-par(mar=c(4,8,4,4))
-plot(lifestyle_predicted_lytic$modified_mash_distance,lifestyle_predicted_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#Fig S9
 ###Phylogeny comparison 
+#Format:
+#0 = ref_query
+#1 = phylogeny distance
 phylogeny_data <- read.csv("phylogeny_data.csv",sep=",",header=TRUE)
-
-
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#Decide which table to merge with...
-phylogeny_analysis <- merge(mash_table2,phylogeny_data,by.x="mash_ref_query",by.y="ref_query")
-#OR...
 phylogeny_analysis <- merge(gene_specific_mash_table,phylogeny_data,by.x="mash_ref_query",by.y="ref_query")
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 
@@ -2643,7 +1869,7 @@ phylogeny_analysis_lytic <- subset(phylogeny_analysis,phylogeny_analysis$phage_p
 
 
 
-#Fig S9a (left)
+#Supp. Fig. 9a (left)? Not quite right, some datapoints wrong = intra-cluster a points incorrect
 par(mar=c(4,8,4,4))
 plot(phylogeny_analysis_hgcf$modified_mash_distance,phylogeny_analysis_hgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
 par(new=TRUE)
@@ -2653,17 +1879,13 @@ plot(phylogeny_analysis_lytic$modified_mash_distance,phylogeny_analysis_lytic$ph
 
 
 
-#Fig S9a (right)
+#Supp. Fig 9a (right) Not quite right, some datapoints wrong = intra-cluster a points incorrect
 par(mar=c(4,8,4,4))
 plot(phylogeny_analysis_hgcf$phylogeny_distance,phylogeny_analysis_hgcf$pham_pham_dissimilarity,xlim=c(0,2.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
 par(new=TRUE)
 plot(phylogeny_analysis_lgcf$phylogeny_distance,phylogeny_analysis_lgcf$pham_pham_dissimilarity,xlim=c(0,2.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
 par(new=TRUE)
 plot(phylogeny_analysis_lytic$phylogeny_distance,phylogeny_analysis_lytic$pham_pham_dissimilarity,xlim=c(0,2.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-
-
 
 
 
@@ -2701,12 +1923,64 @@ plot(phylogeny_analysis_a_both_nonA1$phylogeny_distance,phylogeny_analysis_a_bot
 
   
 #match up pham proportion data that contains orpham count, pham distribution, etc.
-#I designate these columns as "pham2" since it is the second set of pham data that I have loaded so far. 
-#This second pham data overlaps the first set, but contains additional columns. Also, the extra columns are impacted by the data subset - it only contains comparisons from the actino782 set. So it is not a replacement for the first pham data file.
-#If the analysis works well, the updated pham data can be loaded at the beginning, and this section removed.
+#Columns designated as "pham2" since it is the second set of pham data that have been loaded so far. 
+#This second pham data overlaps the first set, but contains additional columns. 
+#Also, the extra columns are impacted by the data subset - it only contains comparisons from the actino785 set. 
+#So it is not a replacement for the first pham data file.
 
-
-
+#Format
+#0 = phage1_name"                                              
+#1 = phage1_number_of_unshared_phams"                          
+#2 = phage1_shared_proportion"                                 
+#3 = phage2_name"                                              
+#4 = phage2_number_of_unshared_phams"                          
+#5 = phage2_shared_proportion"                                 
+#6 = number_of_shared_phams"                                   
+#7 = average_shared_proportion"                                
+#8 = jaccard_similarity"                                       
+#9 = shared_pham_distribution_mean"                            
+#10 = shared_pham_distribution_median"                          
+#11 = shared_pham_distribution_max"                             
+#12 = unshared_pham_distribution_mean"                          
+#13 = unshared_pham_distribution_median"                        
+#14 = unshared_pham_distribution_max"                           
+#15 = unshared_orpham_count"                                    
+#16 = Unspecified_phage1_number_of_unshared_phams"              
+#17 = Unspecified_phage2_number_of_unshared_phams"              
+#18 = Unspecified_number_of_shared_phams"                       
+#19 = Unspecified_average_shared_proportion"                    
+#20 = defense_phage1_number_of_unshared_phams"                  
+#21 = defense_phage2_number_of_unshared_phams"                  
+#22 = defense_number_of_shared_phams"                           
+#23 = defense_average_shared_proportion"                        
+#24 = dna_metabolism_phage1_number_of_unshared_phams"           
+#25 = dna_metabolism_phage2_number_of_unshared_phams"           
+#26 = dna_metabolism_number_of_shared_phams"                    
+#27 = dna_metabolism_average_shared_proportion"                 
+#28 = lysis_phage1_number_of_unshared_phams"                    
+#29 = lysis_phage2_number_of_unshared_phams"                    
+#30 = lysis_number_of_shared_phams"                             
+#31 = lysis_average_shared_proportion"                          
+#32 = lysogeny_phage1_number_of_unshared_phams"                 
+#33 = lysogeny_phage2_number_of_unshared_phams"                 
+#34 = lysogeny_number_of_shared_phams"                          
+#35 = lysogeny_average_shared_proportion"                       
+#36 = mobile_phage1_number_of_unshared_phams"                   
+#37 = mobile_phage2_number_of_unshared_phams"                   
+#38 = mobile_number_of_shared_phams"                            
+#39 = mobile_average_shared_proportion"                         
+#40 = other_phage1_number_of_unshared_phams"                    
+#41 = other_phage2_number_of_unshared_phams"                    
+#42 = other_number_of_shared_phams"                             
+#43 = other_average_shared_proportion"                          
+#44 = recombination_replication_phage1_number_of_unshared_phams"
+#45 = recombination_replication_phage2_number_of_unshared_phams"
+#46 = recombination_replication_number_of_shared_phams"         
+#47 = recombination_replication_average_shared_proportion"      
+#48 = structure_assembly_phage1_number_of_unshared_phams"       
+#49 = structure_assembly_phage2_number_of_unshared_phams"       
+#50 = structure_assembly_number_of_shared_phams"                
+#51 = structure_assembly_average_shared_proportion
 actino_pham_data <- read.csv("actino_only_pairwise_pham_proportions.csv",sep=",",header=TRUE)
 
 names(actino_pham_data) <- c("pham2_phage1","pham2_phage1_number_unshared_phams","pham2_phage1_shared_proportion","pham2_phage2",
@@ -2726,34 +2000,6 @@ names(actino_pham_data) <- c("pham2_phage1","pham2_phage1_number_unshared_phams"
 
 
 
-#The function-specific average shared proportion data is not exactly accurate. If there were no shared or unshared phams in the function category, technically you can't compute a shared proportion
-#(since dividing by zero), so a "-1" was inserted in these cases. But really, they should be NA.
-actino_pham_data$pham2_Unspecified_average_shared_proportion_mod <- ifelse(actino_pham_data$pham2_Unspecified_average_shared_proportion != -1,actino_pham_data$pham2_Unspecified_average_shared_proportion,NA)
-actino_pham_data$pham2_defense_average_shared_proportion_mod <- ifelse(actino_pham_data$pham2_defense_average_shared_proportion != -1,actino_pham_data$pham2_defense_average_shared_proportion,NA)
-actino_pham_data$pham2_dna_metabolism_average_shared_proportion_mod <- ifelse(actino_pham_data$pham2_dna_metabolism_average_shared_proportion != -1,actino_pham_data$pham2_dna_metabolism_average_shared_proportion,NA)
-actino_pham_data$pham2_lysis_average_shared_proportion_mod <- ifelse(actino_pham_data$pham2_lysis_average_shared_proportion != -1,actino_pham_data$pham2_lysis_average_shared_proportion,NA)
-actino_pham_data$pham2_lysogeny_average_shared_proportion_mod <- ifelse(actino_pham_data$pham2_lysogeny_average_shared_proportion != -1,actino_pham_data$pham2_lysogeny_average_shared_proportion,NA)
-actino_pham_data$pham2_mobile_average_shared_proportion_mod <- ifelse(actino_pham_data$pham2_mobile_average_shared_proportion != -1,actino_pham_data$pham2_mobile_average_shared_proportion,NA)
-actino_pham_data$pham2_other_average_shared_proportion_mod <- ifelse(actino_pham_data$pham2_other_average_shared_proportion != -1,actino_pham_data$pham2_other_average_shared_proportion,NA)
-actino_pham_data$pham2_recombination_replication_average_shared_proportion_mod <- ifelse(actino_pham_data$pham2_recombination_replication_average_shared_proportion != -1,actino_pham_data$pham2_recombination_replication_average_shared_proportion,NA)
-actino_pham_data$pham2_structure_assembly_average_shared_proportion_mod <- ifelse(actino_pham_data$pham2_structure_assembly_average_shared_proportion != -1,actino_pham_data$pham2_structure_assembly_average_shared_proportion,NA)
-
-
-
-
-#Compute gene content dissimilarity
-actino_pham_data$pham2_pham_dissimilarity <- 1 - actino_pham_data$pham2_average_shared_proportion
-actino_pham_data$pham2_jaccard_dissimilarity <- 1 - actino_pham_data$pham2_jaccard_similarity
-actino_pham_data$pham2_pham_dissimilarity_Unspecified <- 1 - actino_pham_data$pham2_Unspecified_average_shared_proportion_mod
-actino_pham_data$pham2_pham_dissimilarity_defense <- 1 - actino_pham_data$pham2_defense_average_shared_proportion_mod
-actino_pham_data$pham2_pham_dissimilarity_dna_metabolism <- 1 - actino_pham_data$pham2_dna_metabolism_average_shared_proportion_mod
-actino_pham_data$pham2_pham_dissimilarity_lysis <- 1 - actino_pham_data$pham2_lysis_average_shared_proportion_mod
-actino_pham_data$pham2_pham_dissimilarity_lysogeny <- 1 - actino_pham_data$pham2_lysogeny_average_shared_proportion_mod
-actino_pham_data$pham2_pham_dissimilarity_mobile <- 1 - actino_pham_data$pham2_mobile_average_shared_proportion_mod
-actino_pham_data$pham2_pham_dissimilarity_other <- 1 - actino_pham_data$pham2_other_average_shared_proportion_mod
-actino_pham_data$pham2_pham_dissimilarity_recomb_rep <- 1 - actino_pham_data$pham2_recombination_replication_average_shared_proportion_mod
-actino_pham_data$pham2_pham_dissimilarity_structural <- 1 - actino_pham_data$pham2_structure_assembly_average_shared_proportion_mod
-
 
 #Since pham data contains pairwise duplicates, no need to worry about which phage is which when creating ref_query match column
 actino_pham_data$pham2_phage1_phage2 <- paste(actino_pham_data$pham2_phage1,"_",actino_pham_data$pham2_phage2,sep="")
@@ -2768,519 +2014,25 @@ actino_pham_data$pham2_phage1_phage2 <- as.factor(actino_pham_data$pham2_phage1_
 phylogeny_analysis <- merge(phylogeny_analysis,actino_pham_data,by.x="mash_ref_query",by.y="pham2_phage1_phage2")
 
 
+#Split into modes to visualize by color
+phylogeny_analysis_hgcf2 <- subset(phylogeny_analysis,phylogeny_analysis$gene_flux_category == "high" & phylogeny_analysis$phage_predicted_temperate_compare == "yes")
+phylogeny_analysis_lgcf2 <- subset(phylogeny_analysis,phylogeny_analysis$gene_flux_category == "low" & phylogeny_analysis$phage_predicted_temperate_compare == "yes")
+phylogeny_analysis_lytic2 <- subset(phylogeny_analysis,phylogeny_analysis$phage_predicted_temperate_compare == "no")
 
-
-
-
-
-
-
-
-
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$pham_pham_dissimilarity,xlim=c(0,2.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$pham_pham_dissimilarity,xlim=c(0,2.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-
-
-
-plot(phylogeny_hgcf$modified_mash_distance,phylogeny_hgcf$phylogeny_distance)
-plot(phylogeny_lgcf$modified_mash_distance,phylogeny_lgcf$phylogeny_distance)
-
-
-
-
-
-
-####CURRENT REVIEW STOP
-
-
-
-#Compare types, sizes, GC content of shared and unshared genes
-par(mar=c(4,8,4,4))
-plot(phylogeny_a1$phylogeny_distance,phylogeny_a1$gsm_ave_size_unshared_unshared,xlim=c(0,2.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_a_not_a1$phylogeny_distance,phylogeny_a_not_a1$gsm_ave_size_unshared_unshared,xlim=c(0,2.5),ylim=c(0,1200),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-par(new=TRUE)
-plot(phylogeny_a1$phylogeny_distance,phylogeny_a1$gsm_ave_size_unshared_unshared,xlim=c(0,2.5),ylim=c(0,1200),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_f$phylogeny_distance,phylogeny_f$gsm_ave_size_unshared_unshared,xlim=c(0,2.5),ylim=c(0,1200),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-
-
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_a_not_a1$phylogeny_distance,phylogeny_a_not_a1$gsm_ave_size_unshared_unshared,xlim=c(0,2.5),ylim=c(0,1200),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-par(new=TRUE)
-plot(phylogeny_a1$phylogeny_distance,phylogeny_a1$gsm_ave_size_unshared_unshared,xlim=c(0,2.5),ylim=c(0,1200),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-
-
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$gsm_ave_size_unshared_unshared,xlim=c(0,2.5),ylim=c(0,1200),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-par(new=TRUE)
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$gsm_ave_size_unshared_unshared,xlim=c(0,2.5),ylim=c(0,1200),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-par(new=TRUE)
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$gsm_ave_size_unshared_unshared,xlim=c(0,2.5),ylim=c(0,1200),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$gsm_ave_size_unshared_unshared,xlim=c(0,0.5),ylim=c(0,1200),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$gsm_ave_size_unshared_unshared,xlim=c(0,0.5),ylim=c(0,1200),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$gsm_ave_size_unshared_unshared,xlim=c(0,0.5),ylim=c(0,1200),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-
-
-
-
-#Standard plot
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-
-
-
-#Coding proportion
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$gsm_unshared_coding_potential,xlim=c(0,0.5),ylim=c(0,0.8),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$gsm_unshared_coding_potential,xlim=c(0,0.5),ylim=c(0,0.8),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$gsm_unshared_coding_potential,xlim=c(0,0.5),ylim=c(0,0.8),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-
-
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$gsm_unshared_coding_potential,xlim=c(0,0.5),ylim=c(0,0.8),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-par(new=TRUE)
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$gsm_unshared_coding_potential,xlim=c(0,0.5),ylim=c(0,0.8),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-par(new=TRUE)
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$gsm_unshared_coding_potential,xlim=c(0,0.5),ylim=c(0,0.8),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-
-
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$gsm_unshared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-par(new=TRUE)
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$gsm_unshared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-par(new=TRUE)
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$gsm_unshared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-
-
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$gsm_unshared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$gsm_unshared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$gsm_unshared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-
-
-
-#total genome sequence size
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$gsm_all_total_size,xlim=c(0,0.5),ylim=c(0.8E5,1.4E5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$gsm_all_total_size,xlim=c(0,0.5),ylim=c(0.8E5,1.4E5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$gsm_all_total_size,xlim=c(0,0.5),ylim=c(0.8E5,1.4E5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-#change in genome size
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$size_diff_ave_percent,xlim=c(0,0.5),ylim=c(0,0.2),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$size_diff_ave_percent,xlim=c(0,0.5),ylim=c(0,0.2),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$size_diff_ave_percent,xlim=c(0,0.5),ylim=c(0,0.2),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-
-
-#GC content
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$gsm_ave_gc_all_all,xlim=c(0,0.5),ylim=c(0.5,0.8),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$gsm_ave_gc_all_all,xlim=c(0,0.5),ylim=c(0.5,0.8),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$gsm_ave_gc_all_all,xlim=c(0,0.5),ylim=c(0.5,0.8),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-#Change in GC content
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$gsm_modified_gc_diff_all_all,xlim=c(0,0.5),ylim=c(0,0.05),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$gsm_modified_gc_diff_all_all,xlim=c(0,0.5),ylim=c(0,0.05),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$gsm_modified_gc_diff_all_all,xlim=c(0,0.5),ylim=c(0,0.05),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-#Change in unshared gene GC content
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$gsm_modified_gc_diff_unshared_unshared,xlim=c(0,0.5),ylim=c(0,0.2),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$gsm_modified_gc_diff_unshared_unshared,xlim=c(0,0.5),ylim=c(0,0.2),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$gsm_modified_gc_diff_unshared_unshared,xlim=c(0,0.5),ylim=c(0,0.2),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-
-#Change in shared gene GC content
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$gsm_modified_gc_diff_unshared_unshared,xlim=c(0,0.5),ylim=c(0,0.15),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-par(new=TRUE)
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$gsm_modified_gc_diff_shared_shared,xlim=c(0,0.5),ylim=c(0,0.15),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark blue")
-
-
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$gsm_modified_gc_diff_unshared_unshared,xlim=c(0,0.5),ylim=c(0,0.15),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-par(new=TRUE)
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$gsm_modified_gc_diff_shared_shared,xlim=c(0,0.5),ylim=c(0,0.15),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
-
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$gsm_modified_gc_diff_unshared_unshared,xlim=c(0,0.5),ylim=c(0,0.15),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-par(new=TRUE)
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$gsm_modified_gc_diff_shared_shared,xlim=c(0,0.5),ylim=c(0,0.15),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
-
-
-
-
-
-
-
-
-#Shared pham distribution mean
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$pham2_shared_pham_distribution_mean,xlim=c(0,0.5),ylim=c(0,5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$pham2_shared_pham_distribution_mean,xlim=c(0,0.5),ylim=c(0,5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$pham2_shared_pham_distribution_mean,xlim=c(0,0.5),ylim=c(0,5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$pham2_shared_pham_distribution_mean,xlim=c(0,0.5),ylim=c(0,5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-par(new=TRUE)
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$pham2_shared_pham_distribution_mean,xlim=c(0,0.5),ylim=c(0,5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-par(new=TRUE)
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$pham2_shared_pham_distribution_mean,xlim=c(0,0.5),ylim=c(0,5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-
-
-
-
-#Shared pham distribution median
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$pham2_shared_pham_distribution_median,xlim=c(0,0.5),ylim=c(0,5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$pham2_shared_pham_distribution_median,xlim=c(0,0.5),ylim=c(0,5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$pham2_shared_pham_distribution_median,xlim=c(0,0.5),ylim=c(0,5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-
-#Shared pham distribution max
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$pham2_shared_pham_distribution_max,xlim=c(0,0.5),ylim=c(0,15),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$pham2_shared_pham_distribution_max,xlim=c(0,0.5),ylim=c(0,15),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$pham2_shared_pham_distribution_max,xlim=c(0,0.5),ylim=c(0,15),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-
-
-
-#Unshared pham distribution mean
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$pham2_unshared_pham_distribution_mean,xlim=c(0,0.5),ylim=c(0,10),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$pham2_unshared_pham_distribution_mean,xlim=c(0,0.5),ylim=c(0,10),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$pham2_unshared_pham_distribution_mean,xlim=c(0,0.5),ylim=c(0,10),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-
-#Unshared pham distribution median
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$pham2_unshared_pham_distribution_median,xlim=c(0,0.5),ylim=c(0,10),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$pham2_unshared_pham_distribution_median,xlim=c(0,0.5),ylim=c(0,10),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$pham2_unshared_pham_distribution_median,xlim=c(0,0.5),ylim=c(0,10),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-#Unshared pham distribution max
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$pham2_unshared_pham_distribution_max,xlim=c(0,0.5),ylim=c(0,15),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$pham2_unshared_pham_distribution_max,xlim=c(0,0.5),ylim=c(0,15),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$pham2_unshared_pham_distribution_max,xlim=c(0,0.5),ylim=c(0,15),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-#Unshared orpham count
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$pham2_unshared_orpham_count,xlim=c(0,0.5),ylim=c(0,30),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$pham2_unshared_orpham_count,xlim=c(0,0.5),ylim=c(0,30),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$pham2_unshared_orpham_count,xlim=c(0,0.5),ylim=c(0,30),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-
-
-###REVIEW PROGRESS
-
-
-
-###CURRENT
-#sliding window average
-library(caTools)
-
-phylogeny_hgcf_phylosort <- phylogeny_hgcf[order(phylogeny_hgcf$phylogeny_distance),]
-phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_mean_runmean <- runmean(phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_mean,101)
-phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_median_runmean <- runmean(phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_median,101)
-phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_max_runmean <- runmean(phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_max,101)
-phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_mean_runmean <- runmean(phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_mean,101)
-phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_median_runmean <- runmean(phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_median,101)
-phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_max_runmean <- runmean(phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_max,101)
-phylogeny_hgcf_phylosort$pham2_unshared_orpham_count_runmean <- runmean(phylogeny_hgcf_phylosort$pham2_unshared_orpham_count,101)
-phylogeny_hgcf_phylosort$pham2_pham_dissimilarity_runmean <- runmean(phylogeny_hgcf_phylosort$pham2_pham_dissimilarity,101)
-phylogeny_hgcf_phylosort$size_diff_ave_percent_runmean <- runmean(phylogeny_hgcf_phylosort$size_diff_ave_percent,101)
-phylogeny_hgcf_phylosort$gsm_ave_size_unshared_unshared_runmean <- runmean(phylogeny_hgcf_phylosort$gsm_ave_size_unshared_unshared,101)
-phylogeny_hgcf_phylosort$gsm_unshared_coding_potential_runmean <- runmean(phylogeny_hgcf_phylosort$gsm_unshared_coding_potential,101)
-
-
-
-
-phylogeny_lgcf_phylosort <- phylogeny_lgcf[order(phylogeny_lgcf$phylogeny_distance),]
-phylogeny_lgcf_phylosort$pham2_shared_pham_distribution_mean_runmean <- runmean(phylogeny_lgcf_phylosort$pham2_shared_pham_distribution_mean,101)
-phylogeny_lgcf_phylosort$pham2_shared_pham_distribution_median_runmean <- runmean(phylogeny_lgcf_phylosort$pham2_shared_pham_distribution_median,101)
-phylogeny_lgcf_phylosort$pham2_shared_pham_distribution_max_runmean <- runmean(phylogeny_lgcf_phylosort$pham2_shared_pham_distribution_max,101)
-phylogeny_lgcf_phylosort$pham2_unshared_pham_distribution_mean_runmean <- runmean(phylogeny_lgcf_phylosort$pham2_unshared_pham_distribution_mean,101)
-phylogeny_lgcf_phylosort$pham2_unshared_pham_distribution_median_runmean <- runmean(phylogeny_lgcf_phylosort$pham2_unshared_pham_distribution_median,101)
-phylogeny_lgcf_phylosort$pham2_unshared_pham_distribution_max_runmean <- runmean(phylogeny_lgcf_phylosort$pham2_unshared_pham_distribution_max,101)
-phylogeny_lgcf_phylosort$pham2_unshared_orpham_count_runmean <- runmean(phylogeny_lgcf_phylosort$pham2_unshared_orpham_count,101)
-phylogeny_lgcf_phylosort$pham2_pham_dissimilarity_runmean <- runmean(phylogeny_lgcf_phylosort$pham2_pham_dissimilarity,101)
-phylogeny_lgcf_phylosort$size_diff_ave_percent_runmean <- runmean(phylogeny_lgcf_phylosort$size_diff_ave_percent,101)
-phylogeny_lgcf_phylosort$gsm_ave_size_unshared_unshared_runmean <- runmean(phylogeny_lgcf_phylosort$gsm_ave_size_unshared_unshared,101)
-phylogeny_lgcf_phylosort$gsm_unshared_coding_potential_runmean <- runmean(phylogeny_lgcf_phylosort$gsm_unshared_coding_potential,101)
-
-
-
-phylogeny_lytic_phylosort <- phylogeny_lytic[order(phylogeny_lytic$phylogeny_distance),]
-phylogeny_lytic_phylosort$pham2_shared_pham_distribution_mean_runmean <- runmean(phylogeny_lytic_phylosort$pham2_shared_pham_distribution_mean,101)
-phylogeny_lytic_phylosort$pham2_shared_pham_distribution_median_runmean <- runmean(phylogeny_lytic_phylosort$pham2_shared_pham_distribution_median,101)
-phylogeny_lytic_phylosort$pham2_shared_pham_distribution_max_runmean <- runmean(phylogeny_lytic_phylosort$pham2_shared_pham_distribution_max,101)
-phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_mean_runmean <- runmean(phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_mean,101)
-phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_median_runmean <- runmean(phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_median,101)
-phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_max_runmean <- runmean(phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_max,101)
-phylogeny_lytic_phylosort$pham2_unshared_orpham_count_runmean <- runmean(phylogeny_lytic_phylosort$pham2_unshared_orpham_count,101)
-phylogeny_lytic_phylosort$pham2_pham_dissimilarity_runmean <- runmean(phylogeny_lytic_phylosort$pham2_pham_dissimilarity,101)
-phylogeny_lytic_phylosort$size_diff_ave_percent_runmean <- runmean(phylogeny_lytic_phylosort$size_diff_ave_percent,101)
-phylogeny_lytic_phylosort$gsm_ave_size_unshared_unshared_runmean <- runmean(phylogeny_lytic_phylosort$gsm_ave_size_unshared_unshared,101)
-phylogeny_lytic_phylosort$gsm_unshared_coding_potential_runmean <- runmean(phylogeny_lytic_phylosort$gsm_unshared_coding_potential,101)
-
-
-#Shared pham distribution mean
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_mean_runmean,xlim=c(0,0.5),ylim=c(0.5,3.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark blue")
-par(new=TRUE)
-plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$pham2_shared_pham_distribution_mean_runmean,xlim=c(0,0.5),ylim=c(0.5,3.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
-par(new=TRUE)
-plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham2_shared_pham_distribution_mean_runmean,xlim=c(0,0.5),ylim=c(0.5,3.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
-
-#Unshared pham distribution mean
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_mean_runmean,xlim=c(0,0.5),ylim=c(0.5,3.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-par(new=TRUE)
-plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$pham2_unshared_pham_distribution_mean_runmean,xlim=c(0,0.5),ylim=c(0.5,3.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-par(new=TRUE)
-plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_mean_runmean,xlim=c(0,0.5),ylim=c(0.5,3.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-
-
-#Shared pham distribution median
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_median_runmean,xlim=c(0,0.5),ylim=c(0.5,3),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark blue")
-par(new=TRUE)
-plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$pham2_shared_pham_distribution_median_runmean,xlim=c(0,0.5),ylim=c(0.5,3),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
-par(new=TRUE)
-plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham2_shared_pham_distribution_median_runmean,xlim=c(0,0.5),ylim=c(0.5,3),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
-
-#Unshared pham distribution median
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_median_runmean,xlim=c(0,0.5),ylim=c(0.5,3),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-par(new=TRUE)
-plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$pham2_unshared_pham_distribution_median_runmean,xlim=c(0,0.5),ylim=c(0.5,3),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-par(new=TRUE)
-plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_median_runmean,xlim=c(0,0.5),ylim=c(0.5,3),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-
-
-
-#Shared pham distribution max
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_max_runmean,xlim=c(0,0.5),ylim=c(2,11),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark blue")
-par(new=TRUE)
-plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$pham2_shared_pham_distribution_max_runmean,xlim=c(0,0.5),ylim=c(2,11),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
-par(new=TRUE)
-plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham2_shared_pham_distribution_max_runmean,xlim=c(0,0.5),ylim=c(2,11),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
-
-#Unshared pham distribution max
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_max_runmean,xlim=c(0,0.5),ylim=c(2,11),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-par(new=TRUE)
-plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$pham2_unshared_pham_distribution_max_runmean,xlim=c(0,0.5),ylim=c(2,11),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-par(new=TRUE)
-plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_max_runmean,xlim=c(0,0.5),ylim=c(2,11),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-
-
-
-
-
-#Unshared orpham count
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_unshared_orpham_count_runmean,xlim=c(0,0.5),ylim=c(0,8),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-par(new=TRUE)
-plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$pham2_unshared_orpham_count_runmean,xlim=c(0,0.5),ylim=c(0,8),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-par(new=TRUE)
-plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham2_unshared_orpham_count_runmean,xlim=c(0,0.5),ylim=c(0,8),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_unshared_orpham_count_runmean,xlim=c(0,0.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-par(mar=c(4,8,4,4))
-plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$pham2_unshared_orpham_count_runmean,xlim=c(0,0.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-par(mar=c(4,8,4,4))
-plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham2_unshared_orpham_count_runmean,xlim=c(0,0.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-
-
-
-
-
-
-
-
-#Shared/unshared pham distribution mean
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_mean_runmean,xlim=c(0,0.5),ylim=c(1,3.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark blue")
-par(new=TRUE)
-plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$pham2_shared_pham_distribution_mean_runmean,xlim=c(0,0.5),ylim=c(1,3.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
-par(new=TRUE)
-plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham2_shared_pham_distribution_mean_runmean,xlim=c(0,0.5),ylim=c(1,3.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
-par(new=TRUE)
-plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_mean_runmean,xlim=c(0,0.5),ylim=c(1,3.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-par(new=TRUE)
-plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$pham2_unshared_pham_distribution_mean_runmean,xlim=c(0,0.5),ylim=c(1,3.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-par(new=TRUE)
-plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_mean_runmean,xlim=c(0,0.5),ylim=c(1,3.5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-
-
-
-
-
-#Shared/unshared pham distribution median
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_median_runmean,xlim=c(0,0.5),ylim=c(0.5,3),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark blue")
-par(new=TRUE)
-plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$pham2_shared_pham_distribution_median_runmean,xlim=c(0,0.5),ylim=c(0.5,3),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
-par(new=TRUE)
-plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham2_shared_pham_distribution_median_runmean,xlim=c(0,0.5),ylim=c(0.5,3),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
-par(new=TRUE)
-plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_median_runmean,xlim=c(0,0.5),ylim=c(0.5,3),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-par(new=TRUE)
-plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$pham2_unshared_pham_distribution_median_runmean,xlim=c(0,0.5),ylim=c(0.5,3),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-par(new=TRUE)
-plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_median_runmean,xlim=c(0,0.5),ylim=c(0.5,3),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-
-
-
-
-#Shared/unshared pham distribution max
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_max_runmean,xlim=c(0,0.5),ylim=c(2,11),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark blue")
-par(new=TRUE)
-plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$pham2_shared_pham_distribution_max_runmean,xlim=c(0,0.5),ylim=c(2,11),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
-par(new=TRUE)
-plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham2_shared_pham_distribution_max_runmean,xlim=c(0,0.5),ylim=c(2,11),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
-par(new=TRUE)
-plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_max_runmean,xlim=c(0,0.5),ylim=c(2,11),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-par(new=TRUE)
-plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$pham2_unshared_pham_distribution_max_runmean,xlim=c(0,0.5),ylim=c(2,11),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-par(new=TRUE)
-plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_max_runmean,xlim=c(0,0.5),ylim=c(2,11),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-
-
-#Unshared orpham count
-par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_unshared_orpham_count_runmean,xlim=c(0,0.5),ylim=c(0,5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-par(new=TRUE)
-plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$pham2_unshared_orpham_count_runmean,xlim=c(0,0.5),ylim=c(0,5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-par(new=TRUE)
-plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham2_unshared_orpham_count_runmean,xlim=c(0,0.5),ylim=c(0,5),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
 
 
 
 
 #sliding window average
-#X axis = c(0,0.3)
-#only use data for sliding windows that fit within the scatter plot boundaries
+#only use data for sliding windows that fit within the scatter plot boundaries = phylogeny distance < 0.3
 library(caTools)
 
-phylogeny_hgcf_phylosort <- phylogeny_hgcf[order(phylogeny_hgcf$phylogeny_distance),]
+
+phylogeny_hgcf_phylosort <- phylogeny_analysis_hgcf[order(phylogeny_analysis_hgcf2$phylogeny_distance),]
 phylogeny_hgcf_phylosort <- phylogeny_hgcf_phylosort[phylogeny_hgcf_phylosort$phylogeny_distance < 0.3,]
 
 phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_mean_runmean <- runmean(phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_mean,101)
-phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_median_runmean <- runmean(phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_median,101)
-phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_max_runmean <- runmean(phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_max,101)
 phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_mean_runmean <- runmean(phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_mean,101)
-phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_median_runmean <- runmean(phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_median,101)
-phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_max_runmean <- runmean(phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_max,101)
 phylogeny_hgcf_phylosort$pham2_unshared_orpham_count_runmean <- runmean(phylogeny_hgcf_phylosort$pham2_unshared_orpham_count,101)
 phylogeny_hgcf_phylosort$pham2_pham_dissimilarity_runmean <- runmean(phylogeny_hgcf_phylosort$pham2_pham_dissimilarity,101)
 phylogeny_hgcf_phylosort$size_diff_ave_percent_runmean <- runmean(phylogeny_hgcf_phylosort$size_diff_ave_percent,101)
@@ -3290,15 +2042,11 @@ phylogeny_hgcf_phylosort$gsm_ave_size_shared_shared_runmean <- runmean(phylogeny
 
 
 
-phylogeny_lgcf_phylosort <- phylogeny_lgcf[order(phylogeny_lgcf$phylogeny_distance),]
+phylogeny_lgcf_phylosort <- phylogeny_analysis_lgcf[order(phylogeny_analysis_lgcf2$phylogeny_distance),]
 phylogeny_lgcf_phylosort <- phylogeny_lgcf_phylosort[phylogeny_lgcf_phylosort$phylogeny_distance < 0.3,]
 
 phylogeny_lgcf_phylosort$pham2_shared_pham_distribution_mean_runmean <- runmean(phylogeny_lgcf_phylosort$pham2_shared_pham_distribution_mean,101)
-phylogeny_lgcf_phylosort$pham2_shared_pham_distribution_median_runmean <- runmean(phylogeny_lgcf_phylosort$pham2_shared_pham_distribution_median,101)
-phylogeny_lgcf_phylosort$pham2_shared_pham_distribution_max_runmean <- runmean(phylogeny_lgcf_phylosort$pham2_shared_pham_distribution_max,101)
 phylogeny_lgcf_phylosort$pham2_unshared_pham_distribution_mean_runmean <- runmean(phylogeny_lgcf_phylosort$pham2_unshared_pham_distribution_mean,101)
-phylogeny_lgcf_phylosort$pham2_unshared_pham_distribution_median_runmean <- runmean(phylogeny_lgcf_phylosort$pham2_unshared_pham_distribution_median,101)
-phylogeny_lgcf_phylosort$pham2_unshared_pham_distribution_max_runmean <- runmean(phylogeny_lgcf_phylosort$pham2_unshared_pham_distribution_max,101)
 phylogeny_lgcf_phylosort$pham2_unshared_orpham_count_runmean <- runmean(phylogeny_lgcf_phylosort$pham2_unshared_orpham_count,101)
 phylogeny_lgcf_phylosort$pham2_pham_dissimilarity_runmean <- runmean(phylogeny_lgcf_phylosort$pham2_pham_dissimilarity,101)
 phylogeny_lgcf_phylosort$size_diff_ave_percent_runmean <- runmean(phylogeny_lgcf_phylosort$size_diff_ave_percent,101)
@@ -3307,15 +2055,11 @@ phylogeny_lgcf_phylosort$gsm_unshared_coding_potential_runmean <- runmean(phylog
 phylogeny_lgcf_phylosort$gsm_ave_size_shared_shared_runmean <- runmean(phylogeny_lgcf_phylosort$gsm_ave_size_shared_shared,101)
 
 
-phylogeny_lytic_phylosort <- phylogeny_lytic[order(phylogeny_lytic$phylogeny_distance),]
+phylogeny_lytic_phylosort <- phylogeny_analysis_lytic[order(phylogeny_analysis_lytic2$phylogeny_distance),]
 phylogeny_lytic_phylosort <- phylogeny_lytic_phylosort[phylogeny_lytic_phylosort$phylogeny_distance < 0.3,]
 
 phylogeny_lytic_phylosort$pham2_shared_pham_distribution_mean_runmean <- runmean(phylogeny_lytic_phylosort$pham2_shared_pham_distribution_mean,101)
-phylogeny_lytic_phylosort$pham2_shared_pham_distribution_median_runmean <- runmean(phylogeny_lytic_phylosort$pham2_shared_pham_distribution_median,101)
-phylogeny_lytic_phylosort$pham2_shared_pham_distribution_max_runmean <- runmean(phylogeny_lytic_phylosort$pham2_shared_pham_distribution_max,101)
 phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_mean_runmean <- runmean(phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_mean,101)
-phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_median_runmean <- runmean(phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_median,101)
-phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_max_runmean <- runmean(phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_max,101)
 phylogeny_lytic_phylosort$pham2_unshared_orpham_count_runmean <- runmean(phylogeny_lytic_phylosort$pham2_unshared_orpham_count,101)
 phylogeny_lytic_phylosort$pham2_pham_dissimilarity_runmean <- runmean(phylogeny_lytic_phylosort$pham2_pham_dissimilarity,101)
 phylogeny_lytic_phylosort$size_diff_ave_percent_runmean <- runmean(phylogeny_lytic_phylosort$size_diff_ave_percent,101)
@@ -3329,6 +2073,7 @@ phylogeny_lytic_phylosort$gsm_ave_size_shared_shared_runmean <- runmean(phylogen
 
 
 #Gene content dissimilarity
+#Supp. Fig. 9b (but doesn't quite look right)
 par(mar=c(4,8,4,4))
 plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_pham_dissimilarity_runmean,xlim=c(0,0.3),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
 par(new=TRUE)
@@ -3338,6 +2083,7 @@ plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham
 
 
 #Ave genome size difference
+#Supp. Fig. 9b (but doesn't quite look right)
 par(mar=c(4,8,4,4))
 plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$size_diff_ave_percent_runmean,xlim=c(0,0.3),ylim=c(0,0.06),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
 par(new=TRUE)
@@ -3346,12 +2092,8 @@ par(new=TRUE)
 plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$size_diff_ave_percent_runmean,xlim=c(0,0.3),ylim=c(0,0.06),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
 
 
-
-
-
-
-###NEED TO CHANGE COLORS
 #Unshared coding sequence proportion
+#Supp. Fig. 9c (but doesn't quite look right)
 par(mar=c(4,8,4,4))
 plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$gsm_unshared_coding_potential_runmean,xlim=c(0,0.3),ylim=c(0,0.4),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
 par(new=TRUE)
@@ -3361,6 +2103,7 @@ plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$gsm_
 
 
 #Shared/unshared ave gene size
+#Supp. Fig. 9c
 par(mar=c(4,8,4,4))
 plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$gsm_ave_size_shared_shared_runmean,xlim=c(0,0.3),ylim=c(0,800),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark blue")
 par(new=TRUE)
@@ -3368,6 +2111,8 @@ plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$gsm_av
 par(new=TRUE)
 plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$gsm_ave_size_shared_shared_runmean,xlim=c(0,0.3),ylim=c(0,800),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
 
+
+#Supp. Fig. 9c (but doesn't quite look right)
 par(mar=c(4,8,4,4))
 plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$gsm_ave_size_unshared_unshared_runmean,xlim=c(0,0.3),ylim=c(0,800),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
 par(new=TRUE)
@@ -3377,8 +2122,8 @@ plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$gsm_
 
 
 
-#Fig S9?
 #Shared/unshared pham distribution mean
+#Supp. Fig. 9c (but doesn't quite look right)
 par(mar=c(4,8,4,4))
 plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_mean_runmean,xlim=c(0,0.3),ylim=c(0,3),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark blue")
 par(new=TRUE)
@@ -3386,6 +2131,7 @@ plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$pham2_
 par(new=TRUE)
 plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham2_shared_pham_distribution_mean_runmean,xlim=c(0,0.3),ylim=c(0,3),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
 
+#Supp. Fig. 9c (but doesn't quite look right)
 par(mar=c(4,8,4,4))
 plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_mean_runmean,xlim=c(0,0.3),ylim=c(0,3),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
 par(new=TRUE)
@@ -3393,10 +2139,8 @@ plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$pham2_
 par(new=TRUE)
 plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_mean_runmean,xlim=c(0,0.3),ylim=c(0,3),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
 
-
-
-
 #Unshared orpham count
+#Supp. Fig. 9c (but doesn't quite look right)
 par(mar=c(4,8,4,4))
 plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_unshared_orpham_count_runmean,xlim=c(0,0.3),ylim=c(0,4),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
 par(new=TRUE)
@@ -3411,100 +2155,5 @@ plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-###Predict evolutionary mode
-
-data_for_mode_prediction <- subset(mash_table2,mash_table2$host_superkingdom_compare == "Bacteria" &
-                                     mash_table2$phage_viral_type_compare == "dsDNA" &
-                                     mash_table2$modified_mash_distance < 0.42 &
-                                     mash_table2$pham_pham_dissimilarity < 0.89)
-data_for_mode_prediction <- subset(data_for_mode_prediction,select=c("mash_reference","mash_query","modified_mash_distance","pham_pham_dissimilarity"))
-write.table(data_for_mode_prediction,"/Users/Hatfull_Lab/Desktop/Project_phage_classification/7_merged2333_analysis/20170315_data_for_mode_prediction.csv",sep=",",row.names = FALSE,col.names = FALSE,quote=FALSE)
-
-
-
-#Run the data through the analyze_mash_network_script to predict the evolutionary mode and analyze results in Excel
-
-
-
-
-
-
-
-###Fig. 3f Misc clusters genometrics
-
-
-misc_clusters_genometrics <- read.csv("misc_clusters_genometrics.csv",sep=",",header=TRUE)
-misc_clusters_genometrics$phage_cluster <- factor(misc_clusters_genometrics$phage_cluster,c("A1","F","BD","K","non-A1","B"))
-
-misc_clusters_gc <- read.csv("/Users/Hatfull_Lab/Desktop/Project_phage_classification/7_merged2333_analysis/current/20170403_misc_clusters_gc.csv",sep=",",header=TRUE)
-misc_clusters_gc$Cluster <- factor(misc_clusters_gc$Cluster,c("A1","F","BD","K","non-A1","B"))
-
-
-
-par(mar=c(8,24,4,4))
-boxplot(misc_clusters_genometrics$size ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
-stripchart(misc_clusters_genometrics$size ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
-
-par(mar=c(8,24,4,4))
-boxplot(misc_clusters_genometrics$total_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
-stripchart(misc_clusters_genometrics$total_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
-
-par(mar=c(8,24,4,4))
-boxplot(misc_clusters_genometrics$Unspecified_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
-stripchart(misc_clusters_genometrics$Unspecified_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
-
-par(mar=c(8,24,4,4))
-boxplot(misc_clusters_genometrics$lysis_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
-stripchart(misc_clusters_genometrics$lysis_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
-
-par(mar=c(8,24,4,4))
-boxplot(misc_clusters_genometrics$lysogeny_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
-stripchart(misc_clusters_genometrics$lysogeny_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
-
-par(mar=c(8,24,4,4))
-boxplot(misc_clusters_genometrics$recombination_replication_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
-stripchart(misc_clusters_genometrics$recombination_replication_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
-
-par(mar=c(8,24,4,4))
-boxplot(misc_clusters_genometrics$structure_assembly_gene_count ~ misc_clusters_genometrics$phage_cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
-stripchart(misc_clusters_genometrics$structure_assembly_gene_count ~ misc_clusters_genometrics$phage_cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
-
-par(mar=c(8,24,4,4))
-boxplot(misc_clusters_gc$GC ~ misc_clusters_gc$Cluster,las=2,cex.axis=2,whisklty=0,staplelty=0,range=0,varwidth=FALSE)
-stripchart(misc_clusters_gc$GC ~ misc_clusters_gc$Cluster,add=TRUE,vertical=TRUE,method="jitter",pch=19,cex=0.5,col=c("blue","blue","green","green","green","red"))
 
 
