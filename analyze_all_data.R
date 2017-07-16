@@ -1,36 +1,69 @@
-#R script to perform misc. analyses on Mash and pham data
+#R script to perform misc. analyses on Mash and pham data for Mavrich & Hatfull, Nature Micro, 2017
 #Travis Mavrich
-#Note: this code is not intended to be run from start to finish at once.
-#Instead, several sections require exporting data for other code/software or
-#importing additional data for analysis.
+#Note: this code merges and analyzes various datasets and exports datasets for downstream analyses in Python and Excel
+#Distinct analyses and code blocks separated by "###"
 
 
-#Function to import Mash data
-import_function <- function(kmer_file,kmer){
+###Define functions
+
+
+
+
+#The standard genomic similarity plot parameters
+plot_genomic_similarity_standard <- function(table){
   
-  kmer_table <- read.csv(kmer_file,sep=",",header=TRUE)
+  par(mar=c(4,8,4,4))
+  plot(table$modified_mash_distance,table$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+  abline(0,2,lty=2,lwd=3,col="grey")
   
-  #Convert fields from factor class (default) to character class
-  kmer_table$reference <- as.character(kmer_table$reference)
-  kmer_table$query <- as.character(kmer_table$query)
-  kmer_table$ref_query <- as.character(kmer_table$ref_query)
-  
-  #Create column headers and assign them
-  reference <- paste(kmer,"reference",sep="_")
-  query <- paste(kmer,"query",sep="_")
-  dist <- paste(kmer,"distance",sep="_")
-  pvalue <- paste(kmer,"pvalue",sep="_")
-  count <- paste(kmer,"count",sep="_")
-  ref_query <- paste(kmer,"ref_query",sep="_")
-  column_headers <- c(reference,query,dist,pvalue,count,ref_query)
-  names(kmer_table) <- column_headers
-  return(kmer_table)
+}
   
   
+  
+
+
+#Genomic similarities color-coded by type of intra- and inter-cluster comparisons
+plot_cluster_specific_profiles <- function(table,cluster){
+  
+  table$cluster_specific_one_or_two <- ifelse(table$ref_phage_cluster == cluster | table$query_phage_cluster == cluster,TRUE,FALSE)
+  table$cluster_specific_both <- ifelse(table$ref_phage_cluster == cluster & table$query_phage_cluster == cluster,TRUE,FALSE)
+  table$cluster_specific_one <- ifelse(table$cluster_specific_one_or_two == TRUE & table$cluster_specific_both == FALSE,TRUE,FALSE)
+  cluster_specific_one <- subset(table,table$cluster_specific_one == TRUE)
+  cluster_specific_both <- subset(table,table$cluster_specific_both == TRUE)
+  
+  par(mar=c(4,8,4,4))
+  plot(cluster_specific_both$modified_mash_distance,cluster_specific_both$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="orange")
+  par(new=TRUE)
+  plot(cluster_specific_one$modified_mash_distance,cluster_specific_one$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="black")
+  abline(0,2,lty=2,lwd=3,col="grey")
+  return(nrow(cluster_specific_one) + nrow(cluster_specific_both))
   
 }
 
 
+#Genomic similarities colored by evolutionary mode
+plot_genomic_similarity_tricolored <- function(table1,table2,table3){
+  
+  par(mar=c(4,8,4,4))
+  plot(table1$modified_mash_distance,table1$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
+  par(new=TRUE)
+  plot(table2$modified_mash_distance,table2$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
+  par(new=TRUE)
+  plot(table3$modified_mash_distance,table3$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
+  
+}
+  
+
+
+#Genomic similarities colored orange
+plot_genomic_similarity_orange <- function(table){
+  
+  par(mar=c(4,8,4,4))
+  plot(table$modified_mash_distance,table$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="orange")
+  abline(0,2,lty=2,lwd=3,col="grey")
+  
+}
+  
 
 #Function to compute how many comparisons in each data subset are assigned to each sector
 compute_sector_distribution <- function(table){
@@ -43,16 +76,16 @@ compute_sector_distribution <- function(table){
   sector_non_cds_similarity_count <- sum(table$sector_non_cds_similarity == TRUE)
   sector_filtered_out_count <- sum(table$sector_filtered_out == TRUE)
   
-
-    print(c("sector_intra_subcluster_count",
-            "sector_intra_cluster_count",
-            "sector_inter_cluster_distant_homology_count",
-            "sector_inter_cluster_hgt_count",
-            "sector_no_similarity_count",
-            "sector_non_cds_similarity_count",
-            "sector_filtered_out_count"))
   
-    print(c(sector_intra_subcluster_count,
+  print(c("sector_intra_subcluster_count",
+          "sector_intra_cluster_count",
+          "sector_inter_cluster_distant_homology_count",
+          "sector_inter_cluster_hgt_count",
+          "sector_no_similarity_count",
+          "sector_non_cds_similarity_count",
+          "sector_filtered_out_count"))
+  
+  print(c(sector_intra_subcluster_count,
           sector_intra_cluster_count,
           sector_inter_cluster_distant_homology_count,
           sector_inter_cluster_hgt_count,
@@ -60,28 +93,33 @@ compute_sector_distribution <- function(table){
           sector_non_cds_similarity_count,
           sector_filtered_out_count))
   
-    print(c("sector_intra_subcluster_percent",
-            "sector_intra_cluster_percent",
-            "sector_inter_cluster_distant_homology_percent",
-            "sector_inter_cluster_hgt_percent",
-            "sector_no_similarity_percent",
-            "sector_non_cds_similarity_percent",
-            "sector_filtered_out_percent"))
-
-    print(c(sector_intra_subcluster_count,
-            sector_intra_cluster_count,
-            sector_inter_cluster_distant_homology_count,
-            sector_inter_cluster_hgt_count,
-            sector_no_similarity_count,
-            sector_non_cds_similarity_count,
-            sector_filtered_out_count)/nrow(table))
-        
+  print(c("sector_intra_subcluster_percent",
+          "sector_intra_cluster_percent",
+          "sector_inter_cluster_distant_homology_percent",
+          "sector_inter_cluster_hgt_percent",
+          "sector_no_similarity_percent",
+          "sector_non_cds_similarity_percent",
+          "sector_filtered_out_percent"))
+  
+  print(c(sector_intra_subcluster_count,
+          sector_intra_cluster_count,
+          sector_inter_cluster_distant_homology_count,
+          sector_inter_cluster_hgt_count,
+          sector_no_similarity_count,
+          sector_non_cds_similarity_count,
+          sector_filtered_out_count)/nrow(table))
+  
 }
 
 
 
 
 
+
+
+
+
+###Import primary mash and gene content data
 
 #Import mash dataset
 #Format:
@@ -90,14 +128,14 @@ compute_sector_distribution <- function(table){
 #2 = mash distance 
 #3 = mash p-value
 #4 = mash kmer count
-mash_table <- import_function("processed_mash_output.csv","mash")
-
-
-#Convert fields from character class (default) to factor class
-mash_table$mash_reference <- as.factor(mash_table$mash_reference)
-mash_table$mash_query <- as.factor(mash_table$mash_query)
-mash_table$mash_ref_query <- as.factor(mash_table$mash_ref_query)
-
+#5 = reference_query
+mash_table <- read.csv("processed_mash_output.csv",sep=",",header=TRUE)
+names(mash_table) <- c("mash_reference",
+                       "mash_query",
+                       "mash_distance",
+                       "mash_pvalue",
+                       "mash_count",
+                       "mash_ref_query")
 
 
 
@@ -125,21 +163,21 @@ mash_table$mash_ref_query <- as.factor(mash_table$mash_ref_query)
 #19 = gene_count
 #20 = toxic
 #21 = predicted_temperate
-host_table <- read.csv("phage_host_data.csv",sep=",",header=TRUE)
+phage_metadata_table <- read.csv("phage_host_data.csv",sep=",",header=TRUE)
 
 
 #Convert all Unspecified fields to NA missing value
-host_table[host_table == "Unspecified"] <- NA
+phage_metadata_table[phage_metadata_table == "Unspecified"] <- NA
 
 
 
-#Modify column names of host data and merge with kmer table
-#Data for all phages in processed mash table should be present in host and phage metadata table.
+#Modify column names of host data and merge with mash table
+#Data for all phages in processed mash table should be present in phage metadata table.
 #As a result, do not select all.x=TRUE option. This way, any missing rows indicates an error in the table.
 
 
 #Match metadata for both the query and reference phages in each pairwise comparison
-names(host_table) <- c("phage_identifier","query_header_source_info","query_database",
+names(phage_metadata_table) <- c("phage_identifier","query_header_source_info","query_database",
                              "query_host_superkingdom","query_host_phylum","query_host_class","query_host_order","query_host_family","query_host_genus",
                              "query_phage_superkingdom","query_phage_viral_type","query_phage_order","query_phage_family","query_phage_genus",
                              "query_phage_cluster","query_phage_subcluster","query_phage_cluster_source",
@@ -147,9 +185,9 @@ names(host_table) <- c("phage_identifier","query_header_source_info","query_data
                              "query_toxic","query_predicted_temperate")
 
 
-mash_table2 <- merge(mash_table,host_table,by.x="mash_query",by.y="phage_identifier")
+main_data_table <- merge(mash_table,phage_metadata_table,by.x="mash_query",by.y="phage_identifier")
 
-names(host_table) <- c("phage_identifier","ref_header_source_info","ref_database",
+names(phage_metadata_table) <- c("phage_identifier","ref_header_source_info","ref_database",
                        "ref_host_superkingdom","ref_host_phylum","ref_host_class","ref_host_order","ref_host_family","ref_host_genus",
                        "ref_phage_superkingdom","ref_phage_viral_type","ref_phage_order","ref_phage_family","ref_phage_genus",
                        "ref_phage_cluster","ref_phage_subcluster","ref_phage_cluster_source",
@@ -158,9 +196,9 @@ names(host_table) <- c("phage_identifier","ref_header_source_info","ref_database
 
 
 
-mash_table2 <- merge(mash_table2,host_table,by.x="mash_reference",by.y="phage_identifier")
+main_data_table <- merge(main_data_table,phage_metadata_table,by.x="mash_reference",by.y="phage_identifier")
 
-names(host_table) <- c("phage_identifier","header_source_info","database",
+names(phage_metadata_table) <- c("phage_identifier","header_source_info","database",
                        "host_superkingdom","host_phylum","host_class","host_order","host_family","host_genus",
                        "phage_superkingdom","phage_viral_type","phage_order","phage_family","phage_genus",
                        "phage_cluster","phage_subcluster","phage_cluster_source",
@@ -170,19 +208,12 @@ names(host_table) <- c("phage_identifier","header_source_info","database",
 
 
 #Compare genome sizes
-mash_table2$size_diff <- abs(mash_table2$ref_size - mash_table2$query_size)
-mash_table2$size_diff_ref_percent <- mash_table2$size_diff / mash_table2$ref_size
-mash_table2$size_diff_query_percent <- mash_table2$size_diff / mash_table2$query_size
-mash_table2$size_diff_min_percent <- ifelse(mash_table2$size_diff_ref_percent < mash_table2$size_diff_query_percent,mash_table2$size_diff_ref_percent,mash_table2$size_diff_query_percent)
-mash_table2$size_diff_max_percent <- ifelse(mash_table2$size_diff_ref_percent > mash_table2$size_diff_query_percent,mash_table2$size_diff_ref_percent,mash_table2$size_diff_query_percent)
-mash_table2$size_diff_ave_percent <- (mash_table2$size_diff_ref_percent + mash_table2$size_diff_query_percent)/2
-
-
-
-#Compare difference in gene abundance
-mash_table2$gene_count_disparity <- abs(mash_table2$ref_gene_count - mash_table2$query_gene_count)
-mash_table2$gene_count_disparity_ave_percent <- ((mash_table2$gene_count_disparity/mash_table2$ref_gene_count) + (mash_table2$gene_count_disparity/mash_table2$query_gene_count))/2
-
+main_data_table$size_diff <- abs(main_data_table$ref_size - main_data_table$query_size)
+main_data_table$size_diff_ref_percent <- main_data_table$size_diff / main_data_table$ref_size
+main_data_table$size_diff_query_percent <- main_data_table$size_diff / main_data_table$query_size
+main_data_table$size_diff_min_percent <- ifelse(main_data_table$size_diff_ref_percent < main_data_table$size_diff_query_percent,main_data_table$size_diff_ref_percent,main_data_table$size_diff_query_percent)
+main_data_table$size_diff_max_percent <- ifelse(main_data_table$size_diff_ref_percent > main_data_table$size_diff_query_percent,main_data_table$size_diff_ref_percent,main_data_table$size_diff_query_percent)
+main_data_table$size_diff_ave_percent <- (main_data_table$size_diff_ref_percent + main_data_table$size_diff_query_percent)/2
 
 
 
@@ -190,6 +221,7 @@ mash_table2$gene_count_disparity_ave_percent <- ((mash_table2$gene_count_dispari
 
 
 #Import ANI data to check Mash vs Pham of specific clusters
+#This ANI data is different than the ANI data from 79 genomes used to optimize the Mash parameters
 #Format:
 #0 = ani_ref_query
 #1 = ani_reference
@@ -201,11 +233,11 @@ ani_data$ani_ref_query <- as.character(ani_data$ani_ref_query)
 ani_data$ani_distance <- 1 - ani_data$ani_ani
 
 #Merge with the main table
-mash_table2 <- merge(mash_table2,ani_data,by.x="mash_ref_query",by.y="ani_ref_query",all.x=TRUE)
+main_data_table <- merge(main_data_table,ani_data,by.x="mash_ref_query",by.y="ani_ref_query",all.x=TRUE)
 
 
 
-#Import pham data and merge with kmer table
+#Import pham data and merge with mash table
 #Format
 #0 = phage1
 #1 = phage1_number_unshared_phams
@@ -244,29 +276,29 @@ pham_table$pham_phage1_phage2 <- paste(pham_table$pham_phage1,"_",pham_table$pha
 pham_table$pham_phage1_phage2 <- as.factor(pham_table$pham_phage1_phage2)
 
 #To retain all rows, be sure to keep all.x=TRUE.
-#But you don't want to retain all rows = making scatter plots or histograms can cause errors if not all rows have data.
+#But all rows don't need to be retained = making scatter plots or histograms can cause errors if some rows are missing data.
 #Omitting all.x, all rows with no matching pham data are removed, so no errors are encountered when making scatterplots
-mash_table2 <- merge(mash_table2,pham_table,by.x="mash_ref_query",by.y="pham_phage1_phage2")
+main_data_table <- merge(main_data_table,pham_table,by.x="mash_ref_query",by.y="pham_phage1_phage2")
 
 
 
 #Assign filter status and change mash distance if data is not significant
 #Alternatively, the max percent parameter can be omitted with minimal change to final analysis.
-mash_table2$filter <- ifelse(mash_table2$mash_pvalue < 1e-10 & mash_table2$size_diff_max_percent < 1,TRUE,FALSE)
+main_data_table$filter <- ifelse(main_data_table$mash_pvalue < 1e-10 & main_data_table$size_diff_max_percent < 1,TRUE,FALSE)
 
-#At this point, the max mash distance of all filtered comparisons = 0.4903. So set the distance of all comparisons that did not pass the filter = 0.5
-mash_table2$modified_mash_distance <- ifelse(mash_table2$filter == TRUE,mash_table2$mash_distance,0.5)
+#At this point, the max mash distance of all filtered comparisons < 0.5. So set the distance of all comparisons that did not pass the filter = 0.5
+main_data_table$modified_mash_distance <- ifelse(main_data_table$filter == TRUE,main_data_table$mash_distance,0.5)
 
 
 
 
 
 #Assign evolutionary mode to each pairwise comparison.
-#This assigns all data in the dataset. However, evolutionary mode is only relevant to dsDNA
-mash_table2$gene_flux_part1 <- ifelse(mash_table2$modified_mash_distance < 0.1666667 & mash_table2$pham_pham_dissimilarity > (mash_table2$modified_mash_distance * 3.5),TRUE,FALSE)
-mash_table2$gene_flux_part2 <- ifelse(mash_table2$modified_mash_distance > 0.1666667 & mash_table2$pham_pham_dissimilarity > (mash_table2$modified_mash_distance * 2 + 0.25),TRUE,FALSE)
-mash_table2$gene_flux_category <- ifelse(mash_table2$gene_flux_part1 == TRUE | mash_table2$gene_flux_part2 ==TRUE,"high","low")
-mash_table2$gene_flux_category <- as.factor(mash_table2$gene_flux_category)
+#This assigns all data in the dataset, but evolutionary mode in this analysis is only relevant to dsDNA
+main_data_table$gene_flux_part1 <- ifelse(main_data_table$modified_mash_distance < 0.1666667 & main_data_table$pham_pham_dissimilarity > (main_data_table$modified_mash_distance * 3.5),TRUE,FALSE)
+main_data_table$gene_flux_part2 <- ifelse(main_data_table$modified_mash_distance > 0.1666667 & main_data_table$pham_pham_dissimilarity > (main_data_table$modified_mash_distance * 2 + 0.25),TRUE,FALSE)
+main_data_table$gene_flux_category <- ifelse(main_data_table$gene_flux_part1 == TRUE | main_data_table$gene_flux_part2 ==TRUE,"high","low")
+main_data_table$gene_flux_category <- as.factor(main_data_table$gene_flux_category)
 
 
 
@@ -290,44 +322,44 @@ intra_cluster_gene_content_threshold_upper <- 0.89
 
 #Assign each comparison to each sector as TRUE or FALSE
 #The last sector, "unsectored" is used to catch any errors
-mash_table2$sector_intra_subcluster <- ifelse(mash_table2$modified_mash_distance < intra_subcluster_nucleotide_threshold_upper &
-                                                mash_table2$modified_mash_distance >= 0 &
-                                                mash_table2$pham_pham_dissimilarity < intra_subcluster_gene_content_threshold_upper &
-                                                mash_table2$pham_pham_dissimilarity >= 0,TRUE,FALSE)
+main_data_table$sector_intra_subcluster <- ifelse(main_data_table$modified_mash_distance < intra_subcluster_nucleotide_threshold_upper &
+                                                main_data_table$modified_mash_distance >= 0 &
+                                                main_data_table$pham_pham_dissimilarity < intra_subcluster_gene_content_threshold_upper &
+                                                main_data_table$pham_pham_dissimilarity >= 0,TRUE,FALSE)
 
-mash_table2$sector_intra_cluster <- ifelse(mash_table2$modified_mash_distance < intra_cluster_nucleotide_threshold_upper &
-                                             mash_table2$pham_pham_dissimilarity < intra_cluster_gene_content_threshold_upper &
-                                             (mash_table2$modified_mash_distance >= intra_subcluster_nucleotide_threshold_upper |
-                                                (mash_table2$modified_mash_distance < intra_subcluster_nucleotide_threshold_upper &
-                                                   mash_table2$pham_pham_dissimilarity >= intra_subcluster_gene_content_threshold_upper)),TRUE,FALSE)
+main_data_table$sector_intra_cluster <- ifelse(main_data_table$modified_mash_distance < intra_cluster_nucleotide_threshold_upper &
+                                             main_data_table$pham_pham_dissimilarity < intra_cluster_gene_content_threshold_upper &
+                                             (main_data_table$modified_mash_distance >= intra_subcluster_nucleotide_threshold_upper |
+                                                (main_data_table$modified_mash_distance < intra_subcluster_nucleotide_threshold_upper &
+                                                   main_data_table$pham_pham_dissimilarity >= intra_subcluster_gene_content_threshold_upper)),TRUE,FALSE)
 
-mash_table2$sector_inter_cluster_distant_homology <- ifelse(mash_table2$modified_mash_distance < 0.5 &
-                                                              mash_table2$modified_mash_distance >= intra_cluster_nucleotide_threshold_upper &
-                                                              mash_table2$pham_pham_dissimilarity < intra_cluster_gene_content_threshold_upper &
-                                                              mash_table2$pham_pham_dissimilarity >= 0,TRUE,FALSE)
+main_data_table$sector_inter_cluster_distant_homology <- ifelse(main_data_table$modified_mash_distance < 0.5 &
+                                                              main_data_table$modified_mash_distance >= intra_cluster_nucleotide_threshold_upper &
+                                                              main_data_table$pham_pham_dissimilarity < intra_cluster_gene_content_threshold_upper &
+                                                              main_data_table$pham_pham_dissimilarity >= 0,TRUE,FALSE)
 
-mash_table2$sector_inter_cluster_hgt <- ifelse(mash_table2$modified_mash_distance < intra_cluster_nucleotide_threshold_upper &
-                                                 mash_table2$modified_mash_distance >= 0 &
-                                                 mash_table2$pham_pham_dissimilarity < 1 &
-                                                 mash_table2$pham_pham_dissimilarity >= intra_cluster_gene_content_threshold_upper,TRUE,FALSE)
+main_data_table$sector_inter_cluster_hgt <- ifelse(main_data_table$modified_mash_distance < intra_cluster_nucleotide_threshold_upper &
+                                                 main_data_table$modified_mash_distance >= 0 &
+                                                 main_data_table$pham_pham_dissimilarity < 1 &
+                                                 main_data_table$pham_pham_dissimilarity >= intra_cluster_gene_content_threshold_upper,TRUE,FALSE)
 
-mash_table2$sector_no_similarity <- ifelse(mash_table2$modified_mash_distance < 0.5 &
-                                             mash_table2$modified_mash_distance >= intra_cluster_nucleotide_threshold_upper &
-                                             mash_table2$pham_pham_dissimilarity >= intra_cluster_gene_content_threshold_upper,TRUE,FALSE)
+main_data_table$sector_no_similarity <- ifelse(main_data_table$modified_mash_distance < 0.5 &
+                                             main_data_table$modified_mash_distance >= intra_cluster_nucleotide_threshold_upper &
+                                             main_data_table$pham_pham_dissimilarity >= intra_cluster_gene_content_threshold_upper,TRUE,FALSE)
 
-mash_table2$sector_non_cds_similarity <- ifelse(mash_table2$modified_mash_distance < intra_cluster_nucleotide_threshold_upper &
-                                                  mash_table2$modified_mash_distance >= 0 &
-                                                  mash_table2$pham_pham_dissimilarity == 1,TRUE,FALSE)
+main_data_table$sector_non_cds_similarity <- ifelse(main_data_table$modified_mash_distance < intra_cluster_nucleotide_threshold_upper &
+                                                  main_data_table$modified_mash_distance >= 0 &
+                                                  main_data_table$pham_pham_dissimilarity == 1,TRUE,FALSE)
 
-mash_table2$sector_filtered_out <- ifelse(mash_table2$modified_mash_distance == 0.5,TRUE,FALSE)
+main_data_table$sector_filtered_out <- ifelse(main_data_table$modified_mash_distance == 0.5,TRUE,FALSE)
 
-mash_table2$sector_unsectored <- ifelse(mash_table2$sector_intra_subcluster == FALSE &
-                                          mash_table2$sector_intra_cluster == FALSE &
-                                          mash_table2$sector_inter_cluster_distant_homology == FALSE &
-                                          mash_table2$sector_inter_cluster_hgt == FALSE &
-                                          mash_table2$sector_no_similarity == FALSE &
-                                          mash_table2$sector_non_cds_similarity == FALSE &
-                                          mash_table2$sector_filtered_out == FALSE,TRUE,FALSE)
+main_data_table$sector_unsectored <- ifelse(main_data_table$sector_intra_subcluster == FALSE &
+                                          main_data_table$sector_intra_cluster == FALSE &
+                                          main_data_table$sector_inter_cluster_distant_homology == FALSE &
+                                          main_data_table$sector_inter_cluster_hgt == FALSE &
+                                          main_data_table$sector_no_similarity == FALSE &
+                                          main_data_table$sector_non_cds_similarity == FALSE &
+                                          main_data_table$sector_filtered_out == FALSE,TRUE,FALSE)
 
 
 
@@ -337,50 +369,52 @@ mash_table2$sector_unsectored <- ifelse(mash_table2$sector_intra_subcluster == F
 
 
 #Compare ref and query host and phage metadata columns
-mash_table2$host_superkingdom_compare <- ifelse(mash_table2$ref_host_superkingdom==mash_table2$query_host_superkingdom,as.character(mash_table2$ref_host_superkingdom),"different")
-mash_table2$host_phylum_compare <- ifelse(mash_table2$ref_host_phylum==mash_table2$query_host_phylum,as.character(mash_table2$ref_host_phylum),"different")
-mash_table2$host_class_compare <- ifelse(mash_table2$ref_host_class==mash_table2$query_host_class,as.character(mash_table2$ref_host_class),"different")
-mash_table2$host_order_compare <- ifelse(mash_table2$ref_host_order==mash_table2$query_host_order,as.character(mash_table2$ref_host_order),"different")
-mash_table2$host_family_compare <- ifelse(mash_table2$ref_host_family==mash_table2$query_host_family,as.character(mash_table2$ref_host_family),"different")
-mash_table2$host_genus_compare <- ifelse(mash_table2$ref_host_genus==mash_table2$query_host_genus,as.character(mash_table2$ref_host_genus),"different")
-mash_table2$phage_superkingdom_compare <- ifelse(mash_table2$ref_phage_superkingdom==mash_table2$query_phage_superkingdom,as.character(mash_table2$ref_phage_superkingdom),"different")
-mash_table2$phage_viral_type_compare <- ifelse(mash_table2$ref_phage_viral_type==mash_table2$query_phage_viral_type,as.character(mash_table2$ref_phage_viral_type),"different")
-mash_table2$phage_order_compare <- ifelse(mash_table2$ref_phage_order==mash_table2$query_phage_order,as.character(mash_table2$ref_phage_order),"different")
-mash_table2$phage_family_compare <- ifelse(mash_table2$ref_phage_family==mash_table2$query_phage_family,as.character(mash_table2$ref_phage_family),"different")
-mash_table2$phage_genus_compare <- ifelse(mash_table2$ref_phage_genus==mash_table2$query_phage_genus,as.character(mash_table2$ref_phage_genus),"different")
-mash_table2$phage_cluster_compare <- ifelse(mash_table2$ref_phage_cluster==mash_table2$query_phage_cluster,as.character(mash_table2$ref_phage_cluster),"different")
-mash_table2$phage_subcluster_compare <- ifelse(mash_table2$ref_phage_subcluster==mash_table2$query_phage_subcluster,as.character(mash_table2$ref_phage_subcluster),"different")
-mash_table2$phage_cluster_source_compare <- ifelse(mash_table2$ref_phage_cluster_source==mash_table2$query_phage_cluster_source,as.character(mash_table2$ref_phage_cluster_source),"different")
-mash_table2$phage_temperate_compare <- ifelse(mash_table2$ref_phage_temperate==mash_table2$query_phage_temperate,as.character(mash_table2$ref_phage_temperate),"different")
-mash_table2$phage_toxic_compare <- ifelse(mash_table2$ref_toxic==mash_table2$query_toxic,as.character(mash_table2$ref_toxic),"different")
-mash_table2$phage_predicted_temperate_compare <- ifelse(mash_table2$ref_predicted_temperate==mash_table2$query_predicted_temperate,as.character(mash_table2$ref_predicted_temperate),"different")
+main_data_table$host_superkingdom_compare <- ifelse(main_data_table$ref_host_superkingdom==main_data_table$query_host_superkingdom,as.character(main_data_table$ref_host_superkingdom),"different")
+main_data_table$host_phylum_compare <- ifelse(main_data_table$ref_host_phylum==main_data_table$query_host_phylum,as.character(main_data_table$ref_host_phylum),"different")
+main_data_table$host_class_compare <- ifelse(main_data_table$ref_host_class==main_data_table$query_host_class,as.character(main_data_table$ref_host_class),"different")
+main_data_table$host_order_compare <- ifelse(main_data_table$ref_host_order==main_data_table$query_host_order,as.character(main_data_table$ref_host_order),"different")
+main_data_table$host_family_compare <- ifelse(main_data_table$ref_host_family==main_data_table$query_host_family,as.character(main_data_table$ref_host_family),"different")
+main_data_table$host_genus_compare <- ifelse(main_data_table$ref_host_genus==main_data_table$query_host_genus,as.character(main_data_table$ref_host_genus),"different")
+main_data_table$phage_superkingdom_compare <- ifelse(main_data_table$ref_phage_superkingdom==main_data_table$query_phage_superkingdom,as.character(main_data_table$ref_phage_superkingdom),"different")
+main_data_table$phage_viral_type_compare <- ifelse(main_data_table$ref_phage_viral_type==main_data_table$query_phage_viral_type,as.character(main_data_table$ref_phage_viral_type),"different")
+main_data_table$phage_order_compare <- ifelse(main_data_table$ref_phage_order==main_data_table$query_phage_order,as.character(main_data_table$ref_phage_order),"different")
+main_data_table$phage_family_compare <- ifelse(main_data_table$ref_phage_family==main_data_table$query_phage_family,as.character(main_data_table$ref_phage_family),"different")
+main_data_table$phage_genus_compare <- ifelse(main_data_table$ref_phage_genus==main_data_table$query_phage_genus,as.character(main_data_table$ref_phage_genus),"different")
+main_data_table$phage_cluster_compare <- ifelse(main_data_table$ref_phage_cluster==main_data_table$query_phage_cluster,as.character(main_data_table$ref_phage_cluster),"different")
+main_data_table$phage_subcluster_compare <- ifelse(main_data_table$ref_phage_subcluster==main_data_table$query_phage_subcluster,as.character(main_data_table$ref_phage_subcluster),"different")
+main_data_table$phage_cluster_source_compare <- ifelse(main_data_table$ref_phage_cluster_source==main_data_table$query_phage_cluster_source,as.character(main_data_table$ref_phage_cluster_source),"different")
+main_data_table$phage_temperate_compare <- ifelse(main_data_table$ref_phage_temperate==main_data_table$query_phage_temperate,as.character(main_data_table$ref_phage_temperate),"different")
+main_data_table$phage_toxic_compare <- ifelse(main_data_table$ref_toxic==main_data_table$query_toxic,as.character(main_data_table$ref_toxic),"different")
+main_data_table$phage_predicted_temperate_compare <- ifelse(main_data_table$ref_predicted_temperate==main_data_table$query_predicted_temperate,as.character(main_data_table$ref_predicted_temperate),"different")
 
 
 
 
 
 #Now set all new columns to factor class
-mash_table2$host_superkingdom_compare <- as.factor(mash_table2$host_superkingdom_compare)
-mash_table2$host_phylum_compare <- as.factor(mash_table2$host_phylum_compare)
-mash_table2$host_class_compare <- as.factor(mash_table2$host_class_compare)
-mash_table2$host_order_compare <- as.factor(mash_table2$host_order_compare)
-mash_table2$host_family_compare <- as.factor(mash_table2$host_family_compare)
-mash_table2$host_genus_compare <- as.factor(mash_table2$host_genus_compare)
-mash_table2$phage_superkingdom_compare <- as.factor(mash_table2$phage_superkingdom_compare)
-mash_table2$phage_viral_type_compare <- as.factor(mash_table2$phage_viral_type_compare)
-mash_table2$phage_order_compare <- as.factor(mash_table2$phage_order_compare)
-mash_table2$phage_family_compare <- as.factor(mash_table2$phage_family_compare)
-mash_table2$phage_genus_compare <- as.factor(mash_table2$phage_genus_compare)
-mash_table2$phage_cluster_compare <- as.factor(mash_table2$phage_cluster_compare)
-mash_table2$phage_subcluster_compare <- as.factor(mash_table2$phage_subcluster_compare)
-mash_table2$phage_cluster_source_compare <- as.factor(mash_table2$phage_cluster_source_compare)
-mash_table2$phage_temperate_compare <- as.factor(mash_table2$phage_temperate_compare)
-mash_table2$phage_toxic_compare <- as.factor(mash_table2$phage_toxic_compare)
-mash_table2$phage_predicted_temperate_compare <- as.factor(mash_table2$phage_predicted_temperate_compare)
+main_data_table$host_superkingdom_compare <- as.factor(main_data_table$host_superkingdom_compare)
+main_data_table$host_phylum_compare <- as.factor(main_data_table$host_phylum_compare)
+main_data_table$host_class_compare <- as.factor(main_data_table$host_class_compare)
+main_data_table$host_order_compare <- as.factor(main_data_table$host_order_compare)
+main_data_table$host_family_compare <- as.factor(main_data_table$host_family_compare)
+main_data_table$host_genus_compare <- as.factor(main_data_table$host_genus_compare)
+main_data_table$phage_superkingdom_compare <- as.factor(main_data_table$phage_superkingdom_compare)
+main_data_table$phage_viral_type_compare <- as.factor(main_data_table$phage_viral_type_compare)
+main_data_table$phage_order_compare <- as.factor(main_data_table$phage_order_compare)
+main_data_table$phage_family_compare <- as.factor(main_data_table$phage_family_compare)
+main_data_table$phage_genus_compare <- as.factor(main_data_table$phage_genus_compare)
+main_data_table$phage_cluster_compare <- as.factor(main_data_table$phage_cluster_compare)
+main_data_table$phage_subcluster_compare <- as.factor(main_data_table$phage_subcluster_compare)
+main_data_table$phage_cluster_source_compare <- as.factor(main_data_table$phage_cluster_source_compare)
+main_data_table$phage_temperate_compare <- as.factor(main_data_table$phage_temperate_compare)
+main_data_table$phage_toxic_compare <- as.factor(main_data_table$phage_toxic_compare)
+main_data_table$phage_predicted_temperate_compare <- as.factor(main_data_table$phage_predicted_temperate_compare)
 
 
-#At this point, all imported data has been processed. From here on out, commands are mostly analysis
-#based on subsets of the data, although for some specific analyses dataset are imported or exported. 
+#At this point, the primary data for the analysis has been imported and processed.
+#From here on out, commands are mostly analysis and data visualization.
+#Although, for some specific analyses, additional datasets are either exported for downstream analysis with Python or Excel or imported
+#to be paired up with the primary data.
 
 
 
@@ -393,21 +427,20 @@ mash_table2$phage_predicted_temperate_compare <- as.factor(mash_table2$phage_pre
 
 
 ###All dsDNA phages
-bacteria <- subset(mash_table2,mash_table2$host_superkingdom_compare == "Bacteria")
-type_dsDNA <- subset(bacteria,bacteria$phage_viral_type_compare == "dsDNA")
+bacteria_dsDNA <- subset(main_data_table,main_data_table$host_superkingdom_compare == 'Bacteria' & main_data_table$phage_viral_type_compare == 'dsDNA')
+
+
 
 #Fig. 1a
-par(mar=c(4,8,4,4))
-plot(type_dsDNA$modified_mash_distance,type_dsDNA$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(bacteria_dsDNA)
 
 #Fig. 1a
 par(mar=c(4,8,15,4))
-hist(type_dsDNA$modified_mash_distance,breaks=((range(type_dsDNA$modified_mash_distance)[2]-range(type_dsDNA$modified_mash_distance)[1]) * 100),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(0,0.5),ylim=c(0,3e4),col="black",cex.axis=2)
+hist(bacteria_dsDNA$modified_mash_distance,breaks=((range(bacteria_dsDNA$modified_mash_distance)[2]-range(bacteria_dsDNA$modified_mash_distance)[1]) * 100),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(0,0.5),ylim=c(0,3e4),col="black",cex.axis=2)
 
 #Fig. 1a
 par(mar=c(4,4,15,4))
-hist(type_dsDNA$pham_pham_dissimilarity,breaks=((range(type_dsDNA$pham_pham_dissimilarity)[2]-range(type_dsDNA$pham_pham_dissimilarity)[1]) * 100 +1),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(1,0),col="black",cex.axis=2,ylim=c(0,2e3),yaxt="n")
+hist(bacteria_dsDNA$pham_pham_dissimilarity,breaks=((range(bacteria_dsDNA$pham_pham_dissimilarity)[2]-range(bacteria_dsDNA$pham_pham_dissimilarity)[1]) * 100 +1),xlab=NULL,ylab=NULL,main=NULL,las=1,xlim=c(1,0),col="black",cex.axis=2,ylim=c(0,2e3),yaxt="n")
 axis(side=4,pos=0,cex.axis=2)
 
 
@@ -420,29 +453,22 @@ axis(side=4,pos=0,cex.axis=2)
 
 
 
-###Check by empirical lifestyle.
-type <- subset(mash_table2,mash_table2$phage_viral_type_compare != "different")
-type_dsDNA <- subset(type,type$phage_viral_type_compare == "dsDNA")
-
-all_temperate <- subset(type_dsDNA,type_dsDNA$phage_temperate_compare == "yes")
-all_lytic <- subset(type_dsDNA,type_dsDNA$phage_temperate_compare == "no")
-all_different <- subset(type_dsDNA,type_dsDNA$phage_temperate_compare == "different")
+###Empirical lifestyle analysis
+bacteria_dsDNA <- subset(main_data_table,main_data_table$host_superkingdom_compare == 'Bacteria' & main_data_table$phage_viral_type_compare == 'dsDNA')
+all_temperate <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_temperate_compare == "yes")
+all_lytic <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_temperate_compare == "no")
+all_different <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_temperate_compare == "different")
 
 
 #Fig. 1c
-par(mar=c(4,8,4,4))
-plot(all_temperate$modified_mash_distance,all_temperate$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(all_temperate)
 
 #Fig. 1c
-par(mar=c(4,8,4,4))
-plot(all_lytic$modified_mash_distance,all_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(all_lytic)
 
 #Fig. 1c
-par(mar=c(4,8,4,4))
-plot(all_different$modified_mash_distance,all_different$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(all_different)
+
 
 
 
@@ -453,28 +479,7 @@ abline(0,2,lty=2,lwd=3,col="grey")
 
 
 ###Cluster-specific analysis
-plot_cluster_specific_profiles <- function(table,cluster){
-  
-  table$cluster_specific_one_or_two <- ifelse(table$ref_phage_cluster == cluster | table$query_phage_cluster == cluster,TRUE,FALSE)
-  table$cluster_specific_both <- ifelse(table$ref_phage_cluster == cluster & table$query_phage_cluster == cluster,TRUE,FALSE)
-  table$cluster_specific_one <- ifelse(table$cluster_specific_one_or_two == TRUE & table$cluster_specific_both == FALSE,TRUE,FALSE)
-  cluster_specific_one <- subset(table,table$cluster_specific_one == TRUE)
-  cluster_specific_both <- subset(table,table$cluster_specific_both == TRUE)
-  
-  
-  
-  
-  par(mar=c(4,8,4,4))
-  plot(cluster_specific_both$modified_mash_distance,cluster_specific_both$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="orange")
-  par(new=TRUE)
-  plot(cluster_specific_one$modified_mash_distance,cluster_specific_one$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="black")
-  abline(0,2,lty=2,lwd=3,col="grey")
-  return(nrow(cluster_specific_one) + nrow(cluster_specific_both))
-  
-}
-type <- subset(mash_table2,mash_table2$phage_viral_type_compare != "different")
-type_dsDNA <- subset(type,type$phage_viral_type_compare == "dsDNA")
-cluster_actino <- subset(type_dsDNA,type_dsDNA$phage_cluster_source_compare == "actino")
+cluster_actino <- subset(main_data_table,main_data_table$phage_cluster_source_compare == "actino")
 
 #Fig. 2a
 dev.off()
@@ -510,12 +515,11 @@ plot_cluster_specific_profiles(cluster_actino,"N")
 
 
 
-###Check A1 and non-A1 distances to other non-A phages
+###Cluster A analysis
+#Check A1 and non-A1 distances to other non-A phages.
 #Since only actino phages that have been clustered are used, all rows should have cluster data.
-#However, not all rows necessarily have subcluster data, so you have to take this into account.
-type <- subset(mash_table2,mash_table2$phage_viral_type_compare != "different")
-type_dsDNA <- subset(type,type$phage_viral_type_compare == "dsDNA")
-cluster_actino <- subset(type_dsDNA,type_dsDNA$phage_cluster_source_compare == "actino")
+#However, not all rows necessarily have subcluster data, so this must be taken into account.
+cluster_actino <- subset(main_data_table,main_data_table$phage_cluster_source_compare == "actino")
 
 
 
@@ -531,28 +535,28 @@ cluster_actino$cluster_A_one <- ifelse(cluster_actino$cluster_A_one_or_two == TR
 cluster_actino$cluster_A_one_but_notA1 <- ifelse(cluster_actino$cluster_A_one == TRUE & cluster_actino$subcluster_A1_neither == TRUE,TRUE,FALSE)
 
 
-#Subset of all comparisons with at least one A1 phage
+#Comparisons with at least one A1 phage
 subcluster_A1_one_or_two_all <- subset(cluster_actino,cluster_actino$subcluster_A1_one_or_two == TRUE)
 
-#Subset of all A1 comparisons
+#Comparisons between all A1 phages
 subcluster_A1_both <- subset(subcluster_A1_one_or_two_all,subcluster_A1_one_or_two_all$phage_subcluster_compare == "A1")
 
-#Subset of all comparisons with one and only one A1 phage
+#Comparisons of one and only one A1 phage
 subcluster_A1_one_all <- subset(subcluster_A1_one_or_two_all,subcluster_A1_one_or_two_all$subcluster_A1_one == TRUE)
 
-#Subset of all comparisons with one and only one A1 phage, and the other phage is a Cluster A phage
+#Comparisons of one and only one A1 phage, and the other phage is a Cluster A phage
 subcluster_A1_one_clusterA <- subset(subcluster_A1_one_all,subcluster_A1_one_all$phage_cluster_compare == "A")
 
-#Subset of all comparisons with one and only one A1 phage, and the other phage is NOT a Cluster A phage
+#Comparisons of one and only one A1 phage, and the other phage is NOT a Cluster A phage
 #The phage_cluster_compare should NOT be "A", but it can be "NA" (since some phages are not clustered), or it can be "different"
-subcluster_A1_one_other_not_clusterA <- subset(subcluster_A1_one_all,is.na(subcluster_A1_one_all$phage_cluster_compare) | subcluster_A1_one_all$phage_cluster_compare == "different")
+subcluster_A1_one_other_not_clusterA <- subset(subcluster_A1_one_all,
+                                               is.na(subcluster_A1_one_all$phage_cluster_compare) | 
+                                               subcluster_A1_one_all$phage_cluster_compare == "different")
 
-
-
-#Subset of all comparisons with one and only non-A1, and no other cluster A
+#Comparisons of one and only non-A1, and no other Cluster A phages
 cluster_A_one_but_notA1 <- subset(cluster_actino,cluster_actino$cluster_A_one_but_notA1 == TRUE)
 
-#Subset of all comparisons with both A, but no A1
+#Comparisons of two Cluster A phages, but neither are A1 phages
 cluster_A_both_but_notA1 <- subset(cluster_actino,cluster_actino$cluster_A_both_but_notA1 == TRUE)
 
 
@@ -653,78 +657,34 @@ stripchart(misc_clusters_gc$GC ~ misc_clusters_gc$Cluster,add=TRUE,vertical=TRUE
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-###By host phylum, then by lifestyle
+###Host phylum and empirical lifestyle analysis
 #Only focus on dsDNA phages, so remove other phage types.
-bacteria <- subset(mash_table2,mash_table2$host_superkingdom_compare == "Bacteria")
-type_dsDNA <- subset(bacteria,bacteria$phage_viral_type_compare == "dsDNA")
+bacteria_dsDNA <- subset(main_data_table,main_data_table$host_superkingdom_compare == 'Bacteria' & main_data_table$phage_viral_type_compare == 'dsDNA')
+host_phylum_diff <- subset(bacteria_dsDNA,bacteria_dsDNA$host_phylum_compare == "different")
 
-host_phylum <- subset(type_dsDNA,type_dsDNA$host_phylum_compare != "different")
-host_phylum_diff <- subset(type_dsDNA,type_dsDNA$host_phylum_compare == "different")
-
-actino <- subset(host_phylum,host_phylum$host_phylum_compare == "Actinobacteria")
-bacter <- subset(host_phylum,host_phylum$host_phylum_compare == "Bacteroidetes")
-cyano <- subset(host_phylum,host_phylum$host_phylum_compare == "Cyanobacteria")
-firm <- subset(host_phylum,host_phylum$host_phylum_compare == "Firmicutes")
-proteo <- subset(host_phylum,host_phylum$host_phylum_compare == "Proteobacteria")
-
-
-
-
-
-
+actino <- subset(bacteria_dsDNA,bacteria_dsDNA$host_phylum_compare == "Actinobacteria")
+bacter <- subset(bacteria_dsDNA,bacteria_dsDNA$host_phylum_compare == "Bacteroidetes")
+cyano <- subset(bacteria_dsDNA,bacteria_dsDNA$host_phylum_compare == "Cyanobacteria")
+firm <- subset(bacteria_dsDNA,bacteria_dsDNA$host_phylum_compare == "Firmicutes")
+proteo <- subset(bacteria_dsDNA,bacteria_dsDNA$host_phylum_compare == "Proteobacteria")
 
 
 #Same phylum
-#Scatter plots of Mash vs Pham distances by host phyla
-
 
 #Fig 4a
-par(mar=c(4,8,4,4))
-plot(actino$modified_mash_distance,actino$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(actino)
 
 #Fig 4b
-par(mar=c(4,8,4,4))
-plot(bacter$modified_mash_distance,bacter$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(bacter)
 
 #Fig 4c
-par(mar=c(4,8,4,4))
-plot(cyano$modified_mash_distance,cyano$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(cyano)
 
 #Fig 4d
-par(mar=c(4,8,4,4))
-plot(firm$modified_mash_distance,firm$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(firm)
 
 #Fig 4e
-par(mar=c(4,8,4,4))
-plot(proteo$modified_mash_distance,proteo$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(proteo)
 
 
 
@@ -787,9 +747,7 @@ axis(side=4,pos=0,cex.axis=2)
 
 #Different phyla
 #Supp. Fig. 5c
-par(mar=c(4,8,4,4))
-plot(host_phylum_diff$modified_mash_distance,host_phylum_diff$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(host_phylum_diff)
 
 
 
@@ -800,61 +758,19 @@ abline(0,2,lty=2,lwd=3,col="grey")
 
 
 
+###Compare general vs jaccard gene content dissimilarity
+bacteria_dsDNA <- subset(main_data_table,main_data_table$host_superkingdom_compare == 'Bacteria' & main_data_table$phage_viral_type_compare == 'dsDNA')
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-###pham general vs jaccard dissimilarity
-
-type <- subset(mash_table2,mash_table2$phage_viral_type_compare != "different")
-type_dsDNA <- subset(type,type$phage_viral_type_compare == "dsDNA")
-bacteria_dsDNA <- subset(type_dsDNA,type_dsDNA$host_superkingdom_compare == 'Bacteria')
-
-
-#Check how correlated pham dissimilarity and jaccard dissimilarity are
+#Assess correlation of general dissimilarity and jaccard dissimilarity
 #Supp. Fig. 2a
 par(mar=c(4,8,4,4))
-plot(mash_table2$pham_jaccard_dissimilarity,mash_table2$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+plot(main_data_table$pham_jaccard_dissimilarity,main_data_table$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
 abline(0,1,lty=2,lwd=3,col="grey")
 
 
-#Mash vs Pham plot using jaccard
+#Genomic similarity (Mash vs Pham) plot using jaccard dissimilarity
 #Supp. Fig. 2b
 par(mar=c(4,8,4,4))
 plot(bacteria_dsDNA$modified_mash_distance,bacteria_dsDNA$pham_jaccard_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
@@ -866,8 +782,7 @@ abline(0,2,lty=2,lwd=3,col="grey")
 
 
 
-###ANI vs Pham Dissimilarity data
-#Import ANI data from the 79 genome optimization test to show ANI vs Pham Distance
+###ANI vs Pham Dissimilarity data for the 79 genomes that were used to optimize Mash parameters
 #Data contains complete matrix of 79 x 79 comparisons, including self comparisons and duplicate (reciprocal) comparisons
 #Format
 #0 = ref_query
@@ -880,12 +795,10 @@ names(ani79_data) <- c("ani79_ref_query","ani79_ref_phage_identifier","ani79_que
 
 #Merge tables
 #The main mash table contains non-redundant comparisona and no self comparisons
-ani79_analysis <- merge(mash_table2,ani79_data,by.x="mash_ref_query",by.y="ani79_ref_query")
+ani79_analysis <- merge(main_data_table,ani79_data,by.x="mash_ref_query",by.y="ani79_ref_query")
 
 #Supp. Fig. 2c
-par(mar=c(4,8,4,4))
-plot(ani79_analysis$modified_mash_distance,ani79_analysis$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(ani79_analysis)
 
 #Supp. Fig. 2c
 par(mar=c(4,8,4,4))
@@ -898,9 +811,9 @@ abline(0,2,lty=2,lwd=3,col="grey")
 
 
 
-###Compare Mash to ANI
-#Compare patterns from pham-mash and pham-ani comparisons
-ani_mash <- subset(mash_table2,complete.cases(mash_table2$ani_distance))
+###Compare Mash to ANI for specific clusters
+#Compare patterns from pham vs mash and pham vs ani comparisons
+ani_mash <- subset(main_data_table,complete.cases(main_data_table$ani_distance))
 
 #Colored plot by assigned evolutionary mode 
 ani_mash_hgcf <- subset(ani_mash,ani_mash$gene_flux_category == "high" & ani_mash$phage_predicted_temperate_compare == "yes")
@@ -909,12 +822,7 @@ ani_mash_lytic <- subset(ani_mash,ani_mash$phage_predicted_temperate_compare == 
 
 
 #Supp. Fig. 2d
-par(mar=c(4,8,4,4))
-plot(ani_mash_hgcf$modified_mash_distance,ani_mash_hgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-par(new=TRUE)
-plot(ani_mash_lgcf$modified_mash_distance,ani_mash_lgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-par(new=TRUE)
-plot(ani_mash_lytic$modified_mash_distance,ani_mash_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
+plot_genomic_similarity_tricolored(ani_mash_hgcf,ani_mash_lgcf,ani_mash_lytic)
 
 #Supp. Fig. 2d
 par(mar=c(4,8,4,4))
@@ -972,48 +880,47 @@ vog_table$vog_ref_query <- as.factor(vog_table$vog_ref_query)
 
 #VOG data is based on 1877 genomes that are present in the merged2333 dataset.
 #But the VOG data contains redundant data rows, where each comparison is represented twice, with the ref and query reversed
-#So when merged to mash_table2, no need to keep all rows in either table - it is expected there will be fewer rows than in both tables
+#So when merged to main_data_table, no need to keep all rows in either table - it is expected there will be fewer rows than in both tables
 #Also, there are 2 genomes (vb_paem_c1-14-ab28__NC_026600 and pv94__NC_027368) that contain no annotated genes. These are not in the pham data,
 #so even though they are present in the VOG data, I am unable to compare these two genomes. This results in 1875 genomes.
-mash_table2_vog <- merge(mash_table2,vog_table,by.x="mash_ref_query",by.y="vog_ref_query")
-mash_table2_vog$mash_reference <- factor(mash_table2_vog$mash_reference)
-mash_table2_vog$mash_query <- factor(mash_table2_vog$mash_query)
+main_data_table_vog <- merge(main_data_table,vog_table,by.x="mash_ref_query",by.y="vog_ref_query")
+main_data_table_vog$mash_reference <- factor(main_data_table_vog$mash_reference)
+main_data_table_vog$mash_query <- factor(main_data_table_vog$mash_query)
 
-
-
-bacteria_dsDNA <- subset(mash_table2_vog,mash_table2_vog$host_superkingdom_compare == 'Bacteria' & mash_table2_vog$phage_viral_type_compare == 'dsDNA')
-temperate_both <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_temperate_compare == 'yes')
-temperate_neither <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_temperate_compare == 'no')
-
+vog_bacteria_dsDNA <- subset(main_data_table_vog,main_data_table_vog$host_superkingdom_compare == 'Bacteria' & main_data_table_vog$phage_viral_type_compare == 'dsDNA')
+vog_temperate_both <- subset(vog_bacteria_dsDNA,vog_bacteria_dsDNA$phage_temperate_compare == 'yes')
+vog_temperate_neither <- subset(vog_bacteria_dsDNA,vog_bacteria_dsDNA$phage_temperate_compare == 'no')
 
 
 
 
-#How well do pham-based gcd and vog-based gcd correlate?
+
+#Compare pham-based gene content dissimilarity and vog-based gene content dissimilarity
 #Supp. Fig. 2e
 par(mar=c(4,8,4,4))
-plot(bacteria_dsDNA$pham_pham_dissimilarity,bacteria_dsDNA$vog_gene_content_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+plot(vog_bacteria_dsDNA$pham_pham_dissimilarity,vog_bacteria_dsDNA$vog_gene_content_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
 abline(0,1,lty=2,lwd=3,col="grey")
 
 
 
-#Compare pham-based and vog-based bacteria dsDNA phage lifestyle plots 
-par(mar=c(4,8,4,4))
-plot(temperate_both$modified_mash_distance,temperate_both$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+#Compare pham-based and vog-based bacteria dsDNA phage empirical lifestyle plots 
+#Temperate
+plot_genomic_similarity_standard(vog_temperate_both)
+
 
 #Supp Fig. 2f
 par(mar=c(4,8,4,4))
-plot(temperate_both$modified_mash_distance,temperate_both$vog_gene_content_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+plot(vog_temperate_both$modified_mash_distance,vog_temperate_both$vog_gene_content_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
 abline(0,2,lty=2,lwd=3,col="grey")
 
-par(mar=c(4,8,4,4))
-plot(temperate_neither$modified_mash_distance,temperate_neither$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+
+
+#Lytic
+plot_genomic_similarity_standard(vog_temperate_neither)
 
 #Supp Fig. 2f
 par(mar=c(4,8,4,4))
-plot(temperate_neither$modified_mash_distance,temperate_neither$vog_gene_content_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
+plot(vog_temperate_neither$modified_mash_distance,vog_temperate_neither$vog_gene_content_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
 abline(0,2,lty=2,lwd=3,col="grey")
 
 
@@ -1022,47 +929,35 @@ abline(0,2,lty=2,lwd=3,col="grey")
 
 
 
+###Phage nucleic acid type analysis
 
-###Plot by phage type
-type <- subset(mash_table2,mash_table2$phage_viral_type_compare != "different")
-type_diff <- subset(mash_table2,mash_table2$phage_viral_type_compare == "different")
-type_dsDNA <- subset(type,type$phage_viral_type_compare == "dsDNA")
-type_dsRNA <- subset(type,type$phage_viral_type_compare == "dsRNA")
-type_ssDNA <- subset(type,type$phage_viral_type_compare == "ssDNA")
-type_ssRNA <- subset(type,type$phage_viral_type_compare == "ssRNA")
+type_dsDNA <- subset(main_data_table,main_data_table$phage_viral_type_compare == "dsDNA")
+type_dsRNA <- subset(main_data_table,main_data_table$phage_viral_type_compare == "dsRNA")
+type_ssDNA <- subset(main_data_table,main_data_table$phage_viral_type_compare == "ssDNA")
+type_ssRNA <- subset(main_data_table,main_data_table$phage_viral_type_compare == "ssRNA")
+type_diff <- subset(main_data_table,main_data_table$phage_viral_type_compare == "different")
 
 
-#Compare similarity of different types
+#Compare different nucleic acid types
 
 #Supp Fig. 5b
-par(mar=c(4,8,4,4))
-plot(type_diff$modified_mash_distance,type_diff$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(type_diff)
 
 
 
-#Now plot for each nucleic acid type
+#Asses each nucleic acid type
 
 #Supp Fig. 4
-par(mar=c(4,8,4,4))
-plot(type_dsDNA$modified_mash_distance,type_dsDNA$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(type_dsDNA)
 
 #Supp Fig. 4
-par(mar=c(4,8,4,4))
-plot(type_dsRNA$modified_mash_distance,type_dsRNA$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(type_dsRNA)
 
 #Supp Fig. 4
-par(mar=c(4,8,4,4))
-plot(type_ssDNA$modified_mash_distance,type_ssDNA$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
+plot_genomic_similarity_standard(type_ssDNA)
 
 #Supp Fig. 4
-par(mar=c(4,8,4,4))
-plot(type_ssRNA$modified_mash_distance,type_ssRNA$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(type_ssRNA)
 
 
 
@@ -1072,21 +967,17 @@ abline(0,2,lty=2,lwd=3,col="grey")
 
 
 
-###Check Eukaryotic controls
-euk_check <- subset(mash_table2,mash_table2$ref_host_superkingdom == "Eukaryota" | mash_table2$query_host_superkingdom == "Eukaryota")
+###Eukaryotic controls
+euk_check <- subset(main_data_table,main_data_table$ref_host_superkingdom == "Eukaryota" | main_data_table$query_host_superkingdom == "Eukaryota")
 euk_check <- subset(euk_check,euk_check$ref_host_superkingdom == "Bacteria" | euk_check$query_host_superkingdom == "Bacteria")
 
 compute_sector_distribution(euk_check)
 
-#No figure
-par(mar=c(4,8,4,4))
-plot(euk_check$modified_mash_distance,euk_check$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(euk_check)
 
 
-
-###Check archaea controls
-controls <- mash_table2
+###Archaea controls
+controls <- main_data_table
 controls$archaea_one_or_two <- ifelse(controls$ref_host_superkingdom == "Archaea" | controls$query_host_superkingdom == "Archaea",TRUE,FALSE)
 controls$archaea_both <- ifelse(controls$ref_host_superkingdom == "Archaea" & controls$query_host_superkingdom == "Archaea",TRUE,FALSE)
 controls$archaea_one <- ifelse(controls$archaea_one_or_two == TRUE & controls$archaea_both == FALSE,TRUE,FALSE)
@@ -1098,9 +989,7 @@ archaea_check <- subset(controls,controls$archaea_one_bacteria_one == TRUE)
 compute_sector_distribution(archaea_check)
 
 #Supp Fig. 5a
-par(mar=c(4,8,4,4))
-plot(archaea_check$modified_mash_distance,archaea_check$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(archaea_check)
 
 
 
@@ -1109,10 +998,8 @@ abline(0,2,lty=2,lwd=3,col="grey")
 
 
 
-###By cluster and subcluster
-type <- subset(mash_table2,mash_table2$phage_viral_type_compare != "different")
-type_dsDNA <- subset(type,type$phage_viral_type_compare == "dsDNA")
-cluster_actino <- subset(type_dsDNA,type_dsDNA$phage_cluster_source_compare == "actino")
+###Cluster and subcluster analyses
+cluster_actino <- subset(main_data_table,main_data_table$phage_cluster_source_compare == "actino")
 cluster_actino_same <- subset(cluster_actino,cluster_actino$phage_cluster_compare != "different")
 cluster_actino_diff <- subset(cluster_actino,cluster_actino$phage_cluster_compare == "different")
 subcluster_actino_same <- subset(cluster_actino_same,cluster_actino_same$phage_subcluster_compare != "different")
@@ -1124,24 +1011,16 @@ compute_sector_distribution(subcluster_actino_same)
 compute_sector_distribution(subcluster_actino_diff)
 
 #Supp. Fig. 5d
-par(mar=c(4,8,4,4))
-plot(cluster_actino_same$modified_mash_distance,cluster_actino_same$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="orange")
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_orange(cluster_actino_same)
 
 #Supp. Fig. 5d
-par(mar=c(4,8,4,4))
-plot(cluster_actino_diff$modified_mash_distance,cluster_actino_diff$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="black")
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(cluster_actino_diff)
 
 #Supp. Fig. 5d
-par(mar=c(4,8,4,4))
-plot(subcluster_actino_same$modified_mash_distance,subcluster_actino_same$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="orange")
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_orange(subcluster_actino_same)
 
 #Supp. Fig. 5d
-par(mar=c(4,8,4,4))
-plot(subcluster_actino_diff$modified_mash_distance,subcluster_actino_diff$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="orange")
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_orange(subcluster_actino_diff)
 
 
 
@@ -1150,49 +1029,43 @@ abline(0,2,lty=2,lwd=3,col="grey")
 
 
 ###Compare distances for phages that are not subclustered.
-#How similar are they to all other phages?
-actino785_data <- subset(mash_table2,mash_table2$phage_cluster_source_compare == "actino")
-actino785_data$query_subclustered <- ifelse(is.na(actino785_data$query_phage_subcluster) == TRUE,FALSE,TRUE) 
-actino785_data$ref_subclustered <- ifelse(is.na(actino785_data$ref_phage_subcluster) == TRUE,FALSE,TRUE) 
-actino785_data$subclustered_one_or_two <- ifelse(actino785_data$query_subclustered == TRUE | actino785_data$ref_subclustered == TRUE,TRUE,FALSE)
-actino785_data$subclustered_neither <- ifelse(actino785_data$query_subclustered == FALSE & actino785_data$ref_subclustered == FALSE,TRUE,FALSE)
-actino785_data$subclustered_both <- ifelse(actino785_data$query_subclustered == TRUE & actino785_data$ref_subclustered == TRUE,TRUE,FALSE)
-actino785_data$subclustered_one <- ifelse(actino785_data$subclustered_one_or_two == TRUE & actino785_data$subclustered_both == FALSE,TRUE,FALSE)
+cluster_actino <- subset(main_data_table,main_data_table$phage_cluster_source_compare == "actino")
 
-actino785_data_same_cluster <- subset(actino785_data,actino785_data$phage_cluster_compare != "different")
-actino785_data_diff_cluster <- subset(actino785_data,actino785_data$phage_cluster_compare == "different")
-actino785_data_same_cluster_neither_subclustered <- subset(actino785_data_same_cluster,actino785_data_same_cluster$subclustered_neither == TRUE)
-actino785_data_diff_cluster_one_subclustered <- subset(actino785_data_diff_cluster,actino785_data_diff_cluster$subclustered_one == TRUE)
+cluster_actino$query_subclustered <- ifelse(is.na(cluster_actino$query_phage_subcluster) == TRUE,FALSE,TRUE) 
+cluster_actino$ref_subclustered <- ifelse(is.na(cluster_actino$ref_phage_subcluster) == TRUE,FALSE,TRUE) 
+cluster_actino$subclustered_one_or_two <- ifelse(cluster_actino$query_subclustered == TRUE | cluster_actino$ref_subclustered == TRUE,TRUE,FALSE)
+cluster_actino$subclustered_neither <- ifelse(cluster_actino$query_subclustered == FALSE & cluster_actino$ref_subclustered == FALSE,TRUE,FALSE)
 
-compute_sector_distribution(actino785_data_same_cluster_neither_subclustered)
+
+cluster_actino_same_cluster_neither_subclustered <- subset(cluster_actino,cluster_actino$phage_cluster_compare != "different" &
+                                                             cluster_actino$subclustered_neither == TRUE)
+
+
+compute_sector_distribution(cluster_actino_same_cluster_neither_subclustered)
 
 #Supp Fig. 5e
-par(mar=c(4,8,4,4))
-plot(actino785_data_same_cluster_neither_subclustered$modified_mash_distance,actino785_data_same_cluster_neither_subclustered$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="orange")
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_orange(cluster_actino_same_cluster_neither_subclustered)
 
 
 
 
 
 
-###Compute distance of all Actinobacteriophage Singletons from other Actinobacteriophages
-#Histogram = Mash distances for all Actino785 comparisons containing at least one Singleton
-actino785_data <- subset(mash_table2,mash_table2$phage_cluster_source_compare == "actino")
-actino785_data_same <- subset(actino785_data,actino785_data$phage_cluster_compare != "different")
-actino785_data_diff <- subset(actino785_data,actino785_data$phage_cluster_compare == "different")
-actino785_data_diff$query_singleton <- grepl("^Singleton",actino785_data_diff$query_phage_cluster)
-actino785_data_diff$ref_singleton <- grepl("^Singleton",actino785_data_diff$ref_phage_cluster)
-actino785_data_diff$singleton_one_or_two <- ifelse(actino785_data_diff$ref_singleton == TRUE | actino785_data_diff$query_singleton == TRUE,TRUE,FALSE)
+###Compute distance of all Actinobacteriophage Singletons from other Actinobacteriophages that have been clustered
+cluster_actino <- subset(main_data_table,main_data_table$phage_cluster_source_compare == "actino")
 
-actino785_singleton_one_or_two <- subset(actino785_data_diff,actino785_data_diff$singleton_one_or_two == TRUE)
+cluster_actino_same <- subset(cluster_actino,cluster_actino$phage_cluster_compare != "different")
+cluster_actino_diff <- subset(cluster_actino,cluster_actino$phage_cluster_compare == "different")
+cluster_actino_diff$query_singleton <- grepl("^Singleton",cluster_actino_diff$query_phage_cluster)
+cluster_actino_diff$ref_singleton <- grepl("^Singleton",cluster_actino_diff$ref_phage_cluster)
+cluster_actino_diff$singleton_one_or_two <- ifelse(cluster_actino_diff$ref_singleton == TRUE | cluster_actino_diff$query_singleton == TRUE,TRUE,FALSE)
 
-compute_sector_distribution(actino785_singleton_one_or_two)
+cluster_actino_singleton_one_or_two <- subset(cluster_actino_diff,cluster_actino_diff$singleton_one_or_two == TRUE)
+
+compute_sector_distribution(cluster_actino_singleton_one_or_two)
 
 #Supp Fig. 5f
-par(mar=c(4,8,4,4))
-plot(actino785_singleton_one_or_two$modified_mash_distance,actino785_singleton_one_or_two$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(cluster_actino_singleton_one_or_two)
 
 
 
@@ -1203,42 +1076,33 @@ abline(0,2,lty=2,lwd=3,col="grey")
 
 
 
-###Analyze predicted lifestyle data
-lifestyle_analysis <- mash_table2
-
-bacteria_dsDNA <- subset(lifestyle_analysis,lifestyle_analysis$host_superkingdom_compare == 'Bacteria' & lifestyle_analysis$phage_viral_type_compare == 'dsDNA')
-
+###Predicted lifestyle analysis
+bacteria_dsDNA <- subset(main_data_table,main_data_table$host_superkingdom_compare == 'Bacteria' & main_data_table$phage_viral_type_compare == 'dsDNA')
 lifestyle_predicted_temperate <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_predicted_temperate_compare == 'yes')
 lifestyle_predicted_lytic <- subset(bacteria_dsDNA,bacteria_dsDNA$phage_predicted_temperate_compare == 'no')
 
 #Supp. Fig. 6b
-par(mar=c(4,8,4,4))
-plot(lifestyle_predicted_temperate$modified_mash_distance,lifestyle_predicted_temperate$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(lifestyle_predicted_temperate)
 
 #Supp. Fig. 6b
-par(mar=c(4,8,4,4))
-plot(lifestyle_predicted_lytic$modified_mash_distance,lifestyle_predicted_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(lifestyle_predicted_lytic)
 
 
 
 
 
 ###Predict evolutionary mode
-
-data_for_mode_prediction <- subset(mash_table2,mash_table2$host_superkingdom_compare == "Bacteria" &
-                                     mash_table2$phage_viral_type_compare == "dsDNA" &
-                                     mash_table2$modified_mash_distance < 0.42 &
-                                     mash_table2$pham_pham_dissimilarity < 0.89)
+data_for_mode_prediction <- subset(main_data_table,main_data_table$host_superkingdom_compare == "Bacteria" &
+                                     main_data_table$phage_viral_type_compare == "dsDNA" &
+                                     main_data_table$modified_mash_distance < 0.42 &
+                                     main_data_table$pham_pham_dissimilarity < 0.89)
 data_for_mode_prediction <- subset(data_for_mode_prediction,select=c("mash_reference","mash_query","modified_mash_distance","pham_pham_dissimilarity"))
-write.table(data_for_mode_prediction,"/Users/Hatfull_Lab/Desktop/Project_phage_classification/7_merged2333_analysis/20170315_data_for_mode_prediction.csv",sep=",",row.names = FALSE,col.names = FALSE,quote=FALSE)
-
-#Run the data through the analyze_mash_network_script to predict the evolutionary mode
+write.table(data_for_mode_prediction,"data_for_mode_prediction.csv",sep=",",row.names = FALSE,col.names = FALSE,quote=FALSE)
 
 
 
-#Then import the mode prediction back into R
+#Run the data through the analyze_mash_network_script to predict the evolutionary mode.
+#Then import the mode prediction back into R.
 #Format
 #0 = phage
 #1 = hgcf_tally
@@ -1275,9 +1139,8 @@ hist(mode_prediction_table$mode_prediction_hgcf_percent,col="black",breaks=25,ce
 
 
 
-###By phage family and tail type
-
-bacteriophages <- subset(mash_table2,mash_table2$host_superkingdom_compare == "Bacteria")
+###Phage tail type analysis
+bacteriophages <- subset(main_data_table,main_data_table$host_superkingdom_compare == "Bacteria")
 caudovirales <- subset(bacteriophages,bacteriophages$phage_order_compare == "Caudovirales")
 caudovirales_family <- subset(caudovirales,caudovirales$phage_family_compare != "different")
 myo <- subset(caudovirales_family,caudovirales_family$phage_family_compare == "Myoviridae")
@@ -1313,155 +1176,55 @@ caudovirales_family_diff_myo_podo <- subset(caudovirales_family_diff,caudovirale
 
 
 #Supp Fig. 7a
-par(mar=c(4,8,4,4))
-plot(myo$modified_mash_distance,myo$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(myo)
 
 #Supp Fig. 7a
-par(mar=c(4,8,4,4))
-plot(sipho$modified_mash_distance,sipho$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(sipho)
 
 #Supp Fig. 7a
-par(mar=c(4,8,4,4))
-plot(podo$modified_mash_distance,podo$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
+plot_genomic_similarity_standard(podo)
 
 
 #Supp Fig. 7a
-par(mar=c(4,8,4,4))
-plot(podo_temperate$modified_mash_distance,podo_temperate$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(podo_temperate)
 
 #Supp Fig. 7a
-par(mar=c(4,8,4,4))
-plot(podo_lytic$modified_mash_distance,podo_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(podo_lytic)
 
 #Supp Fig. 7a
-par(mar=c(4,8,4,4))
-plot(podo_lifestyle_diff$modified_mash_distance,podo_lifestyle_diff$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(podo_lifestyle_diff)
+
+
+#Supp Fig. 7a
+plot_genomic_similarity_standard(sipho_temperate)
+
+#Supp Fig. 7a
+plot_genomic_similarity_standard(sipho_lytic)
+
+#Supp Fig. 7a
+plot_genomic_similarity_standard(sipho_lifestyle_diff)
 
 
 
 #Supp Fig. 7a
-par(mar=c(4,8,4,4))
-plot(sipho_temperate$modified_mash_distance,sipho_temperate$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(myo_temperate)
 
 #Supp Fig. 7a
-par(mar=c(4,8,4,4))
-plot(sipho_lytic$modified_mash_distance,sipho_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(myo_lytic)
 
 #Supp Fig. 7a
-par(mar=c(4,8,4,4))
-plot(sipho_lifestyle_diff$modified_mash_distance,sipho_lifestyle_diff$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
-
-
-#Supp Fig. 7a
-par(mar=c(4,8,4,4))
-plot(myo_temperate$modified_mash_distance,myo_temperate$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-#Supp Fig. 7a
-par(mar=c(4,8,4,4))
-plot(myo_lytic$modified_mash_distance,myo_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-#Supp Fig. 7a
-par(mar=c(4,8,4,4))
-plot(myo_lifestyle_diff$modified_mash_distance,myo_lifestyle_diff$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
+plot_genomic_similarity_standard(myo_lifestyle_diff)
 
 
 
 #Supp Fig. 7b
-par(mar=c(4,8,4,4))
-plot(caudovirales_family_diff_sipho_myo$modified_mash_distance,caudovirales_family_diff_sipho_myo$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(caudovirales_family_diff_sipho_myo)
 
 #Supp Fig. 7b
-par(mar=c(4,8,4,4))
-plot(caudovirales_family_diff_sipho_podo$modified_mash_distance,caudovirales_family_diff_sipho_podo$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(caudovirales_family_diff_sipho_podo)
 
 #Supp Fig. 7b
-par(mar=c(4,8,4,4))
-plot(caudovirales_family_diff_myo_podo$modified_mash_distance,caudovirales_family_diff_myo_podo$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+plot_genomic_similarity_standard(caudovirales_family_diff_myo_podo)
 
 
 
@@ -1472,11 +1235,11 @@ abline(0,2,lty=2,lwd=3,col="grey")
 
 ###Export data for gene-specific mash analysis
 #Only investigate comparisons that are within cluster boundaries
-mash_filtered <- subset(mash_table2,mash_table2$filter == TRUE)
-bacteria_dsDNA <- subset(mash_filtered,mash_filtered$host_superkingdom_compare == 'Bacteria' & mash_filtered$phage_viral_type_compare == 'dsDNA')
+mash_filtered <- subset(main_data_table,main_data_table$filter == TRUE)
+bacteria_dsDNA_filtered <- subset(mash_filtered,mash_filtered$host_superkingdom_compare == 'Bacteria' & mash_filtered$phage_viral_type_compare == 'dsDNA')
 
 #Cluster-boundary dataset
-bacteria_dsDNA_nuc042_gene089 <- subset(bacteria_dsDNA,bacteria_dsDNA$modified_mash_distance < 0.42 & bacteria_dsDNA$pham_pham_dissimilarity < 0.89)
+bacteria_dsDNA_nuc042_gene089 <- subset(bacteria_dsDNA_filtered,bacteria_dsDNA_filtered$modified_mash_distance < 0.42 & bacteria_dsDNA_filtered$pham_pham_dissimilarity < 0.89)
 
 #Now reduce the data table to only the columns needed for export, and export the data
 bacteria_dsDNA_nuc042_gene089_reduced <- subset(bacteria_dsDNA_nuc042_gene089,select = c('mash_reference','mash_query','mash_distance','pham_pham_dissimilarity'))
@@ -1488,15 +1251,15 @@ write.table(bacteria_dsDNA_nuc042_gene089_reduced,"bacteria_dsDNA_nuc042_gene089
 
 
 
-###Gene-specific mash analysis
+###Analyze gene-specific mash data
 #After running gene-specific mash analysis, subset out only the comparisons used in the gsm analysis
 
-mash_filtered <- subset(mash_table2,mash_table2$filter == TRUE)
-bacteria_dsDNA <- subset(mash_filtered,mash_filtered$host_superkingdom_compare == 'Bacteria' & mash_filtered$phage_viral_type_compare == 'dsDNA')
-bacteria_dsDNA_nuc042_gene089 <- subset(bacteria_dsDNA,bacteria_dsDNA$modified_mash_distance < 0.42 & bacteria_dsDNA$pham_pham_dissimilarity < 0.89)
+mash_filtered <- subset(main_data_table,main_data_table$filter == TRUE)
+bacteria_dsDNA_filtered <- subset(mash_filtered,mash_filtered$host_superkingdom_compare == 'Bacteria' & mash_filtered$phage_viral_type_compare == 'dsDNA')
 
-#Rename the reduced data to the generic gsm analysis table name
-gene_specific_mash_table <- bacteria_dsDNA_nuc042_gene089
+
+#Cluster-boundary dataset
+gene_specific_mash_table <- subset(bacteria_dsDNA_filtered,bacteria_dsDNA_filtered$modified_mash_distance < 0.42 & bacteria_dsDNA_filtered$pham_pham_dissimilarity < 0.89)
 
 
 #Now import the gsm data
@@ -1551,9 +1314,6 @@ gene_specific_mash_table <- bacteria_dsDNA_nuc042_gene089
 #47 = phage2 all genes GC content
 #48 = phage2 shared genes GC content
 #49 = phage2 unshared genes GC content
-
-
-
 gene_specific_mash_data <- read.csv("gene_specific_mash_data.csv",sep=",",header=TRUE)
 
 names(gene_specific_mash_data) = c("gsm_mash_ref_query","gsm_ref","gsm_query","gsm_num_shared_phams","gsm_pham_dissimilarity","gsm_pham_jaccard_dissimilarity",
@@ -1574,106 +1334,62 @@ names(gene_specific_mash_data) = c("gsm_mash_ref_query","gsm_ref","gsm_query","g
                                     "gsm_query_all_GC","gsm_query_shared_GC","gsm_query_unshared_GC")
 
 
-
-
-#Now merge the gene-specific mash data to the original data used.
+#Merge the gene-specific mash data to the main data table that has been reduced to contain
+#only those comparisons analyzed by the gene-specific mash script.
 #Since the ref_query comparison identifiers should be identical, there should be equal rows in both tables
 gene_specific_mash_table <- merge(gene_specific_mash_table,gene_specific_mash_data,by.x="mash_ref_query",by.y="gsm_mash_ref_query")
 
 
 
-
-
-
-#There several types of misleading data in the gsm dataset, since some comparisons have no shared or unshared genes. The program can't compute some values, and so must output default data. This data needs filtered out.
-#1. For failed mash computations, the script outputs mash distance = 0, pvalue = 1, and kmer count = 0/0. If I filter by pvalue, these are successfully removed.
-#2. For failed gene ave size computations, the script outputs ave gene size = 0. These should be converted to "NA".
-#3. For failed GC content computations, the script outputs GC content = 0. These should be converted to "NA".
-
-  
-#Choose which data should be retained. Those not passing the filter getting Mash distances re-assigned to 0.5.
+#Choose which data should be retained. 
+#Data not passing the filter get Mash distances re-assigned to 0.6.
 gene_specific_mash_table$gsm_all_mash_filter <- ifelse(gene_specific_mash_table$gsm_all_mash_pvalue < 1e-10,TRUE,FALSE)
 gene_specific_mash_table$gsm_shared_mash_filter <- ifelse(gene_specific_mash_table$gsm_shared_mash_pvalue < 1e-10,TRUE,FALSE)
 gene_specific_mash_table$gsm_unshared_mash_filter <- ifelse(gene_specific_mash_table$gsm_unshared_mash_pvalue < 1e-10,TRUE,FALSE)
 gene_specific_mash_table$gsm_shared_unshared_mash_filter <- ifelse(gene_specific_mash_table$gsm_shared_unshared_mash_pvalue < 1e-10,TRUE,FALSE)
 
-
-
-
-#Compute modified values
-
-#Create modified data for mash
 gene_specific_mash_table$gsm_all_modified_mash_distance <- ifelse(gene_specific_mash_table$gsm_all_mash_filter == TRUE,gene_specific_mash_table$gsm_all_mash_distance,0.6)
 gene_specific_mash_table$gsm_shared_modified_mash_distance <- ifelse(gene_specific_mash_table$gsm_shared_mash_filter == TRUE,gene_specific_mash_table$gsm_shared_mash_distance,0.6)
 gene_specific_mash_table$gsm_unshared_modified_mash_distance <- ifelse(gene_specific_mash_table$gsm_unshared_mash_filter == TRUE,gene_specific_mash_table$gsm_unshared_mash_distance,0.6)
 gene_specific_mash_table$gsm_shared_unshared_modified_mash_distance <- ifelse(gene_specific_mash_table$gsm_shared_unshared_mash_filter == TRUE,gene_specific_mash_table$gsm_shared_unshared_mash_distance,0.6)
 
 
-####PROBABLY CAN DELETE THIS AFTER CHECKING AVE GENE SIZE MATH
-#Create modified data for average gene size
-gene_specific_mash_table$gsm_ref_all_modified_ave_size <- ifelse(gene_specific_mash_table$gsm_ref_num_all_genes > 0,gene_specific_mash_table$gsm_ref_all_ave_size,NA)
-gene_specific_mash_table$gsm_ref_shared_modified_ave_size <- ifelse(gene_specific_mash_table$gsm_ref_num_shared_genes > 0,gene_specific_mash_table$gsm_ref_shared_ave_size,NA)
-gene_specific_mash_table$gsm_ref_unshared_modified_ave_size <- ifelse(gene_specific_mash_table$gsm_ref_num_unshared_genes > 0,gene_specific_mash_table$gsm_ref_unshared_ave_size,NA)
-gene_specific_mash_table$gsm_query_all_modified_ave_size <- ifelse(gene_specific_mash_table$gsm_query_num_all_genes > 0,gene_specific_mash_table$gsm_query_all_ave_size,NA)
-gene_specific_mash_table$gsm_query_shared_modified_ave_size <- ifelse(gene_specific_mash_table$gsm_query_num_shared_genes > 0,gene_specific_mash_table$gsm_query_shared_ave_size,NA)
-gene_specific_mash_table$gsm_query_unshared_modified_ave_size <- ifelse(gene_specific_mash_table$gsm_query_num_unshared_genes > 0,gene_specific_mash_table$gsm_query_unshared_ave_size,NA)
-####
-
-
 #Estimate of the proportion of coding sequence per genome
-#Note: the gene-specific sequence length used does not take into account overlapping CDS features, so the sequences could have duplicate regions in the genome
-#Note: the 'all coding potential' data is based on the real genome size, but the 'shared/unshared coding potential' data is based only on the gene-specific mash sizes
+#Note: the gene-specific sequence length used does not take into account overlapping CDS features, 
+#so the sequences could have duplicate regions in the genome.
+#Note: the 'all coding proportion' data is based on the real genome size, 
+#but the 'shared/unshared coding proportion' data is based only on the gene-specific mash sizes
+gene_specific_mash_table$gsm_all_total_size <- gene_specific_mash_table$gsm_ref_all_total_size + 
+                                                gene_specific_mash_table$gsm_query_all_total_size
 
-gene_specific_mash_table$gsm_all_total_size <- gene_specific_mash_table$gsm_ref_all_total_size + gene_specific_mash_table$gsm_query_all_total_size
+gene_specific_mash_table$gsm_ref_unshared_coding_proportion <- gene_specific_mash_table$gsm_ref_unshared_total_size/
+                                                                gene_specific_mash_table$gsm_ref_all_total_size
 
-gene_specific_mash_table$gsm_ref_unshared_coding_potential <- gene_specific_mash_table$gsm_ref_unshared_total_size/gene_specific_mash_table$gsm_ref_all_total_size
-gene_specific_mash_table$gsm_query_unshared_coding_potential <- gene_specific_mash_table$gsm_query_unshared_total_size/gene_specific_mash_table$gsm_query_all_total_size
+gene_specific_mash_table$gsm_query_unshared_coding_proportion <- gene_specific_mash_table$gsm_query_unshared_total_size/
+                                                                  gene_specific_mash_table$gsm_query_all_total_size
 
-gene_specific_mash_table$gsm_unshared_coding_potential <- gene_specific_mash_table$gsm_unshared_total_size / gene_specific_mash_table$gsm_all_total_size
+gene_specific_mash_table$gsm_unshared_coding_proportion <- gene_specific_mash_table$gsm_unshared_total_size/
+                                                            gene_specific_mash_table$gsm_all_total_size
 
 
-
-####VERIFY THIS MATH IS CORRECT!
 #Average gene sizes
-#This data does not use the modified gene size data, because if there are no shared/unshared genes, the default ave size is 0, and this is fine to use to compute averages
-gene_specific_mash_table$gsm_ave_size_shared_shared <- (gene_specific_mash_table$gsm_ref_shared_ave_size + gene_specific_mash_table$gsm_query_shared_ave_size)/2
-gene_specific_mash_table$gsm_ave_size_unshared_unshared <- (gene_specific_mash_table$gsm_ref_unshared_ave_size + gene_specific_mash_table$gsm_query_unshared_ave_size)/2
+#To compute average gene size, sum up all nucleotide sizes then divide by total number of genes
+gene_specific_mash_table$gsm_ave_size_shared_shared <- ((gene_specific_mash_table$gsm_ref_shared_ave_size * gene_specific_mash_table$gsm_ref_num_shared_genes) +
+                                                          (gene_specific_mash_table$gsm_query_shared_ave_size * gene_specific_mash_table$gsm_query_num_shared_genes))/
+                                                          (gene_specific_mash_table$gsm_ref_num_shared_genes + gene_specific_mash_table$gsm_query_num_shared_genes)
+  
+gene_specific_mash_table$gsm_ave_size_unshared_unshared <- ((gene_specific_mash_table$gsm_ref_unshared_ave_size * gene_specific_mash_table$gsm_ref_num_unshared_genes) +
+                                                          (gene_specific_mash_table$gsm_query_unshared_ave_size * gene_specific_mash_table$gsm_query_num_unshared_genes))/
+                                                          (gene_specific_mash_table$gsm_ref_num_unshared_genes + gene_specific_mash_table$gsm_query_num_unshared_genes)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                                                          
 
 
 #Convert all Unspecified fields to NA missing value
 gene_specific_mash_table[gene_specific_mash_table == "Unspecified"] <- NA
 
 
-
-#Make backup table before subsetting
-gene_specific_mash_table_complete <- gene_specific_mash_table
-
-
-
-
-
-#Split into HGCF and LGCF datasets
-
+#Split into HGCF and LGCF datasets based on position of data points on the plot
 gene_specific_mash_table_temperate_hgcf <- subset(gene_specific_mash_table,gene_specific_mash_table$gene_flux_category == 'high' & gene_specific_mash_table$phage_temperate_compare == 'yes')
 gene_specific_mash_table_temperate_lgcf <- subset(gene_specific_mash_table,gene_specific_mash_table$gene_flux_category == 'low' & gene_specific_mash_table$phage_temperate_compare == 'yes')
 gene_specific_mash_table_lytic <- subset(gene_specific_mash_table,gene_specific_mash_table$phage_temperate_compare == 'no')
@@ -1684,6 +1400,60 @@ gene_specific_mash_table_lytic <- subset(gene_specific_mash_table,gene_specific_
 
 
 #Analysis after splitting into gene flux modes
+
+#All data points used in gene-specific mash plots
+#Supp. Fig. 8a
+plot_genomic_similarity_tricolored(gene_specific_mash_table_temperate_hgcf,gene_specific_mash_table_temperate_lgcf,gene_specific_mash_table_lytic)
+
+
+
+
+
+#Compare whole genome distance to shared and unshared distances
+#Supp. Fig. 8b
+par(mar=c(4,8,4,4))
+plot(gene_specific_mash_table_lytic$modified_mash_distance,gene_specific_mash_table_lytic$gsm_shared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
+par(new=TRUE)
+plot(gene_specific_mash_table_lytic$modified_mash_distance,gene_specific_mash_table_lytic$gsm_unshared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
+abline(0,1,lty=2,lwd=3,col="grey")
+
+#Supp. Fig. 8b
+par(mar=c(4,8,4,4))
+plot(gene_specific_mash_table_temperate_hgcf$modified_mash_distance,gene_specific_mash_table_temperate_hgcf$gsm_shared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark blue")
+par(new=TRUE)
+plot(gene_specific_mash_table_temperate_hgcf$modified_mash_distance,gene_specific_mash_table_temperate_hgcf$gsm_unshared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
+abline(0,1,lty=2,lwd=3,col="grey")
+
+#Supp. Fig. 8b
+par(mar=c(4,8,4,4))
+plot(gene_specific_mash_table_temperate_lgcf$modified_mash_distance,gene_specific_mash_table_temperate_lgcf$gsm_shared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
+par(new=TRUE)
+plot(gene_specific_mash_table_temperate_lgcf$modified_mash_distance,gene_specific_mash_table_temperate_lgcf$gsm_unshared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
+abline(0,1,lty=2,lwd=3,col="grey")
+
+
+
+
+
+
+#Coding proportion
+#Supp. Fig. 8d
+par(mar=c(4,8,4,4))
+plot(gene_specific_mash_table_lytic$gsm_unshared_coding_proportion,gene_specific_mash_table_lytic$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
+abline(0,1,lty=2,lwd=3,col="grey")
+
+#Supp. Fig. 8d
+par(mar=c(4,8,4,4))
+plot(gene_specific_mash_table_temperate_lgcf$gsm_unshared_coding_proportion,gene_specific_mash_table_temperate_lgcf$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
+abline(0,1,lty=2,lwd=3,col="grey")
+
+#Supp. Fig. 8d
+par(mar=c(4,8,4,4))
+plot(gene_specific_mash_table_temperate_hgcf$gsm_unshared_coding_proportion,gene_specific_mash_table_temperate_hgcf$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
+abline(0,1,lty=2,lwd=3,col="grey")
+
+
+
 
 #Compare average gene sizes
 gsm_temperate_hgcf_shared <- subset(gene_specific_mash_table_temperate_hgcf,select=c("gsm_ave_size_shared_shared"))
@@ -1731,81 +1501,8 @@ boxplot(gsm_plotting_table$ave_gene_size ~ gsm_plotting_table$category*gsm_plott
 
 
 
-
-
-#How distant are shared and unshared sequences?
-
-
-#Compare all to shared and unshared by mash distance
-
-
-#Supp. Fig. 8b
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_lytic$modified_mash_distance,gene_specific_mash_table_lytic$gsm_shared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
-par(new=TRUE)
-plot(gene_specific_mash_table_lytic$modified_mash_distance,gene_specific_mash_table_lytic$gsm_unshared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-abline(0,1,lty=2,lwd=3,col="grey")
-
-#Supp. Fig. 8b
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_hgcf$modified_mash_distance,gene_specific_mash_table_temperate_hgcf$gsm_shared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark blue")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_hgcf$modified_mash_distance,gene_specific_mash_table_temperate_hgcf$gsm_unshared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-abline(0,1,lty=2,lwd=3,col="grey")
-
-#Supp. Fig. 8b
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_lgcf$modified_mash_distance,gene_specific_mash_table_temperate_lgcf$gsm_shared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_lgcf$modified_mash_distance,gene_specific_mash_table_temperate_lgcf$gsm_unshared_modified_mash_distance,xlim=c(0,0.5),ylim=c(0,0.6),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-abline(0,1,lty=2,lwd=3,col="grey")
-
-
-
-
-
-
-#Coding potential
-
-#Supp. Fig. 8d
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_lytic$gsm_unshared_coding_potential,gene_specific_mash_table_lytic$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
-abline(0,1,lty=2,lwd=3,col="grey")
-
-#Supp. Fig. 8d
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_lgcf$gsm_unshared_coding_potential,gene_specific_mash_table_temperate_lgcf$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
-abline(0,1,lty=2,lwd=3,col="grey")
-
-#Supp. Fig. 8d
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_hgcf$gsm_unshared_coding_potential,gene_specific_mash_table_temperate_hgcf$pham_pham_dissimilarity,xlim=c(0,1),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
-abline(0,1,lty=2,lwd=3,col="grey")
-
-
-
-
-
-
-
-#All data points used in gsm plots
-#Supp. Fig. 8a
-par(mar=c(4,8,4,4))
-plot(gene_specific_mash_table_temperate_hgcf$modified_mash_distance,gene_specific_mash_table_temperate_hgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-par(new=TRUE)
-plot(gene_specific_mash_table_temperate_lgcf$modified_mash_distance,gene_specific_mash_table_temperate_lgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-par(new=TRUE)
-plot(gene_specific_mash_table_lytic$modified_mash_distance,gene_specific_mash_table_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-
-
-
-
-
-
-#Analysis after splitting into gene flux modes and after computing sliding windows
-#sliding window average
+#Analysis after splitting into gene flux modes
+#Sliding window average across ordered mash distances
 library(caTools)
 
 gene_specific_mash_table_temperate_hgcf_mmdsort <- gene_specific_mash_table_temperate_hgcf[order(gene_specific_mash_table_temperate_hgcf$modified_mash_distance),]
@@ -1818,7 +1515,7 @@ gene_specific_mash_table_lytic_mmdsort <- gene_specific_mash_table_lytic[order(g
 gene_specific_mash_table_lytic_mmdsort$size_diff_ave_percent_runmean <- runmean(gene_specific_mash_table_lytic_mmdsort$size_diff_ave_percent,101)
 
 
-#Compare all genome size disparity
+#Compare whole genome size disparity
 #Supp. Fig. 8a
 par(mar=c(4,8,4,4))
 plot(gene_specific_mash_table_temperate_lgcf_mmdsort$modified_mash_distance,gene_specific_mash_table_temperate_lgcf_mmdsort$size_diff_ave_percent_runmean,xlim=c(0,0.5),ylim=c(0,0.2),pch=20,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
@@ -1829,7 +1526,7 @@ plot(gene_specific_mash_table_lytic_mmdsort$modified_mash_distance,gene_specific
 
 
 
-#sliding window analyis based on gene content instead of nucleotide distance
+#Sliding window analyis across ordered gene content dissimilarity instead of nucleotide distance
 gene_specific_mash_table_temperate_hgcf_gcdsort <- gene_specific_mash_table_temperate_hgcf[order(gene_specific_mash_table_temperate_hgcf$pham_pham_dissimilarity),]
 gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_shared_modified_mash_distance_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_shared_modified_mash_distance,101)
 gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_unshared_modified_mash_distance_runmean <- runmean(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_unshared_modified_mash_distance,101)
@@ -1864,29 +1561,8 @@ plot(gene_specific_mash_table_temperate_hgcf_gcdsort$gsm_shared_modified_mash_di
 
 
 
-####STILL NEED TO FINISH REVIEWING ALL GENE-SPECIFIC-MASH DATA ABOVE
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ###Phylogeny comparison 
+#Note: Requires that the gene-specific mash data has been loaded and processed
 #Format:
 #0 = ref_query
 #1 = phylogeny distance
@@ -1895,44 +1571,48 @@ phylogeny_analysis <- merge(gene_specific_mash_table,phylogeny_data,by.x="mash_r
 
 
 
+
+
 #Compare mash distance to phylogeny distance
 
-#Split into modes to visualize by color
-phylogeny_analysis_hgcf <- subset(phylogeny_analysis,phylogeny_analysis$gene_flux_category == "high" & phylogeny_analysis$phage_predicted_temperate_compare == "yes")
-phylogeny_analysis_lgcf <- subset(phylogeny_analysis,phylogeny_analysis$gene_flux_category == "low" & phylogeny_analysis$phage_predicted_temperate_compare == "yes")
-phylogeny_analysis_lytic <- subset(phylogeny_analysis,phylogeny_analysis$phage_predicted_temperate_compare == "no")
+#Split by Clusters to visualize by color
+phylogeny_hgcf <- subset(phylogeny_analysis,phylogeny_analysis$phage_cluster_compare == 'F' |
+                           (phylogeny_analysis$phage_cluster_compare == 'A' & phylogeny_analysis$phage_subcluster_compare == 'A1'))
+
+
+phylogeny_lgcf <- subset(phylogeny_analysis,
+                         phylogeny_analysis$phage_cluster_compare == 'K' |
+                           phylogeny_analysis$phage_cluster_compare == 'BD' |
+                           (phylogeny_analysis$phage_cluster_compare == 'A' & phylogeny_analysis$phage_subcluster_compare != 'A1'))
+
+
+phylogeny_lytic <- subset(phylogeny_analysis,phylogeny_analysis$phage_cluster_compare == 'B')
 
 
 
-#Supp. Fig. 9a (left)? Not quite right, some datapoints wrong = intra-cluster a points incorrect
+#Supp. Fig. 9a
+plot_genomic_similarity_tricolored(phylogeny_hgcf,phylogeny_lgcf,phylogeny_lytic)
+
+
+#Supp. Fig 9a
 par(mar=c(4,8,4,4))
-plot(phylogeny_analysis_hgcf$modified_mash_distance,phylogeny_analysis_hgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
+plot(phylogeny_hgcf$phylogeny_distance,phylogeny_hgcf$pham_pham_dissimilarity,xlim=c(0,2.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
 par(new=TRUE)
-plot(phylogeny_analysis_lgcf$modified_mash_distance,phylogeny_analysis_lgcf$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
+plot(phylogeny_lgcf$phylogeny_distance,phylogeny_lgcf$pham_pham_dissimilarity,xlim=c(0,2.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
 par(new=TRUE)
-plot(phylogeny_analysis_lytic$modified_mash_distance,phylogeny_analysis_lytic$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
-
-
-
-#Supp. Fig 9a (right) Not quite right, some datapoints wrong = intra-cluster a points incorrect
-par(mar=c(4,8,4,4))
-plot(phylogeny_analysis_hgcf$phylogeny_distance,phylogeny_analysis_hgcf$pham_pham_dissimilarity,xlim=c(0,2.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
-par(new=TRUE)
-plot(phylogeny_analysis_lgcf$phylogeny_distance,phylogeny_analysis_lgcf$pham_pham_dissimilarity,xlim=c(0,2.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="green")
-par(new=TRUE)
-plot(phylogeny_analysis_lytic$phylogeny_distance,phylogeny_analysis_lytic$pham_pham_dissimilarity,xlim=c(0,2.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
+plot(phylogeny_lytic$phylogeny_distance,phylogeny_lytic$pham_pham_dissimilarity,xlim=c(0,2.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="red")
 
 
 
 
-#Assess Cluster A data
+#Cluster A phylogenetic distance analysis
 phylogeny_analysis_a <- subset(phylogeny_analysis,phylogeny_analysis$phage_cluster_compare == 'A')
 phylogeny_analysis_a_both_a1 <- subset(phylogeny_analysis_a,phylogeny_analysis_a$phage_subcluster_compare == 'A1')
 phylogeny_analysis_a_both_nonA1 <- subset(phylogeny_analysis_a,phylogeny_analysis_a$phage_subcluster_compare != 'A1')
 phylogeny_analysis_a_one_a1 <- subset(phylogeny_analysis_a,(phylogeny_analysis_a$ref_phage_subcluster == 'A1' | phylogeny_analysis_a$query_phage_subcluster == 'A1') & phylogeny_analysis_a$phage_subcluster_compare == "different")
 
 
-#Fig. 3a (right)
+#Fig. 3a
 par(mar=c(4,8,4,4))
 plot(phylogeny_analysis_a_both_nonA1$phylogeny_distance,phylogeny_analysis_a_both_nonA1$pham_pham_dissimilarity,xlim=c(0,2.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark green")
 par(new=TRUE)
@@ -1957,11 +1637,11 @@ plot(phylogeny_analysis_a_both_nonA1$phylogeny_distance,phylogeny_analysis_a_bot
 
 
   
-#match up pham proportion data that contains orpham count, pham distribution, etc.
-#Columns designated as "pham2" since it is the second set of pham data that have been loaded so far. 
+#Match up pham proportion data that contains orpham count, pham distribution, etc.
+#Columns are designated as "pham2" since it is the second set of pham data that have been loaded so far. 
 #This second pham data overlaps the first set, but contains additional columns. 
-#Also, the extra columns are impacted by the data subset - it only contains comparisons from the actino785 set. 
-#So it is not a replacement for the first pham data file.
+#Also, the extra columns are impacted by the data subset - it only contains comparisons from the actino785 set,
+#so it is not a replacement for the first pham data file.
 
 #Format
 #0 = phage1_name"                                              
@@ -2035,6 +1715,10 @@ names(actino_pham_data) <- c("pham2_phage1","pham2_phage1_number_unshared_phams"
 
 
 
+#Compute gene content dissimilarity
+actino_pham_data$pham2_pham_dissimilarity <- 1 - actino_pham_data$pham2_average_shared_proportion
+actino_pham_data$pham2_jaccard_dissimilarity <- 1 - actino_pham_data$pham2_jaccard_similarity
+
 
 #Since pham data contains pairwise duplicates, no need to worry about which phage is which when creating ref_query match column
 actino_pham_data$pham2_phage1_phage2 <- paste(actino_pham_data$pham2_phage1,"_",actino_pham_data$pham2_phage2,sep="")
@@ -2044,62 +1728,64 @@ actino_pham_data$pham2_phage1_phage2 <- as.factor(actino_pham_data$pham2_phage1_
 
 
 
-#To retain all rows, be sure to keep all.x=TRUE, but you don't want to retain all rows = making scatter plots or histograms can cause errors if not all rows have data.
+#To retain all rows, be sure to keep all.x=TRUE.
+#But all rows shouldn't be retained = making scatter plots or histograms can cause errors if some rows are missing data.
 #Omitting all.x, all rows with no matching pham data are removed, so no errors are encountered when making scatterplots
 phylogeny_analysis <- merge(phylogeny_analysis,actino_pham_data,by.x="mash_ref_query",by.y="pham2_phage1_phage2")
 
 
-#Split into modes to visualize by color
-phylogeny_analysis_hgcf2 <- subset(phylogeny_analysis,phylogeny_analysis$gene_flux_category == "high" & phylogeny_analysis$phage_predicted_temperate_compare == "yes")
-phylogeny_analysis_lgcf2 <- subset(phylogeny_analysis,phylogeny_analysis$gene_flux_category == "low" & phylogeny_analysis$phage_predicted_temperate_compare == "yes")
-phylogeny_analysis_lytic2 <- subset(phylogeny_analysis,phylogeny_analysis$phage_predicted_temperate_compare == "no")
+#Split by Clusters to visualize by color
+phylogeny_hgcf2 <- subset(phylogeny_analysis,phylogeny_analysis$phage_cluster_compare == 'F' |
+                           (phylogeny_analysis$phage_cluster_compare == 'A' & phylogeny_analysis$phage_subcluster_compare == 'A1'))
+
+phylogeny_lgcf2 <- subset(phylogeny_analysis,
+                         phylogeny_analysis$phage_cluster_compare == 'K' |
+                           phylogeny_analysis$phage_cluster_compare == 'BD' |
+                           (phylogeny_analysis$phage_cluster_compare == 'A' & phylogeny_analysis$phage_subcluster_compare != 'A1'))
+
+phylogeny_lytic2 <- subset(phylogeny_analysis,phylogeny_analysis$phage_cluster_compare == 'B')
 
 
 
 
-
-#sliding window average
-#only use data for sliding windows that fit within the scatter plot boundaries = phylogeny distance < 0.3
+#Sliding window average across mash distance
+#Only use data for sliding windows that are positioned within the scatter plot boundaries = phylogeny distance < 0.3.
 library(caTools)
 
-
-phylogeny_hgcf_phylosort <- phylogeny_analysis_hgcf[order(phylogeny_analysis_hgcf2$phylogeny_distance),]
+phylogeny_hgcf_phylosort <- phylogeny_hgcf2[order(phylogeny_hgcf2$phylogeny_distance),]
 phylogeny_hgcf_phylosort <- phylogeny_hgcf_phylosort[phylogeny_hgcf_phylosort$phylogeny_distance < 0.3,]
-
 phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_mean_runmean <- runmean(phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_mean,101)
 phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_mean_runmean <- runmean(phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_mean,101)
 phylogeny_hgcf_phylosort$pham2_unshared_orpham_count_runmean <- runmean(phylogeny_hgcf_phylosort$pham2_unshared_orpham_count,101)
 phylogeny_hgcf_phylosort$pham2_pham_dissimilarity_runmean <- runmean(phylogeny_hgcf_phylosort$pham2_pham_dissimilarity,101)
 phylogeny_hgcf_phylosort$size_diff_ave_percent_runmean <- runmean(phylogeny_hgcf_phylosort$size_diff_ave_percent,101)
 phylogeny_hgcf_phylosort$gsm_ave_size_unshared_unshared_runmean <- runmean(phylogeny_hgcf_phylosort$gsm_ave_size_unshared_unshared,101)
-phylogeny_hgcf_phylosort$gsm_unshared_coding_potential_runmean <- runmean(phylogeny_hgcf_phylosort$gsm_unshared_coding_potential,101)
+phylogeny_hgcf_phylosort$gsm_unshared_coding_proportion_runmean <- runmean(phylogeny_hgcf_phylosort$gsm_unshared_coding_proportion,101)
 phylogeny_hgcf_phylosort$gsm_ave_size_shared_shared_runmean <- runmean(phylogeny_hgcf_phylosort$gsm_ave_size_shared_shared,101)
 
 
 
-phylogeny_lgcf_phylosort <- phylogeny_analysis_lgcf[order(phylogeny_analysis_lgcf2$phylogeny_distance),]
+phylogeny_lgcf_phylosort <- phylogeny_lgcf2[order(phylogeny_lgcf2$phylogeny_distance),]
 phylogeny_lgcf_phylosort <- phylogeny_lgcf_phylosort[phylogeny_lgcf_phylosort$phylogeny_distance < 0.3,]
-
 phylogeny_lgcf_phylosort$pham2_shared_pham_distribution_mean_runmean <- runmean(phylogeny_lgcf_phylosort$pham2_shared_pham_distribution_mean,101)
 phylogeny_lgcf_phylosort$pham2_unshared_pham_distribution_mean_runmean <- runmean(phylogeny_lgcf_phylosort$pham2_unshared_pham_distribution_mean,101)
 phylogeny_lgcf_phylosort$pham2_unshared_orpham_count_runmean <- runmean(phylogeny_lgcf_phylosort$pham2_unshared_orpham_count,101)
 phylogeny_lgcf_phylosort$pham2_pham_dissimilarity_runmean <- runmean(phylogeny_lgcf_phylosort$pham2_pham_dissimilarity,101)
 phylogeny_lgcf_phylosort$size_diff_ave_percent_runmean <- runmean(phylogeny_lgcf_phylosort$size_diff_ave_percent,101)
 phylogeny_lgcf_phylosort$gsm_ave_size_unshared_unshared_runmean <- runmean(phylogeny_lgcf_phylosort$gsm_ave_size_unshared_unshared,101)
-phylogeny_lgcf_phylosort$gsm_unshared_coding_potential_runmean <- runmean(phylogeny_lgcf_phylosort$gsm_unshared_coding_potential,101)
+phylogeny_lgcf_phylosort$gsm_unshared_coding_proportion_runmean <- runmean(phylogeny_lgcf_phylosort$gsm_unshared_coding_proportion,101)
 phylogeny_lgcf_phylosort$gsm_ave_size_shared_shared_runmean <- runmean(phylogeny_lgcf_phylosort$gsm_ave_size_shared_shared,101)
 
 
-phylogeny_lytic_phylosort <- phylogeny_analysis_lytic[order(phylogeny_analysis_lytic2$phylogeny_distance),]
+phylogeny_lytic_phylosort <- phylogeny_lytic2[order(phylogeny_lytic2$phylogeny_distance),]
 phylogeny_lytic_phylosort <- phylogeny_lytic_phylosort[phylogeny_lytic_phylosort$phylogeny_distance < 0.3,]
-
 phylogeny_lytic_phylosort$pham2_shared_pham_distribution_mean_runmean <- runmean(phylogeny_lytic_phylosort$pham2_shared_pham_distribution_mean,101)
 phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_mean_runmean <- runmean(phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_mean,101)
 phylogeny_lytic_phylosort$pham2_unshared_orpham_count_runmean <- runmean(phylogeny_lytic_phylosort$pham2_unshared_orpham_count,101)
 phylogeny_lytic_phylosort$pham2_pham_dissimilarity_runmean <- runmean(phylogeny_lytic_phylosort$pham2_pham_dissimilarity,101)
 phylogeny_lytic_phylosort$size_diff_ave_percent_runmean <- runmean(phylogeny_lytic_phylosort$size_diff_ave_percent,101)
 phylogeny_lytic_phylosort$gsm_ave_size_unshared_unshared_runmean <- runmean(phylogeny_lytic_phylosort$gsm_ave_size_unshared_unshared,101)
-phylogeny_lytic_phylosort$gsm_unshared_coding_potential_runmean <- runmean(phylogeny_lytic_phylosort$gsm_unshared_coding_potential,101)
+phylogeny_lytic_phylosort$gsm_unshared_coding_proportion_runmean <- runmean(phylogeny_lytic_phylosort$gsm_unshared_coding_proportion,101)
 phylogeny_lytic_phylosort$gsm_ave_size_shared_shared_runmean <- runmean(phylogeny_lytic_phylosort$gsm_ave_size_shared_shared,101)
 
 
@@ -2108,7 +1794,7 @@ phylogeny_lytic_phylosort$gsm_ave_size_shared_shared_runmean <- runmean(phylogen
 
 
 #Gene content dissimilarity
-#Supp. Fig. 9b (but doesn't quite look right)
+#Supp. Fig. 9b
 par(mar=c(4,8,4,4))
 plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_pham_dissimilarity_runmean,xlim=c(0,0.3),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
 par(new=TRUE)
@@ -2118,7 +1804,7 @@ plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham
 
 
 #Ave genome size difference
-#Supp. Fig. 9b (but doesn't quite look right)
+#Supp. Fig. 9b
 par(mar=c(4,8,4,4))
 plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$size_diff_ave_percent_runmean,xlim=c(0,0.3),ylim=c(0,0.06),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="blue")
 par(new=TRUE)
@@ -2128,13 +1814,13 @@ plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$size
 
 
 #Unshared coding sequence proportion
-#Supp. Fig. 9c (but doesn't quite look right)
+#Supp. Fig. 9c
 par(mar=c(4,8,4,4))
-plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$gsm_unshared_coding_potential_runmean,xlim=c(0,0.3),ylim=c(0,0.4),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
+plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$gsm_unshared_coding_proportion_runmean,xlim=c(0,0.3),ylim=c(0,0.4),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
 par(new=TRUE)
-plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$gsm_unshared_coding_potential_runmean,xlim=c(0,0.3),ylim=c(0,0.4),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
+plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$gsm_unshared_coding_proportion_runmean,xlim=c(0,0.3),ylim=c(0,0.4),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light green")
 par(new=TRUE)
-plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$gsm_unshared_coding_potential_runmean,xlim=c(0,0.3),ylim=c(0,0.4),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
+plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$gsm_unshared_coding_proportion_runmean,xlim=c(0,0.3),ylim=c(0,0.4),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
 
 
 #Shared/unshared ave gene size
@@ -2147,7 +1833,7 @@ par(new=TRUE)
 plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$gsm_ave_size_shared_shared_runmean,xlim=c(0,0.3),ylim=c(0,800),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
 
 
-#Supp. Fig. 9c (but doesn't quite look right)
+#Supp. Fig. 9c
 par(mar=c(4,8,4,4))
 plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$gsm_ave_size_unshared_unshared_runmean,xlim=c(0,0.3),ylim=c(0,800),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
 par(new=TRUE)
@@ -2158,7 +1844,7 @@ plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$gsm_
 
 
 #Shared/unshared pham distribution mean
-#Supp. Fig. 9c (but doesn't quite look right)
+#Supp. Fig. 9c
 par(mar=c(4,8,4,4))
 plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_shared_pham_distribution_mean_runmean,xlim=c(0,0.3),ylim=c(0,3),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark blue")
 par(new=TRUE)
@@ -2166,7 +1852,7 @@ plot(phylogeny_lgcf_phylosort$phylogeny_distance,phylogeny_lgcf_phylosort$pham2_
 par(new=TRUE)
 plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham2_shared_pham_distribution_mean_runmean,xlim=c(0,0.3),ylim=c(0,3),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="dark red")
 
-#Supp. Fig. 9c (but doesn't quite look right)
+#Supp. Fig. 9c
 par(mar=c(4,8,4,4))
 plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_unshared_pham_distribution_mean_runmean,xlim=c(0,0.3),ylim=c(0,3),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
 par(new=TRUE)
@@ -2175,7 +1861,7 @@ par(new=TRUE)
 plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham2_unshared_pham_distribution_mean_runmean,xlim=c(0,0.3),ylim=c(0,3),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="pink")
 
 #Unshared orpham count
-#Supp. Fig. 9c (but doesn't quite look right)
+#Supp. Fig. 9c
 par(mar=c(4,8,4,4))
 plot(phylogeny_hgcf_phylosort$phylogeny_distance,phylogeny_hgcf_phylosort$pham2_unshared_orpham_count_runmean,xlim=c(0,0.3),ylim=c(0,4),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1,col="light blue")
 par(new=TRUE)
@@ -2190,42 +1876,26 @@ plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham
 
 
 
-
-
-
-
-
-
-
-
-
-
-###Scatter plot of all comparisons involving lambda
+###Lambda analysis
 #Phage identifier for lambda:lambda__nc_001416
-#Copy main data table then determine which comparisons involve lambda. Since no self comparisons are present in the dataset, only need to compute if there's 'one' lambda, instead of 'one_or_two' or 'both'
-lambda_figure <- mash_table2
+#Since no self comparisons are present in the dataset, only need to compute if there's 'one' lambda, instead of 'one_or_two' or 'both'
+lambda_figure <- main_data_table
 lambda_figure$lambda_one <- ifelse(lambda_figure$mash_reference == 'lambda__nc_001416' | lambda_figure$mash_query == 'lambda__nc_001416',TRUE,FALSE)
 lambda_comparisons <- subset(lambda_figure,lambda_figure$lambda_one == TRUE)
 
 #Supp. Fig. 11a
-par(mar=c(4,8,4,4))
-plot(lambda_comparisons$modified_mash_distance,lambda_comparisons$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
-
-
+plot_genomic_similarity_standard(lambda_comparisons)
 
 
 
 ###Toxic phage analysis
-mash_table2_toxic <- mash_table2
-mash_table2_toxic$toxic_one_or_two <- ifelse(mash_table2_toxic$ref_toxic == "yes" | mash_table2_toxic$query_toxic == "yes",TRUE,FALSE)
-mash_table2_toxic$toxic_both <- ifelse(mash_table2_toxic$ref_toxic == "yes" & mash_table2_toxic$query_toxic == "yes",TRUE,FALSE)
-toxic_one_or_two <- subset(mash_table2_toxic,mash_table2_toxic$toxic_one_or_two == TRUE)
+main_data_table_toxic <- main_data_table
+main_data_table_toxic$toxic_one_or_two <- ifelse(main_data_table_toxic$ref_toxic == "yes" | main_data_table_toxic$query_toxic == "yes",TRUE,FALSE)
+main_data_table_toxic$toxic_both <- ifelse(main_data_table_toxic$ref_toxic == "yes" & main_data_table_toxic$query_toxic == "yes",TRUE,FALSE)
+toxic_one_or_two <- subset(main_data_table_toxic,main_data_table_toxic$toxic_one_or_two == TRUE)
 
 #Supp. Fig. 11b
-par(mar=c(4,8,4,4))
-plot(toxic_one_or_two$modified_mash_distance,toxic_one_or_two$pham_pham_dissimilarity,xlim=c(0,0.5),ylim=c(0,1),pch=1,cex=1,cex.axis=2,ann=FALSE,main=NULL,las=1)
-abline(0,2,lty=2,lwd=3,col="grey")
+plot_genomic_similarity_standard(toxic_one_or_two)
 
 
 
