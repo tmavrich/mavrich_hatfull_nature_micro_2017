@@ -1040,10 +1040,18 @@ if (analysis_type == 3) or (analysis_type == 4):
             group1_shared_pham_distribution = []
             for pham in group1_shared_pham_set:
                 group1_shared_pham_distribution.append(len(pham_group_dict[pham]))
-            group1_shared_pham_distribution_mean = statistics.mean(group1_shared_pham_distribution)
-            group1_shared_pham_distribution_median = statistics.median(group1_shared_pham_distribution)
-            group1_shared_pham_distribution_max = max(group1_shared_pham_distribution)
 
+
+            #Need to account for 0 or 1 members to compute mean and median
+            #as has been corrected for it in section above
+            if len(group1_shared_pham_distribution) > 0:
+                group1_shared_pham_distribution_mean = statistics.mean(group1_shared_pham_distribution)
+                group1_shared_pham_distribution_median = statistics.median(group1_shared_pham_distribution)
+                group1_shared_pham_distribution_max = max(group1_shared_pham_distribution)
+            else:
+                group1_shared_pham_distribution_mean = 0
+                group1_shared_pham_distribution_median = 0
+                group1_shared_pham_distribution_max = 0
 
 
             #Now compile all data for each group in a list for output
