@@ -1110,12 +1110,14 @@ write.table(data_for_mode_prediction,"data_for_mode_prediction.csv",sep=",",row.
 #3 = out_of_range_tally
 #4 = hgcf_percent
 #5 = lgcf_percent"
-#6 = mode"
+#6 = mode_exact	
+#7 = mode_approx_80_percent
 mode_prediction_table <- read.csv("mode_prediction.csv",sep=",",header=TRUE)
 
 names(mode_prediction_table) <- c("phage_identifier",
                                   "mode_prediction_hgcf_tally","mode_prediction_lgcf_tally","mode_prediction_out_of_range_tally",
-                                  "mode_prediction_hgcf_percent","mode_prediction_lgcf_percent","mode_prediction_mode")
+                                  "mode_prediction_hgcf_percent","mode_prediction_lgcf_percent",
+                                  "mode_prediction_exact","mode_prediction_approx_80")
 
 #Supp. Fig. 6d
 par(mar=c(4,8,4,4))
@@ -1250,8 +1252,7 @@ write.table(bacteria_dsDNA_nuc042_gene089_reduced,"bacteria_dsDNA_nuc042_gene089
 
 
 
-
-###Analyze gene-specific mash data
+###Gene-specific mash analysis
 #After running gene-specific mash analysis, subset out only the comparisons used in the gsm analysis
 
 mash_filtered <- subset(main_data_table,main_data_table$filter == TRUE)
