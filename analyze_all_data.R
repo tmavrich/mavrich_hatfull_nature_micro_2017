@@ -1640,85 +1640,36 @@ plot(phylogeny_analysis_a_both_nonA1$phylogeny_distance,phylogeny_analysis_a_bot
 
 
   
-#Match up pham proportion data that contains orpham count, pham distribution, etc.
+#Match up pham proportion data based only on clustered actinobacteriophages (785 genomes).
 #Columns are designated as "pham2" since it is the second set of pham data that have been loaded so far. 
-#This second pham data overlaps the first set, but contains additional columns. 
-#Some metrics, such as pham distribution and orpham count, are impacted by the data subset, so these values may
+#This second pham data is similar, but not identical, to the first.
+#Some metrics, such as pham distribution and orpham count, are impacted by the diversity in the dataset, so these values may
 #not be the same as in the first pham dataset since it only contains comparisons from the actino785 set.
-#Also, there are additional pham function columnes not present in the first dataset.
-#So it is not a replacement for the first pham data file.
 
 #Format
-#0 = phage1_name"                                              
-#1 = phage1_number_of_unshared_phams"                          
-#2 = phage1_shared_proportion"                                 
-#3 = phage2_name"                                              
-#4 = phage2_number_of_unshared_phams"                          
-#5 = phage2_shared_proportion"                                 
-#6 = number_of_shared_phams"                                   
-#7 = average_shared_proportion"                                
-#8 = jaccard_similarity"                                       
-#9 = shared_pham_distribution_mean"                            
-#10 = shared_pham_distribution_median"                          
-#11 = shared_pham_distribution_max"                             
-#12 = unshared_pham_distribution_mean"                          
-#13 = unshared_pham_distribution_median"                        
-#14 = unshared_pham_distribution_max"                           
-#15 = unshared_orpham_count"                                    
-#16 = Unspecified_phage1_number_of_unshared_phams"              
-#17 = Unspecified_phage2_number_of_unshared_phams"              
-#18 = Unspecified_number_of_shared_phams"                       
-#19 = Unspecified_average_shared_proportion"                    
-#20 = defense_phage1_number_of_unshared_phams"                  
-#21 = defense_phage2_number_of_unshared_phams"                  
-#22 = defense_number_of_shared_phams"                           
-#23 = defense_average_shared_proportion"                        
-#24 = dna_metabolism_phage1_number_of_unshared_phams"           
-#25 = dna_metabolism_phage2_number_of_unshared_phams"           
-#26 = dna_metabolism_number_of_shared_phams"                    
-#27 = dna_metabolism_average_shared_proportion"                 
-#28 = lysis_phage1_number_of_unshared_phams"                    
-#29 = lysis_phage2_number_of_unshared_phams"                    
-#30 = lysis_number_of_shared_phams"                             
-#31 = lysis_average_shared_proportion"                          
-#32 = lysogeny_phage1_number_of_unshared_phams"                 
-#33 = lysogeny_phage2_number_of_unshared_phams"                 
-#34 = lysogeny_number_of_shared_phams"                          
-#35 = lysogeny_average_shared_proportion"                       
-#36 = mobile_phage1_number_of_unshared_phams"                   
-#37 = mobile_phage2_number_of_unshared_phams"                   
-#38 = mobile_number_of_shared_phams"                            
-#39 = mobile_average_shared_proportion"                         
-#40 = other_phage1_number_of_unshared_phams"                    
-#41 = other_phage2_number_of_unshared_phams"                    
-#42 = other_number_of_shared_phams"                             
-#43 = other_average_shared_proportion"                          
-#44 = recombination_replication_phage1_number_of_unshared_phams"
-#45 = recombination_replication_phage2_number_of_unshared_phams"
-#46 = recombination_replication_number_of_shared_phams"         
-#47 = recombination_replication_average_shared_proportion"      
-#48 = structure_assembly_phage1_number_of_unshared_phams"       
-#49 = structure_assembly_phage2_number_of_unshared_phams"       
-#50 = structure_assembly_number_of_shared_phams"                
-#51 = structure_assembly_average_shared_proportion
+#0 = phage1_name
+#1 = phage1_number_of_unshared_phams
+#2 = phage1_shared_proportion
+#3 = phage2_name
+#4 = phage2_number_of_unshared_phams
+#5 = phage2_shared_proportion
+#6 = number_of_shared_phams
+#7 = average_shared_proportion
+#8 = jaccard_similarity
+#9 = shared_pham_distribution_mean
+#10 = shared_pham_distribution_median
+#11 = shared_pham_distribution_max
+#12 = unshared_pham_distribution_mean
+#13 = unshared_pham_distribution_median
+#14 = unshared_pham_distribution_max
+#15 = unshared_orpham_count
 actino_pham_data <- read.csv("actino_only_pairwise_pham_proportions.csv",sep=",",header=TRUE)
 
 names(actino_pham_data) <- c("pham2_phage1","pham2_phage1_number_unshared_phams","pham2_phage1_shared_proportion","pham2_phage2",
                              "pham2_phage2_number_unshared_phams","pham2_phage2_shared_proportion","pham2_number_shared_phams","pham2_average_shared_proportion",
                              "pham2_jaccard_similarity","pham2_shared_pham_distribution_mean","pham2_shared_pham_distribution_median","pham2_shared_pham_distribution_max",
                              "pham2_unshared_pham_distribution_mean","pham2_unshared_pham_distribution_median",
-                             "pham2_unshared_pham_distribution_max","pham2_unshared_orpham_count",
-                             "pham2_Unspecified_phage1_number_of_unshared_phams","pham2_Unspecified_phage2_number_of_unshared_phams","pham2_Unspecified_number_of_shared_phams","pham2_Unspecified_average_shared_proportion",
-                             "pham2_defense_phage1_number_of_unshared_phams","pham2_defense_phage2_number_of_unshared_phams","pham2_defense_number_of_shared_phams","pham2_defense_average_shared_proportion",
-                             "pham2_dna_metabolism_phage1_number_of_unshared_phams","pham2_dna_metabolism_phage2_number_of_unshared_phams","pham2_dna_metabolism_number_of_shared_phams","pham2_dna_metabolism_average_shared_proportion",
-                             "pham2_lysis_phage1_number_of_unshared_phams","pham2_lysis_phage2_number_of_unshared_phams","pham2_lysis_number_of_shared_phams","pham2_lysis_average_shared_proportion",
-                             "pham2_lysogeny_phage1_number_of_unshared_phams","pham2_lysogeny_phage2_number_of_unshared_phams","pham2_lysogeny_number_of_shared_phams","pham2_lysogeny_average_shared_proportion",
-                             "pham2_mobile_phage1_number_of_unshared_phams","pham2_mobile_phage2_number_of_unshared_phams","pham2_mobile_number_of_shared_phams","pham2_mobile_average_shared_proportion",
-                             "pham2_other_phage1_number_of_unshared_phams","pham2_other_phage2_number_of_unshared_phams","pham2_other_number_of_shared_phams","pham2_other_average_shared_proportion",
-                             "pham2_recombination_replication_phage1_number_of_unshared_phams","pham2_recombination_replication_phage2_number_of_unshared_phams","pham2_recombination_replication_number_of_shared_phams","pham2_recombination_replication_average_shared_proportion",
-                             "pham2_structure_assembly_phage1_number_of_unshared_phams","pham2_structure_assembly_phage2_number_of_unshared_phams","pham2_structure_assembly_number_of_shared_phams","pham2_structure_assembly_average_shared_proportion")
-
-
+                             "pham2_unshared_pham_distribution_max","pham2_unshared_orpham_count")
 
 #Compute gene content dissimilarity
 actino_pham_data$pham2_pham_dissimilarity <- 1 - actino_pham_data$pham2_average_shared_proportion

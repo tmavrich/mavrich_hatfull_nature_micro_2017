@@ -196,7 +196,6 @@ Data generation:
 Run analyze_pham_data.py script on:
     a. genome file generated from SQL query of Phamerator database, manually edited in Excel.
     b. gene file generated from SQL query of Phamerator database, manually edited in Excel.
-    c. pham function file generated from SQL query of Phamerator database, manually edited in Excel.
 
 
 
