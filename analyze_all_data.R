@@ -4,10 +4,10 @@
 #Distinct analyses and code blocks separated by "###"
 
 
+
+
+
 ###Define functions
-
-
-
 
 #The standard genomic similarity plot parameters
 plot_genomic_similarity_standard <- function(table){
@@ -119,12 +119,12 @@ compute_sector_distribution <- function(table){
 
 
 
-###Import primary mash and gene content data
+###Import primary mash and gene content dissimilarity data
 
 #Import mash dataset
 #Format:
-#0 = reference
-#1 = query
+#0 = reference genome
+#1 = query genome
 #2 = mash distance 
 #3 = mash p-value
 #4 = mash kmer count
@@ -159,10 +159,10 @@ names(mash_table) <- c("mash_reference",
 #15 = phage_subcluster
 #16 = phage_cluster_source
 #17 = phage_temperate
-#18 = size
-#19 = gene_count
-#20 = toxic
-#21 = predicted_temperate
+#18 = phage_size
+#19 = phage_gene_count
+#20 = phage_toxic
+#21 = phage_predicted_temperate
 phage_metadata_table <- read.csv("phage_host_data.csv",sep=",",header=TRUE)
 
 
@@ -224,11 +224,11 @@ main_data_table$size_diff_ave_percent <- (main_data_table$size_diff_ref_percent 
 #This ANI data is different than the ANI data from 79 genomes used to optimize the Mash parameters
 #Format:
 #0 = ani_ref_query
-#1 = ani_reference
-#2 = ani_query
+#1 = ani_reference_genome
+#2 = ani_query_genome
 #3 = ani_ani
 #4 = ani_distance
-ani_data <- read.csv("ani_data.csv",sep=",",header=TRUE)
+ani_data <- read.csv("ani_cluster_data.csv",sep=",",header=TRUE)
 ani_data$ani_ref_query <- as.character(ani_data$ani_ref_query)
 ani_data$ani_distance <- 1 - ani_data$ani_ani
 
@@ -283,8 +283,10 @@ main_data_table <- merge(main_data_table,pham_table,by.x="mash_ref_query",by.y="
 
 
 #Assign filter status and change mash distance if data is not significant
-#Alternatively, the max percent parameter can be omitted with minimal change to final analysis.
 main_data_table$filter <- ifelse(main_data_table$mash_pvalue < 1e-10 & main_data_table$size_diff_max_percent < 1,TRUE,FALSE)
+
+#Alternatively, the max percent parameter can be omitted with minimal effects on final analysis.
+#main_data_table$filter <- ifelse(main_data_table$mash_pvalue < 1e-10,TRUE,FALSE)
 
 #At this point, the max mash distance of all filtered comparisons < 0.5. So set the distance of all comparisons that did not pass the filter = 0.5
 main_data_table$modified_mash_distance <- ifelse(main_data_table$filter == TRUE,main_data_table$mash_distance,0.5)
@@ -587,7 +589,7 @@ abline(0,2,lty=2,lwd=3,col="grey")
 
 #Format
 #0 = phage
-#1 = phage_cluster
+#1 = cluster
 #2 = size
 #3 = total_gene_count
 #4 = Unspecified_gene_count
@@ -600,7 +602,7 @@ misc_clusters_genometrics$phage_cluster <- factor(misc_clusters_genometrics$phag
 
 
 #Format
-#0 = phageName
+#0 = phage
 #1 = cluster
 #2 = GC
 misc_clusters_gc <- read.csv("misc_clusters_gc.csv",sep=",",header=TRUE)
@@ -1101,7 +1103,7 @@ write.table(data_for_mode_prediction,"data_for_mode_prediction.csv",sep=",",row.
 
 
 
-#Run the data through the analyze_mash_network_script to predict the evolutionary mode.
+#Run the data through the analyze_mash_network.py script to predict the evolutionary mode.
 #Then import the mode prediction back into R.
 #Format
 #0 = phage
@@ -1287,11 +1289,11 @@ gene_specific_mash_table <- subset(bacteria_dsDNA_filtered,bacteria_dsDNA_filter
 #19 = phage1_phage2 total length of combined unshared sequence
 #20 = phage1_phage2 combined shared gene GC content
 #21 = phage1_phage2 combined unshared gene GC content
-#22 = phage1 # unshared phams
-#23 = phage1 # all phams
-#24 = phage1 # all genes
-#25 = phage1 # shared genes
-#26 = phage1 # unshared genes
+#22 = phage1 number unshared phams
+#23 = phage1 number all phams
+#24 = phage1 number all genes
+#25 = phage1 number shared genes
+#26 = phage1 number unshared genes
 #27 = phage1 average length of all genes
 #28 = phage1 average length of shared genes
 #29 = phage1 average length of unshared genes
@@ -1301,11 +1303,11 @@ gene_specific_mash_table <- subset(bacteria_dsDNA_filtered,bacteria_dsDNA_filter
 #33 = phage1 all genes GC content
 #34 = phage1 shared genes GC content
 #35 = phage1 unshared genes GC content
-#36 = phage2 # unshared phams
-#37 = phage2 # all phams
-#38 = phage2 # all genes
-#39 = phage2 # shared genes
-#40 = phage2 # unshared genes
+#36 = phage2 number unshared phams
+#37 = phage2 number all phams
+#38 = phage2 number all genes
+#39 = phage2 number shared genes
+#40 = phage2 number unshared genes
 #41 = phage2 average length of all genes
 #42 = phage2 average length of shared genes
 #43 = phage2 average length of unshared genes
@@ -1355,7 +1357,7 @@ gene_specific_mash_table$gsm_unshared_modified_mash_distance <- ifelse(gene_spec
 gene_specific_mash_table$gsm_shared_unshared_modified_mash_distance <- ifelse(gene_specific_mash_table$gsm_shared_unshared_mash_filter == TRUE,gene_specific_mash_table$gsm_shared_unshared_mash_distance,0.6)
 
 
-#Estimate of the proportion of coding sequence per genome
+#Compute of the proportion of coding sequence per genome
 #Note: the gene-specific sequence length used does not take into account overlapping CDS features, 
 #so the sequences could have duplicate regions in the genome.
 #Note: the 'all coding proportion' data is based on the real genome size, 
@@ -1641,8 +1643,10 @@ plot(phylogeny_analysis_a_both_nonA1$phylogeny_distance,phylogeny_analysis_a_bot
 #Match up pham proportion data that contains orpham count, pham distribution, etc.
 #Columns are designated as "pham2" since it is the second set of pham data that have been loaded so far. 
 #This second pham data overlaps the first set, but contains additional columns. 
-#Also, the extra columns are impacted by the data subset - it only contains comparisons from the actino785 set,
-#so it is not a replacement for the first pham data file.
+#Some metrics, such as pham distribution and orpham count, are impacted by the data subset, so these values may
+#not be the same as in the first pham dataset since it only contains comparisons from the actino785 set.
+#Also, there are additional pham function columnes not present in the first dataset.
+#So it is not a replacement for the first pham data file.
 
 #Format
 #0 = phage1_name"                                              
@@ -1729,8 +1733,8 @@ actino_pham_data$pham2_phage1_phage2 <- as.factor(actino_pham_data$pham2_phage1_
 
 
 
-#To retain all rows, be sure to keep all.x=TRUE.
-#But all rows shouldn't be retained = making scatter plots or histograms can cause errors if some rows are missing data.
+
+#All rows don't need to be retained = making scatter plots or histograms can cause errors if some rows are missing data.
 #Omitting all.x, all rows with no matching pham data are removed, so no errors are encountered when making scatterplots
 phylogeny_analysis <- merge(phylogeny_analysis,actino_pham_data,by.x="mash_ref_query",by.y="pham2_phage1_phage2")
 
@@ -1878,7 +1882,7 @@ plot(phylogeny_lytic_phylosort$phylogeny_distance,phylogeny_lytic_phylosort$pham
 
 
 ###Lambda analysis
-#Phage identifier for lambda:lambda__nc_001416
+#Phage identifier for lambda: lambda__nc_001416
 #Since no self comparisons are present in the dataset, only need to compute if there's 'one' lambda, instead of 'one_or_two' or 'both'
 lambda_figure <- main_data_table
 lambda_figure$lambda_one <- ifelse(lambda_figure$mash_reference == 'lambda__nc_001416' | lambda_figure$mash_query == 'lambda__nc_001416',TRUE,FALSE)

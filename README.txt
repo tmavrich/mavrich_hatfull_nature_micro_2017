@@ -107,7 +107,7 @@ Data generation: Output from DNAMaster, manually edited in Excel.
 
 
 
-2. ani_data.csv
+2. ani_cluster_data.csv
 
 Description: Average nucleotide identify of phages from specific clusters to assess
 genomic similarities of HGCF and LGCF phages. 
