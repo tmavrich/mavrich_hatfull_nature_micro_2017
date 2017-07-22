@@ -91,7 +91,7 @@ and visualize/plot data.
 
 
 
-Input file folder:
+Script input file folder:
 
 Below is a list of the data files used in the R analysis and a brief description 
 of how they were generated with the scripts listed above:
