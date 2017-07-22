@@ -1245,7 +1245,7 @@ bacteria_dsDNA_nuc042_gene089 <- subset(bacteria_dsDNA_filtered,bacteria_dsDNA_f
 
 #Now reduce the data table to only the columns needed for export, and export the data
 bacteria_dsDNA_nuc042_gene089_reduced <- subset(bacteria_dsDNA_nuc042_gene089,select = c('mash_reference','mash_query','mash_distance','pham_pham_dissimilarity'))
-write.table(bacteria_dsDNA_nuc042_gene089_reduced,"bacteria_dsDNA_nuc042_gene089_data.csv",sep=",",row.names = FALSE,quote=FALSE)
+write.table(bacteria_dsDNA_nuc042_gene089_reduced,"bacteria_dsDNA_nuc042_gene089_data.csv",sep=",",row.names = FALSE,col.names = FALSE,quote=FALSE)
 
 
 

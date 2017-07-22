@@ -198,7 +198,6 @@ date = time.strftime("%Y%m%d")
 
 #Import raw data
 print("Importing data")
-comparison_data_description = input("Provide description of the comparison data set: ")
 
 
 
@@ -453,10 +452,6 @@ print("Computing all, shared, and unshared mash distances")
 
 
 
-shared_unshared_data_header = []
-shared_unshared_data_header.append(['Shared and unshared pham and gene data'])
-shared_unshared_data_header.append([comparison_data_description])
-shared_unshared_data_header.append([date])
 
 shared_unshared_data_columns = ['phage1_phage2',\
                                 'phage1',\
@@ -513,8 +508,6 @@ shared_unshared_data_columns = ['phage1_phage2',\
 output_file_name =  new_dir + '.csv'
 output_csvfile = open(output_file_name,'w')
 output_writer = csv.writer(output_csvfile)
-for row in shared_unshared_data_header:
-    output_writer.writerow(row)
 output_writer.writerow(shared_unshared_data_columns)
 
 
